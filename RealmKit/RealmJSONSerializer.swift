@@ -11,7 +11,7 @@ import RealmSwift
 
 let RealmJSONSerializerErrorDomain = "com.aplo.ErrorDomain.RealmJSONObjectMapping"
 
-class RealmObjectInfo {
+public class RealmObjectInfo {
     let type: Object.Type
     let primaryKey: String
     let indexPath: NSIndexPath? = nil
@@ -22,18 +22,18 @@ class RealmObjectInfo {
     }
 }
 
-extension Object {
+public extension Object {
     
     // MARK: CreateOrUpdate objects with JSON Array
     
-    class func realmObjectsInRealm(realm: Realm,  withJSONArray array: NSArray, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
+    public class func realmObjectsInRealm(realm: Realm,  withJSONArray array: NSArray, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
         realmObjectsInRealm(realm, withJSONArray: array, mappingIdentifier: nil, identifier: nil) { (realmObjectInfos, error) -> Void in
             
             completion(realmObjectInfos: realmObjectInfos, error: error)
         }
     }
     
-    class func realmObjectsInRealm(realm: Realm,  withJSONArray array: NSArray, mappingIdentifier: String?, identifier: String?, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
+    public class func realmObjectsInRealm(realm: Realm,  withJSONArray array: NSArray, mappingIdentifier: String?, identifier: String?, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
         
         if hasPrimaryKey() {
             var completionRealmObjectInfos = [RealmObjectInfo]()
@@ -65,14 +65,14 @@ extension Object {
     
     // MARK: CreateOrUpdate object with JSON Dictionary
     
-    class func realmObjectInRealm(realm: Realm, withJSONDictionary dictionary: NSDictionary, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
+    public class func realmObjectInRealm(realm: Realm, withJSONDictionary dictionary: NSDictionary, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
         
         realmObjectInRealm(realm, withJSONDictionary: dictionary, mappingIdentifier: nil, identifier: nil, replaceObjectWithPrimaryKey: nil) { (realmObjectInfo, error) -> Void in
             completion(realmObjectInfo: realmObjectInfo, error: error)
         }
     }
     
-    class func realmObjectInRealm(realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?, replaceObjectWithPrimaryKey oldPrimaryKey: String?, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
+    public class func realmObjectInRealm(realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?, replaceObjectWithPrimaryKey oldPrimaryKey: String?, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
         
         if hasPrimaryKey() {
             var completionRealmObjectInfo: RealmObjectInfo?
@@ -107,12 +107,12 @@ extension Object {
     
     // This function executes within the transaction block of realmObjectInRealm()
     // Override to modify initial and new RealmObject within the same transaction block
-    class func realmObjectInRealm(realm: Realm, didCreateOrUpdateRealmObjectWithPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?) {
+    public class func realmObjectInRealm(realm: Realm, didCreateOrUpdateRealmObjectWithPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?) {
         
     }
     
     // CreateOrUpdate RealmObject with mapping
-    class func realmObjectWithType<T>(type: T.Type, inRealm realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?) -> Object? {
+    public class func realmObjectWithType<T>(type: T.Type, inRealm realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?) -> Object? {
         
         // Object key -> JSON keyPath
         if let objectType = type as? Object.Type, syncType = type as? RealmSyncProtocol.Type, mappingDictionary = syncType.JSONKeyPathsByPropertyKeyWithIdentifier(mappingIdentifier, identifier: identifier) {
@@ -157,7 +157,7 @@ extension Object {
     
     // MARK: - Methods
     
-    class func hasPrimaryKey() -> Bool {
+    public class func hasPrimaryKey() -> Bool {
         if let primaryKey = primaryKey() where primaryKey.characters.count > 0 {
             return true
         }
@@ -167,7 +167,7 @@ extension Object {
 
 // MARK: - ValueTransformers
 
-class RealmValueTransformer: NSValueTransformer {
+public class RealmValueTransformer: NSValueTransformer {
     
     var forwardClosure: ((value: AnyObject?) -> AnyObject?)?
     var reverseClosure: ((value: AnyObject?) -> AnyObject?)?
@@ -206,15 +206,15 @@ class RealmValueTransformer: NSValueTransformer {
     
     // MARK: ValueTransformer
     
-    override class func allowsReverseTransformation() -> Bool {
+    override public class func allowsReverseTransformation() -> Bool {
         return false
     }
     
-    override class func transformedValueClass() -> AnyClass {
+    override public class func transformedValueClass() -> AnyClass {
         return NSObject.self
     }
     
-    override func transformedValue(value: AnyObject?) -> AnyObject? {
+    override public func transformedValue(value: AnyObject?) -> AnyObject? {
         if let forwardClosure = forwardClosure {
             return forwardClosure(value: value)
         }
@@ -225,13 +225,13 @@ class RealmValueTransformer: NSValueTransformer {
 
 // MARK: - Predefined ValueTransformers
 
-extension RealmValueTransformer {
+public extension RealmValueTransformer {
 
-    class func JSONDictionaryTransformerWithObjectType(type: Object.Type, inRealm realm: Realm) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType(type: Object.Type, inRealm realm: Realm) -> NSValueTransformer! {
         return JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil)
     }
     
-    class func JSONDictionaryTransformerWithObjectType(type: Object.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType(type: Object.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             
             // TODO: Direct value for primary key
@@ -251,11 +251,11 @@ extension RealmValueTransformer {
         })
     }
     
-    class func JSONArrayTransformerWithObjectType(type: Object.Type, inRealm realm: Realm) -> NSValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType(type: Object.Type, inRealm realm: Realm) -> NSValueTransformer! {
         return JSONArrayTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil)
     }
     
-    class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
         let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: mappingIdentifier, identifier: identifier)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
@@ -303,15 +303,15 @@ extension RealmValueTransformer {
     }
 }
 
-class RealmReversibleValueTransformer: RealmValueTransformer {
+public class RealmReversibleValueTransformer: RealmValueTransformer {
     
     // MARK: ValueTransformer
     
-    override class func allowsReverseTransformation() -> Bool {
+    override public class func allowsReverseTransformation() -> Bool {
         return true
     }
     
-    override func reverseTransformedValue(value: AnyObject?) -> AnyObject? {
+    override public func reverseTransformedValue(value: AnyObject?) -> AnyObject? {
         if let reverseClosure = reverseClosure {
             return reverseClosure(value: value)
         }

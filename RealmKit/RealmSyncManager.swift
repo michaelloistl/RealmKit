@@ -13,15 +13,15 @@ let RealmSyncOperationWillDeleteRealmObjectNotification = "com.michaelloistl.Rea
 
 // MARK: - RealmSyncManagerDelegate
 
-protocol RealmSyncManagerDelegate {
+public protocol RealmSyncManagerDelegate {
     func realmSyncManager(sender: RealmSyncManager, shouldStartWithSyncOperation syncOperation: RealmSyncOperation) -> Bool
 }
 
 // MARK: - RealmSyncManager
 
-class RealmSyncManager {
+public class RealmSyncManager {
     
-    enum SyncStatus: String {
+    public enum SyncStatus: String {
         case Sync = "sync"
         case Syncing = "syncing"
         case Synced = "synced"
@@ -155,7 +155,7 @@ class RealmSyncManager {
 
 // MARK: - RealmSyncObjectInfo
 
-class RealmSyncObjectInfo: NSObject {
+public class RealmSyncObjectInfo: NSObject {
     let type: Object.Type
     let oldPrimaryKey: String
     let newPrimaryKey: String
@@ -169,9 +169,9 @@ class RealmSyncObjectInfo: NSObject {
 
 // MARK: - RealmSyncOperation
 
-class RealmSyncOperation: NSOperation {
+public class RealmSyncOperation: NSOperation {
     
-    enum HTTPMethod: String {
+    public enum HTTPMethod: String {
         case GET = "GET"
         case POST = "POST"
         case PUT = "PUT"
@@ -188,7 +188,7 @@ class RealmSyncOperation: NSOperation {
     var identifier: String?
     
     private var _executing: Bool = false
-    override var executing: Bool {
+    override public var executing: Bool {
         get {
             return _executing
         }
@@ -202,7 +202,7 @@ class RealmSyncOperation: NSOperation {
     }
     
     private var _finished: Bool = false;
-    override var finished: Bool {
+    override public var finished: Bool {
         get {
             return _finished
         }
@@ -215,7 +215,7 @@ class RealmSyncOperation: NSOperation {
         }
     }
     
-    override var asynchronous: Bool {
+    override public var asynchronous: Bool {
         return true
     }
     
@@ -234,7 +234,7 @@ class RealmSyncOperation: NSOperation {
     
     // Override NSOperation Functions
     
-    override func start() {
+    override public func start() {
         if NSThread.isMainThread() == false {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 self.start()

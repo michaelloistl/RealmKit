@@ -11,7 +11,7 @@ import RealmSwift
 
 // MARK: - RealmSyncOperationProtocol
 
-protocol RealmSyncProtocol {
+public protocol RealmSyncProtocol {
     
     // MARK: - Model
     
