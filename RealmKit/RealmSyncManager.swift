@@ -46,7 +46,7 @@ public class RealmSyncManager {
         return Singleton.instance
     }
     
-    lazy var syncOperationQueue: NSOperationQueue = {
+    public lazy var syncOperationQueue: NSOperationQueue = {
         var _syncOperationQueue = NSOperationQueue()
         _syncOperationQueue.name = "Sync queue"
         _syncOperationQueue.maxConcurrentOperationCount = 1
