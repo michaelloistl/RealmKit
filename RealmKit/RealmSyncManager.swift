@@ -221,7 +221,7 @@ public class RealmSyncOperation: NSOperation {
     
     // Initializers
     
-    init(objectType: Object.Type, primaryKey: String, path: String, parameters: [String : AnyObject]?, httpMethod: HTTPMethod) {
+    public init(objectType: Object.Type, primaryKey: String, path: String, parameters: [String : AnyObject]?, httpMethod: HTTPMethod) {
         self.objectType = objectType
         self.primaryKey = primaryKey
         
