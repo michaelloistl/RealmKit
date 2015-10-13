@@ -70,24 +70,22 @@ public class RealmSyncManager {
         }
     }
     
-    public class func addPendingSyncOperations() {
-        let syncManager = RealmSyncManager.sharedManager
-        
-        if syncManager.addingPendingSyncOperations == false {
-            syncManager.addingPendingSyncOperations = true
+    public func addPendingSyncOperations() {
+        if addingPendingSyncOperations == false {
+            addingPendingSyncOperations = true
             
-            dispatch_async(syncManager.syncQueue, {
+            dispatch_async(syncQueue, {
                 do {
                     let realm = try Realm()
                     let predicate = NSPredicate(format: "syncStatus == %@", RealmSyncManager.SyncStatus.Sync.rawValue)
-                    for registeredType in syncManager.registeredTypes {
+                    for registeredType in self.registeredTypes {
                         let syncObjects = realm.objects(registeredType).filter(predicate)
 
                         for syncObject in syncObjects {
                             if let syncObject = syncObject as? RealmSyncProtocol {
                                 let syncOperations = syncObject.realmSyncOperations()
                                 for syncOperation in syncOperations {
-                                    if syncManager.delegate?.realmSyncManager(syncManager, shouldStartWithSyncOperation: syncOperation) ?? true {
+                                    if self.delegate?.realmSyncManager(self, shouldStartWithSyncOperation: syncOperation) ?? true {
                                         // SyncOperation completion block
                                         syncOperation.completionBlock = {
                                             
@@ -95,7 +93,7 @@ public class RealmSyncManager {
                                         
                                         // Add SyncOperation to queue
                                         if self.syncOperationIsQueued(syncOperation) == false {
-                                            syncManager.syncOperationQueue.addOperation(syncOperation)
+                                            self.syncOperationQueue.addOperation(syncOperation)
                                         }
                                     }
                                 }
@@ -106,16 +104,16 @@ public class RealmSyncManager {
                     
                 }
                 
-                syncManager.addingPendingSyncOperations = false
+                self.addingPendingSyncOperations = false
             })
         }
     }
     
     // Test: SyncManagerTests.testSyncOperationIsQueued()
-    class func syncOperationIsQueued(syncOperation: RealmSyncOperation, syncManager: RealmSyncManager = RealmSyncManager.sharedManager) -> Bool {
+    func syncOperationIsQueued(syncOperation: RealmSyncOperation) -> Bool {
         var isQueued = false
         
-        for operation in syncManager.syncOperationQueue.operations {
+        for operation in self.syncOperationQueue.operations {
             if let operation = operation as? RealmSyncOperation {
                 if NSStringFromClass(operation.objectType) == NSStringFromClass(syncOperation.objectType) {
                     if operation.primaryKey == syncOperation.primaryKey {
