@@ -36,9 +36,9 @@ public class RealmSyncManager {
     
     var addingPendingSyncOperations = false
     
-    var delegate: RealmSyncManagerDelegate?
+    public var delegate: RealmSyncManagerDelegate?
     
-    class var sharedManager: RealmSyncManager {
+    public class var sharedManager: RealmSyncManager {
         struct Singleton {
             static let instance = RealmSyncManager()
         }
@@ -82,7 +82,7 @@ public class RealmSyncManager {
     
     // MARK: - Methods
     
-    func registerType(type: Object.Type) {
+    public func registerType(type: Object.Type) {
         if let _ = type as? RealmSyncProtocol {
             registeredTypes.append(type)
         }
