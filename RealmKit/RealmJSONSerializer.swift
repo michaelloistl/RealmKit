@@ -12,9 +12,9 @@ import RealmSwift
 let RealmJSONSerializerErrorDomain = "com.aplo.ErrorDomain.RealmJSONObjectMapping"
 
 public class RealmObjectInfo {
-    let type: Object.Type
-    let primaryKey: String
-    let indexPath: NSIndexPath? = nil
+    public let type: Object.Type
+    public let primaryKey: String
+    public var indexPath: NSIndexPath? = nil
     
     init(type: Object.Type, primaryKey: String) {
         self.type = type
