@@ -9,7 +9,7 @@
 import Foundation
 import RealmSwift
 
-public let RealmSyncOperationWillDeleteRealmObjectNotification = "com.michaelloistl.RealmSyncOperationWillDeleteRealmObjectNotification"
+public let RealmSyncOperationWillDeleteObjectNotification = "com.aplo.RealmSyncOperationWillDeleteObjectNotification"
 
 // MARK: - RealmSyncManagerDelegate
 
@@ -28,9 +28,7 @@ public class RealmSyncManager {
         case Failed = "failed"
     }
     
-    var realmNotificationToken: NotificationToken?
-    
-    var registeredTypes = [Object.Type]()
+    var registeredTypes = [RealmSyncObject.Type]()
     
     var syncQueue: dispatch_queue_t = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)
     
@@ -57,38 +55,22 @@ public class RealmSyncManager {
     // MARK: Initializers
     
     init() {
-        
-        // Observe Realm Notifications
-        do {
-            try realmNotificationToken = Realm().addNotificationBlock({ (notification, realm) -> Void in
-                RealmSyncManager.addPendingSyncOperations()
-            })
-        } catch _ {
-            
-        }
+
     }
     
     deinit {
-        if let realmNotificationToken = realmNotificationToken {
-            do {
-                try Realm().removeNotification(realmNotificationToken)
-            } catch _ {
-                
-            }
-        }
-        
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     // MARK: - Methods
     
-    public func registerType(type: Object.Type) {
+    public func registerType(type: RealmSyncObject.Type) {
         if let _ = type as? RealmSyncProtocol {
             registeredTypes.append(type)
         }
     }
     
-    class func addPendingSyncOperations() {
+    public class func addPendingSyncOperations() {
         let syncManager = RealmSyncManager.sharedManager
         
         if syncManager.addingPendingSyncOperations == false {
@@ -97,7 +79,7 @@ public class RealmSyncManager {
             dispatch_async(syncManager.syncQueue, {
                 do {
                     let realm = try Realm()
-                    let predicate = NSPredicate(format: "syncStatus == %@", SyncStatus.Sync.rawValue)
+                    let predicate = NSPredicate(format: "syncStatus == %@", RealmSyncManager.SyncStatus.Sync.rawValue)
                     for registeredType in syncManager.registeredTypes {
                         let syncObjects = realm.objects(registeredType).filter(predicate)
 
@@ -156,11 +138,11 @@ public class RealmSyncManager {
 // MARK: - RealmSyncObjectInfo
 
 public class RealmSyncObjectInfo: NSObject {
-    public let type: Object.Type
+    public let type: RealmSyncObject.Type
     public let oldPrimaryKey: String
     public let newPrimaryKey: String
     
-    init(type: Object.Type, oldPrimaryKey: String, newPrimaryKey: String) {
+    init(type: RealmSyncObject.Type, oldPrimaryKey: String, newPrimaryKey: String) {
         self.type = type
         self.oldPrimaryKey = oldPrimaryKey
         self.newPrimaryKey = newPrimaryKey
@@ -178,7 +160,7 @@ public class RealmSyncOperation: NSOperation {
         case DELETE = "DELETE"
     }
     
-    public let objectType: Object.Type
+    public let objectType: RealmSyncObject.Type
     public let primaryKey: String
     
     public let httpMethod: HTTPMethod
@@ -221,7 +203,7 @@ public class RealmSyncOperation: NSOperation {
     
     // Initializers
     
-    public init(objectType: Object.Type, primaryKey: String, path: String, parameters: [String : AnyObject]?, httpMethod: HTTPMethod) {
+    public init(objectType: RealmSyncObject.Type, primaryKey: String, path: String, parameters: [String : AnyObject]?, httpMethod: HTTPMethod) {
         self.objectType = objectType
         self.primaryKey = primaryKey
         
@@ -318,9 +300,9 @@ public class RealmSyncOperation: NSOperation {
                             
                             dispatch_group_enter(dispatchCompletionGroup)
                             
-                            // Create new RealmObject with ObjectDictionary
+                            // Create new Object with ObjectDictionary
                             if let syncType = self.objectType as? RealmSyncProtocol.Type {
-                                self.objectType.realmObjectInRealm(realm, withJSONDictionary: objectDictionary, mappingIdentifier: nil, identifier: nil, replaceObjectWithPrimaryKey: nil, completion: { (realmObjectInfo, error) -> Void in
+                                self.objectType.realmObjectInRealm(realm, withJSONDictionary: objectDictionary, mappingIdentifier: nil, identifier: nil, replacingObjectWithPrimaryKey: self.primaryKey, completion: { (realmObjectInfo, error) -> Void in
                                     
                                     // Update Realm
                                     realm.refresh()
@@ -336,7 +318,7 @@ public class RealmSyncOperation: NSOperation {
                                                         let realmSyncObjectInfo = RealmSyncObjectInfo(type: self.objectType, oldPrimaryKey: self.primaryKey, newPrimaryKey: newPrimaryKey)
                                                         
                                                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                                            NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteRealmObjectNotification, object:realmSyncObjectInfo)
+                                                            NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
                                                         })
                                                         
                                                         realm.write({ () -> Void in

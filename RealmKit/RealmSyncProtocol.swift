@@ -9,32 +9,7 @@
 import Foundation
 import RealmSwift
 
-// MARK: - RealmSyncOperationProtocol
-
 public protocol RealmSyncProtocol {
-    
-    // MARK: - Model
-    
-    var id: String {get set}
-    var syncStatus: String {get set}
-    var deletedAt: NSTimeInterval {get set}
-    var server_id: String {get set}
-    var server_deletedAt: NSTimeInterval {get set}
-    
-    // MARK: - JSONSerializer
-    
-    static func primaryKey() -> String?
-    
-    static func defaultPropertyValues() -> [String: AnyObject]
-    static func classForParsingJSONDictionary(JSONDictionary: NSDictionary) -> RealmSyncProtocol.Type
-    static func JSONKeyPathsByPropertyKeyWithIdentifier(mappingIdentifier: String?, identifier: String?) -> [String : String]!
-    static func JSONTransformerForKey(key: String!, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer!
-    static func keyValueDictionaryWithPrimaryKeyValue(primaryKeyValue: String) -> [String : String]?
-    
-    func realmObjectInRealm(realm: Realm, didCreateOrUpdateRealmObjectWithPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
-    
-    // MARK: - Sync
-    
     static func realmSyncOperation(sender: RealmSyncOperation, responseObjectKeyForHTTPMethod httpMethod: RealmSyncOperation.HTTPMethod, identifier: String?) -> String?
     static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?, completion: () -> Void)
 

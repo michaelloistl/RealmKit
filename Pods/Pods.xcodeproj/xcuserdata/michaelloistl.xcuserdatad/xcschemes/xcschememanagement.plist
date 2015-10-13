@@ -9,6 +9,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Pods-RealmKitTests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Realm.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -23,6 +28,11 @@
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>53AFDAD50F9A70F45B1246DBF9D9175D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>64EE01F15F42765A4EAEDD9EBE9F5AED</key>
 		<dict>
 			<key>primary</key>
 			<true/>

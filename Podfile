@@ -2,10 +2,10 @@ platform :ios, '8.0'
 use_frameworks!
 
 target 'RealmKit' do
-    pod 'RealmSwift', '~> 0.95'
+    pod 'RealmSwift'
 end
 
 target 'RealmKitTests' do
-
+    pod 'RealmSwift'
 end
 
