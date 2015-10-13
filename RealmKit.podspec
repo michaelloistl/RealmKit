@@ -3,8 +3,8 @@ Pod::Spec.new do |s|
     s.version = '0.0.0'
     s.license = 'MIT'
     s.summary = 'Sync & JSON Serializer for Realm in Swift'
-    s.authors = { 'Michael Loistl' => 'michael.loistl@mobext.com' }
-    s.source = { :git => 'https://michaelloistl@bitbucket.org/aplo/realmkit.git', :tag => s.version }
+    s.authors = { 'Michael Loistl' => 'michael@aplo.co' }
+    s.source = { :git => 'https://bitbucket.org/aplo/realmkit.git', :tag => s.version }
 
     s.ios.deployment_target = '8.0'
     s.osx.deployment_target = '10.9'
