@@ -178,14 +178,14 @@ public class RealmSyncOperation: NSOperation {
         case DELETE = "DELETE"
     }
     
-    var objectType: Object.Type
-    var primaryKey: String
+    public let objectType: Object.Type
+    public let primaryKey: String
     
-    var httpMethod: HTTPMethod
-    var path: String
-    var parameters: [String : AnyObject]?
+    public let httpMethod: HTTPMethod
+    public let path: String
+    public let parameters: [String : AnyObject]?
     
-    var identifier: String?
+    public var identifier: String?
     
     private var _executing: Bool = false
     override public var executing: Bool {
