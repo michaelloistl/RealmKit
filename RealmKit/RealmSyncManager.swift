@@ -9,7 +9,7 @@
 import Foundation
 import RealmSwift
 
-let RealmSyncOperationWillDeleteRealmObjectNotification = "com.michaelloistl.RealmSyncOperationWillDeleteRealmObjectNotification"
+public let RealmSyncOperationWillDeleteRealmObjectNotification = "com.michaelloistl.RealmSyncOperationWillDeleteRealmObjectNotification"
 
 // MARK: - RealmSyncManagerDelegate
 
@@ -156,9 +156,9 @@ public class RealmSyncManager {
 // MARK: - RealmSyncObjectInfo
 
 public class RealmSyncObjectInfo: NSObject {
-    let type: Object.Type
-    let oldPrimaryKey: String
-    let newPrimaryKey: String
+    public let type: Object.Type
+    public let oldPrimaryKey: String
+    public let newPrimaryKey: String
     
     init(type: Object.Type, oldPrimaryKey: String, newPrimaryKey: String) {
         self.type = type
