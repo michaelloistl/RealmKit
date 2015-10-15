@@ -81,23 +81,27 @@ public class RealmSyncObject: Object {
         if hasPrimaryKey() {
             var completionRealmObjectInfos = [RealmObjectInfo]()
             
-            realm.write({ () -> Void in
-                for object in array {
-                    if let dictionary = object as? NSDictionary {
-                        let type = classForParsingJSONDictionary(dictionary)
-                        
-                        if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier) {
+            do {
+                try realm.write({ () -> Void in
+                    for object in array {
+                        if let dictionary = object as? NSDictionary {
+                            let type = classForParsingJSONDictionary(dictionary)
                             
-                            if let primaryKey = type.primaryKey() {
-                                if let primaryKey = realmObject.valueForKey(primaryKey) as? String {
-                                    let realmObjectInfo = RealmObjectInfo(type: self, primaryKey: primaryKey)
-                                    completionRealmObjectInfos.append(realmObjectInfo)
+                            if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier) {
+                                
+                                if let primaryKey = type.primaryKey() {
+                                    if let primaryKey = realmObject.valueForKey(primaryKey) as? String {
+                                        let realmObjectInfo = RealmObjectInfo(type: self, primaryKey: primaryKey)
+                                        completionRealmObjectInfos.append(realmObjectInfo)
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            })
+                })
+            } catch {
+                
+            }
             
             completion(realmObjectInfos: completionRealmObjectInfos, error: nil)
         } else {
@@ -120,22 +124,26 @@ public class RealmSyncObject: Object {
         if hasPrimaryKey() {
             var completionRealmObjectInfo: RealmObjectInfo?
             
-            realm.write({ () -> Void in
-                let type = classForParsingJSONDictionary(dictionary)
-                
-                if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier) {
+            do {
+                try realm.write({ () -> Void in
+                    let type = classForParsingJSONDictionary(dictionary)
                     
-                    if let primaryKey = type.primaryKey() {
-                        if let newPrimaryKey = realmObject.valueForKey(primaryKey) as? String {
-                            let realmObjectInfo = RealmObjectInfo(type: self, primaryKey: newPrimaryKey)
-                            completionRealmObjectInfo = realmObjectInfo
-                            
-                            // Did create RealmObject in transactionWithBlock
-                            didCreateOrUpdateRealmSyncObjectInRealm(realm, withPrimaryKey: newPrimaryKey, replacingObjectWithPrimaryKey: oldPrimaryKey)
+                    if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier) {
+                        
+                        if let primaryKey = type.primaryKey() {
+                            if let newPrimaryKey = realmObject.valueForKey(primaryKey) as? String {
+                                let realmObjectInfo = RealmObjectInfo(type: self, primaryKey: newPrimaryKey)
+                                completionRealmObjectInfo = realmObjectInfo
+                                
+                                // Did create RealmObject in transactionWithBlock
+                                didCreateOrUpdateRealmSyncObjectInRealm(realm, withPrimaryKey: newPrimaryKey, replacingObjectWithPrimaryKey: oldPrimaryKey)
+                            }
                         }
                     }
-                }
-            })
+                })
+            } catch {
+                
+            }
             
             completion(realmObjectInfo: completionRealmObjectInfo, error: nil)
         } else {

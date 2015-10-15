@@ -48,9 +48,13 @@ class RealmJSONSerializerTests: RealmTestCase {
         if let realm = try? Realm() {
             var object: Object?
             
-            realm.write({ () -> Void in
-                object = User.realmObjectWithType(User.self, inRealm: realm, withJSONDictionary: jsonDictionary, mappingIdentifier: nil, identifier: nil)
-            })
+            do {
+                try realm.write({ () -> Void in
+                    object = User.realmObjectWithType(User.self, inRealm: realm, withJSONDictionary: jsonDictionary, mappingIdentifier: nil, identifier: nil)
+                })
+            } catch {
+                
+            }
             
             XCTAssertNotNil(object, "\(object)")
             XCTAssertTrue(object is User, "\(object)")

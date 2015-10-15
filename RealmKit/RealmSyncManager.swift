@@ -319,9 +319,13 @@ public class RealmSyncOperation: NSOperation {
                                                             NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
                                                         })
                                                         
-                                                        realm.write({ () -> Void in
-                                                            realm.delete(tempRealmObject)
-                                                        })
+                                                        do {
+                                                            try realm.write({ () -> Void in
+                                                                realm.delete(tempRealmObject)
+                                                            })
+                                                        } catch {
+                                                            
+                                                        }
                                                     }
                                                 }
                                             }
@@ -333,9 +337,13 @@ public class RealmSyncOperation: NSOperation {
                             }
                         } else {
                             if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncProtocol {
-                                realm.write({ () -> Void in
-                                    realmObject.setSyncStatus(.Synced)
-                                })
+                                do {
+                                    try realm.write({ () -> Void in
+                                        realmObject.setSyncStatus(.Synced)
+                                    })
+                                } catch {
+                                    
+                                }
                             }
                         }
                     } else {
