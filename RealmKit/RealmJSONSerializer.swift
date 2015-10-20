@@ -12,11 +12,11 @@ import RealmSwift
 let RealmJSONSerializerErrorDomain = "com.aplo.ErrorDomain.RealmJSONObjectMapping"
 
 public class RealmObjectInfo {
-    public let type: RealmSyncObject.Type
+    public let type: Object.Type
     public let primaryKey: String
     public var indexPath: NSIndexPath? = nil
     
-    init(type: RealmSyncObject.Type, primaryKey: String) {
+    init(type: Object.Type, primaryKey: String) {
         self.type = type
         self.primaryKey = primaryKey
     }
@@ -84,22 +84,22 @@ public class RealmValueTransformer: NSValueTransformer {
 
 public extension RealmValueTransformer {
 
-    public class func JSONDictionaryTransformerWithObjectType<T: RealmSyncObject>(type: T.Type, inRealm realm: Realm) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm) -> NSValueTransformer! {
         return JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil)
     }
     
-    public class func JSONDictionaryTransformerWithObjectType<T: RealmSyncObject>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             
             // TODO: Direct value for primary key
             
-            if let dictionary = value as? NSDictionary {
-                return type.realmObjectWithType(type, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier)
+            if let dictionary = value as? NSDictionary, _type = type as? RealmJSONSerializerProtocol.Type {
+                return _type.realmObjectWithType(type, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier)
             } else {
                 return nil
             }
             }, reverseClosure: { (value) -> AnyObject? in
-                if let _ = value as? RealmSyncObject {
+                if let _ = value as? Object {
                     // TODO: Implement JSONDictionaryFromRealmObject:
                     return nil
                 } else {
@@ -108,11 +108,11 @@ public extension RealmValueTransformer {
         })
     }
     
-    public class func JSONArrayTransformerWithObjectType<T: RealmSyncObject>(type: T.Type, inRealm realm: Realm) -> NSValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm) -> NSValueTransformer! {
         return JSONArrayTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil)
     }
     
-    public class func JSONArrayTransformerWithObjectType<T: RealmSyncObject>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
         let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: mappingIdentifier, identifier: identifier)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
@@ -127,20 +127,22 @@ public extension RealmValueTransformer {
             } else if let stringArray = value as? [String] { // Assuming that string is the primary Key
                 let list = List<T>()
                 for string in stringArray {
-                    if let primaryKey = (type as RealmSyncObject.Type).primaryKey() {
+                    if let primaryKey = (type as Object.Type).primaryKey() {
                         
                         // Type specific property mapping
-                        var keyValueDictionary = type.keyValueDictionaryWithPrimaryKeyValue(string)
-                        
-                        // Default fallback
-                        if keyValueDictionary == nil {
-                            keyValueDictionary = [primaryKey: string]
-                        }
-                        
-                        if let keyValueDictionary = keyValueDictionary {
-                            if let _: AnyObject = keyValueDictionary[primaryKey] {
-                                let realmObject = realm.create(T.self, value: keyValueDictionary, update: true)
-                                list.append(realmObject)
+                        if let _type = type as? RealmJSONSerializerProtocol.Type {
+                            var keyValueDictionary = _type.keyValueDictionaryWithPrimaryKeyValue(string)
+
+                            // Default fallback
+                            if keyValueDictionary == nil {
+                                keyValueDictionary = [primaryKey: string]
+                            }
+                            
+                            if let keyValueDictionary = keyValueDictionary {
+                                if let _: AnyObject = keyValueDictionary[primaryKey] {
+                                    let realmObject = realm.create(T.self, value: keyValueDictionary, update: true)
+                                    list.append(realmObject)
+                                }
                             }
                         }
                     }

@@ -29,3 +29,15 @@ class RealmTestCase: XCTestCase {
         super.tearDown()
     }
 }
+
+class RealmObject: Object {
+    
+}
+
+class User: RealmObject {
+    
+}
+
+class Item: RealmObject {
+    
+}

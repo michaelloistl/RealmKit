@@ -28,7 +28,7 @@ public class RealmSyncManager {
         case Failed = "failed"
     }
     
-    var registeredTypes = [RealmSyncObject.Type]()
+    var registeredTypes = [Object.Type]()
     
     var syncQueue: dispatch_queue_t = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)
     
@@ -64,10 +64,8 @@ public class RealmSyncManager {
     
     // MARK: - Methods
     
-    public func registerType(type: RealmSyncObject.Type) {
-        if let _ = type as? RealmSyncProtocol {
-            registeredTypes.append(type)
-        }
+    public func registerType(type: Object.Type) {
+        registeredTypes.append(type)
     }
     
     public func addPendingSyncOperations() {
@@ -80,7 +78,7 @@ public class RealmSyncManager {
                     let predicate = NSPredicate(format: "syncStatus == %@", RealmSyncManager.SyncStatus.Sync.rawValue)
                     for registeredType in self.registeredTypes {
                         let syncObjects = realm.objects(registeredType).filter(predicate)
-
+                        
                         for syncObject in syncObjects {
                             if let syncObject = syncObject as? RealmSyncProtocol {
                                 let syncOperations = syncObject.realmSyncOperations()
@@ -136,11 +134,11 @@ public class RealmSyncManager {
 // MARK: - RealmSyncObjectInfo
 
 public class RealmSyncObjectInfo: NSObject {
-    public let type: RealmSyncObject.Type
+    public let type: Object.Type
     public let oldPrimaryKey: String
     public let newPrimaryKey: String
     
-    init(type: RealmSyncObject.Type, oldPrimaryKey: String, newPrimaryKey: String) {
+    init(type: Object.Type, oldPrimaryKey: String, newPrimaryKey: String) {
         self.type = type
         self.oldPrimaryKey = oldPrimaryKey
         self.newPrimaryKey = newPrimaryKey
@@ -158,7 +156,7 @@ public class RealmSyncOperation: NSOperation {
         case DELETE = "DELETE"
     }
     
-    public let objectType: RealmSyncObject.Type
+    public let objectType: Object.Type
     public let primaryKey: String
     
     public let httpMethod: HTTPMethod
@@ -201,7 +199,7 @@ public class RealmSyncOperation: NSOperation {
     
     // Initializers
     
-    public init(objectType: RealmSyncObject.Type, primaryKey: String, path: String, parameters: [String : AnyObject]?, httpMethod: HTTPMethod) {
+    public init(objectType: Object.Type, primaryKey: String, path: String, parameters: [String : AnyObject]?, httpMethod: HTTPMethod) {
         self.objectType = objectType
         self.primaryKey = primaryKey
         
@@ -299,8 +297,8 @@ public class RealmSyncOperation: NSOperation {
                             dispatch_group_enter(dispatchCompletionGroup)
                             
                             // Create new Object with ObjectDictionary
-                            if let syncType = self.objectType as? RealmSyncProtocol.Type {
-                                self.objectType.realmObjectInRealm(realm, withJSONDictionary: objectDictionary, mappingIdentifier: nil, identifier: nil, replacingObjectWithPrimaryKey: self.primaryKey, completion: { (realmObjectInfo, error) -> Void in
+                            if let syncType = self.objectType as? RealmSyncProtocol.Type, serializeType = self.objectType as? RealmJSONSerializerProtocol.Type {
+                                serializeType.realmObjectInRealm(realm, withJSONDictionary: objectDictionary, mappingIdentifier: nil, identifier: nil, replacingObjectWithPrimaryKey: self.primaryKey, completion: { (realmObjectInfo, error) -> Void in
                                     
                                     // Update Realm
                                     realm.refresh()
