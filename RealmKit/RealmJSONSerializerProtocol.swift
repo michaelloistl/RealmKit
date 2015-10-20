@@ -31,7 +31,7 @@ public protocol RealmJSONSerializerProtocol {
     static func JSONTransformerForKey(key: String!, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer!
     static func keyValueDictionaryWithPrimaryKeyValue(primaryKeyValue: String) -> [String : String]?
     
-    static func didCreateOrUpdateRealmSyncObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
+    static func didCreateOrUpdateRealmObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
 }
 
 public extension RealmJSONSerializerProtocol {
@@ -114,7 +114,7 @@ public extension RealmJSONSerializerProtocol {
                                 completionRealmObjectInfo = realmObjectInfo
                                 
                                 // Did create RealmObject in transactionWithBlock
-                                didCreateOrUpdateRealmSyncObjectInRealm(realm, withPrimaryKey: newPrimaryKey, replacingObjectWithPrimaryKey: oldPrimaryKey)
+                                didCreateOrUpdateRealmObjectInRealm(realm, withPrimaryKey: newPrimaryKey, replacingObjectWithPrimaryKey: oldPrimaryKey)
                             }
                         }
                     }
@@ -128,12 +128,6 @@ public extension RealmJSONSerializerProtocol {
             let error = NSError(domain: RealmJSONSerializerErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Class doesn't define a valid primaryKey"])
             completion(realmObjectInfo: nil, error: error)
         }
-    }
-    
-    // This function executes within the transaction block of realmObjectInRealm()
-    // Override to modify initial and new RealmObject within the same transaction block
-    public static func didCreateOrUpdateRealmSyncObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?) {
-        
     }
     
     // CreateOrUpdate RealmObject with mapping
