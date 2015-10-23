@@ -93,7 +93,7 @@ public extension RealmValueTransformer {
             
             // TODO: Direct value for primary key
             
-            if let dictionary = value as? NSDictionary, _type = type as? RealmJSONSerializerProtocol.Type {
+            if let dictionary = value as? NSDictionary, _type = type as? RealmJSONSerializable.Type {
                 return _type.realmObjectWithType(type, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier)
             } else {
                 return nil
@@ -130,7 +130,7 @@ public extension RealmValueTransformer {
                     if let primaryKey = (type as Object.Type).primaryKey() {
                         
                         // Type specific property mapping
-                        if let _type = type as? RealmJSONSerializerProtocol.Type {
+                        if let _type = type as? RealmJSONSerializable.Type {
                             var keyValueDictionary = _type.keyValueDictionaryWithPrimaryKeyValue(string)
 
                             // Default fallback

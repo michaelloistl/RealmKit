@@ -9,7 +9,23 @@
 import Foundation
 import RealmSwift
 
-public protocol RealmJSONSerializerProtocol {
+public protocol RealmSyncable {
+    
+    static func realmSyncOperation(sender: RealmSyncOperation, responseObjectKeyForHTTPMethod httpMethod: RealmSyncOperation.HTTPMethod, identifier: String?) -> String?
+    static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?, completion: () -> Void)
+    
+    func realmSyncOperations() -> [RealmSyncOperation]
+    func realmSyncOperationHTTPMethod() -> RealmSyncOperation.HTTPMethod!
+    func realmSyncOperationPathForHTTPMethod(httpMethod: RealmSyncOperation.HTTPMethod) -> String?
+    func realmSyncOperationParametersForHTTPMethod(httpMethod: RealmSyncOperation.HTTPMethod) -> [String: AnyObject]?
+    
+    func realmSyncOperationResultWithPath(path: String, parameters: [String: AnyObject]?, httpMethod: RealmSyncOperation.HTTPMethod, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
+    func setSyncStatus(syncStatus: RealmKit.SyncStatus)
+    
+    func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, error: NSError!, primaryKey: String, inRealm realm: Realm)
+}
+
+public protocol RealmJSONSerializable {
 
     // Properties
     
@@ -22,9 +38,8 @@ public protocol RealmJSONSerializerProtocol {
     
     // Methods
     
+    func setSyncStatus(syncStatus: RealmKit.SyncStatus)
     static func primaryKey() -> String?
-    
-    func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus)
     static func defaultPropertyValues() -> [String: AnyObject]
     static func classForParsingJSONDictionary(JSONDictionary: NSDictionary) -> Object.Type
     static func JSONKeyPathsByPropertyKeyWithIdentifier(mappingIdentifier: String?, identifier: String?) -> [String : String]!
@@ -34,7 +49,7 @@ public protocol RealmJSONSerializerProtocol {
     static func didCreateOrUpdateRealmObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
 }
 
-public extension RealmJSONSerializerProtocol {
+public extension RealmJSONSerializable {
     
     // MARK: - Methods
     
@@ -71,6 +86,9 @@ public extension RealmJSONSerializerProtocol {
                                     if let primaryKey = realmObject.valueForKey(primaryKey) as? String {
                                         let realmObjectInfo = RealmObjectInfo(type: type.self, primaryKey: primaryKey)
                                         completionRealmObjectInfos.append(realmObjectInfo)
+                                        
+                                        // Did create RealmObject in transactionWithBlock
+                                        didCreateOrUpdateRealmObjectInRealm(realm, withPrimaryKey: primaryKey, replacingObjectWithPrimaryKey: nil)
                                     }
                                 }
                             }
