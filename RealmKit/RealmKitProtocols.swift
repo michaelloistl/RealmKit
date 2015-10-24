@@ -41,12 +41,15 @@ public protocol RealmJSONSerializable {
     func setSyncStatus(syncStatus: RealmKit.SyncStatus)
     static func primaryKey() -> String?
     static func defaultPropertyValues() -> [String: AnyObject]
-    static func classForParsingJSONDictionary(JSONDictionary: NSDictionary) -> Object.Type
     static func JSONKeyPathsByPropertyKeyWithIdentifier(mappingIdentifier: String?, identifier: String?) -> [String : String]!
     static func JSONTransformerForKey(key: String!, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer!
+
+    static func classForParsingJSONDictionary(JSONDictionary: NSDictionary) -> Object.Type
     static func keyValueDictionaryWithPrimaryKeyValue(primaryKeyValue: String) -> [String : String]?
     
     static func didCreateOrUpdateRealmObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
+    
+    static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], mappingIdentifier: String?, identifier: String?, inRealm realm: Realm) -> [String: AnyObject]
 }
 
 public extension RealmJSONSerializable {
@@ -182,6 +185,8 @@ public extension RealmJSONSerializable {
                     }
                 }
             }
+            
+            keyValueDictionary = keyValueDictionaryForRealmObjectWithType(type, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, inRealm: realm)
             
             if let primaryKey = (type as Object.Type).primaryKey(), _ = keyValueDictionary[primaryKey] as? String {
                 let realmObject = realm.create(type.self, value: keyValueDictionary, update: true)
