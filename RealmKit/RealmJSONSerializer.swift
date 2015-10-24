@@ -85,16 +85,16 @@ public class RealmValueTransformer: NSValueTransformer {
 public extension RealmValueTransformer {
 
     public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm) -> NSValueTransformer! {
-        return JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil)
+        return JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil, userInfo: nil)
     }
     
-    public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?) -> NSValueTransformer! {
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             
             // TODO: Direct value for primary key
             
             if let dictionary = value as? NSDictionary, _type = type as? RealmJSONSerializable.Type {
-                return _type.realmObjectWithType(type, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier)
+                return _type.realmObjectWithType(type, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo)
             } else {
                 return nil
             }
@@ -109,11 +109,11 @@ public extension RealmValueTransformer {
     }
     
     public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm) -> NSValueTransformer! {
-        return JSONArrayTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil)
+        return JSONArrayTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: nil, identifier: nil, userInfo: nil)
     }
     
-    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?) -> NSValueTransformer! {
-        let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: mappingIdentifier, identifier: identifier)
+    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, inRealm realm: Realm, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?) -> NSValueTransformer! {
+        let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, inRealm: realm, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             if let dictionaryArray = value as? [NSDictionary] {

@@ -49,7 +49,7 @@ public protocol RealmJSONSerializable {
     
     static func didCreateOrUpdateRealmObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
     
-    static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], mappingIdentifier: String?, identifier: String?, inRealm realm: Realm) -> [String: AnyObject]
+    static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm) -> [String: AnyObject]
 }
 
 public extension RealmJSONSerializable {
@@ -66,13 +66,13 @@ public extension RealmJSONSerializable {
     // MARK: CreateOrUpdate objects with JSON Array
     
     public static func realmObjectsInRealm(realm: Realm,  withJSONArray array: NSArray, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
-        realmObjectsInRealm(realm, withJSONArray: array, mappingIdentifier: nil, identifier: nil) { (realmObjectInfos, error) -> Void in
+        realmObjectsInRealm(realm, withJSONArray: array, mappingIdentifier: nil, identifier: nil, userInfo: nil) { (realmObjectInfos, error) -> Void in
             
             completion(realmObjectInfos: realmObjectInfos, error: error)
         }
     }
     
-    public static func realmObjectsInRealm(realm: Realm,  withJSONArray array: NSArray, mappingIdentifier: String?, identifier: String?, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
+    public static func realmObjectsInRealm(realm: Realm,  withJSONArray array: NSArray, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
         
         if hasPrimaryKey() {
             var completionRealmObjectInfos = [RealmObjectInfo]()
@@ -83,7 +83,7 @@ public extension RealmJSONSerializable {
                         if let dictionary = object as? NSDictionary {
                             let type = classForParsingJSONDictionary(dictionary)
                             
-                            if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier) {
+                            if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo) {
                                 
                                 if let primaryKey = type.primaryKey() {
                                     if let primaryKey = realmObject.valueForKey(primaryKey) as? String {
@@ -113,12 +113,12 @@ public extension RealmJSONSerializable {
     
     public static func realmObjectInRealm(realm: Realm, withJSONDictionary dictionary: NSDictionary, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
         
-        realmObjectInRealm(realm, withJSONDictionary: dictionary, mappingIdentifier: nil, identifier: nil, replacingObjectWithPrimaryKey: nil) { (realmObjectInfo, error) -> Void in
+        realmObjectInRealm(realm, withJSONDictionary: dictionary, mappingIdentifier: nil, identifier: nil, userInfo: nil, replacingObjectWithPrimaryKey: nil) { (realmObjectInfo, error) -> Void in
             completion(realmObjectInfo: realmObjectInfo, error: error)
         }
     }
     
-    public static func realmObjectInRealm(realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
+    public static func realmObjectInRealm(realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, replacingObjectWithPrimaryKey oldPrimaryKey: String?, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
         
         if hasPrimaryKey() {
             var completionRealmObjectInfo: RealmObjectInfo?
@@ -127,7 +127,7 @@ public extension RealmJSONSerializable {
                 try realm.write({ () -> Void in
                     let type = classForParsingJSONDictionary(dictionary)
                     
-                    if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier) {
+                    if let realmObject = self.realmObjectWithType(type.self, inRealm: realm, withJSONDictionary: dictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo) {
                         
                         if let primaryKey = type.primaryKey() {
                             if let newPrimaryKey = realmObject.valueForKey(primaryKey) as? String {
@@ -152,7 +152,7 @@ public extension RealmJSONSerializable {
     }
     
     // CreateOrUpdate RealmObject with mapping
-    public static func realmObjectWithType<T: Object>(type: T.Type, inRealm realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?) -> Object? {
+    public static func realmObjectWithType<T: Object>(type: T.Type, inRealm realm: Realm, withJSONDictionary dictionary: NSDictionary, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?) -> Object? {
         
         // Object key -> JSON keyPath
         if let mappingDictionary = JSONKeyPathsByPropertyKeyWithIdentifier(mappingIdentifier, identifier: identifier) {
@@ -186,7 +186,7 @@ public extension RealmJSONSerializable {
                 }
             }
             
-            keyValueDictionary = keyValueDictionaryForRealmObjectWithType(type, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, inRealm: realm)
+            keyValueDictionary = keyValueDictionaryForRealmObjectWithType(type, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm)
             
             if let primaryKey = (type as Object.Type).primaryKey(), _ = keyValueDictionary[primaryKey] as? String {
                 let realmObject = realm.create(type.self, value: keyValueDictionary, update: true)
