@@ -57,13 +57,13 @@ public class RealmSyncManager {
     
     // MARK: - Methods
     
-    public func registerTypes<T: Object>(types: [T]) {
+    public func registerTypes<T: Object>(types: [T.Type]) {
         for type in types {
             registerType(type)
         }
     }
 
-    public func registerType<T: Object>(type: T) {
+    public func registerType<T: Object>(type: T.Type) {
         registeredTypes.append(T)
     }
     
