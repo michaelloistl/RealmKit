@@ -57,14 +57,14 @@ public class RealmSyncManager {
     
     // MARK: - Methods
     
-    public func registerTypes<T: Object>(types: [T.Type]) {
+    public func registerTypes(types: [Object.Type]) {
         for type in types {
             registerType(type)
         }
     }
 
-    public func registerType<T: Object>(type: T.Type) {
-        registeredTypes.append(T)
+    public func registerType(type: Object.Type) {
+        registeredTypes.append(type)
     }
     
     public func addPendingSyncOperations() {
@@ -270,7 +270,7 @@ public class RealmSyncOperation: NSOperation {
 //            let requestBody = NSString(data: completionSessionDataTask?.originalRequest?.HTTPBody ?? NSData(), encoding: NSUTF8StringEncoding)
 //            let errorResponse = completionError.userInfo[ErrorResponseObjectKey] as? NSDictionary
             
-            NSLog("PATH: \(self.path) HTTPMETHOD: \(self.httpMethod.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject?.description)")
+//            NSLog("PATH: \(self.path) HTTPMETHOD: \(self.httpMethod.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject?.description)")
 
             let dispatchCompletionGroup = dispatch_group_create()
             

@@ -191,8 +191,6 @@ public extension RealmJSONSerializable {
             if let primaryKey = (type as Object.Type).primaryKey(), _ = keyValueDictionary[primaryKey] as? String {
                 let realmObject = realm.create(type.self, value: keyValueDictionary, update: true)
                 
-//                NSLog("JSONDictionary: \(type) => \(dictionary) => \(keyValueDictionary)")
-                
                 return realmObject
             }
         }
