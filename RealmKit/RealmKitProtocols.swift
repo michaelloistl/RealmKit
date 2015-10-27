@@ -9,18 +9,45 @@
 import Foundation
 import RealmSwift
 
+public typealias RealmFetchObjectCompletionBlock = (request: NSURLRequest!, response: NSHTTPURLResponse!, success: Bool, responseObject: AnyObject?, realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void
+
+public typealias RealmFetchObjectsCompletionBlock = (request: NSURLRequest!, response: NSHTTPURLResponse!, success: Bool, responseObject: AnyObject?, realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void
+
+public protocol RealmFetchable {
+
+    static func realmFetchBaseURL() -> NSURL!
+    static func realmFetchPath() -> String!
+    static func realmFetchParameters() -> [String: AnyObject]?
+    static func realmFetchResponseObjectKey() -> String?
+    
+    // Serializing
+    
+    static func realmFetchWillSerializeJSON(json: [String: AnyObject], mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: () -> Void)
+
+    static func realmFetchDidSerializeJSON(json: [String: AnyObject], realmObjectInfos: [RealmObjectInfo]?, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: () -> Void)
+    
+    // Networking
+    
+    static func realmRequestResultWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
+
+    func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, error: NSError!, primaryKey: String, inRealm realm: Realm)
+}
+
 public protocol RealmSyncable {
     
-    static func realmSyncOperation(sender: RealmSyncOperation, responseObjectKeyForHTTPMethod httpMethod: RealmSyncOperation.HTTPMethod, identifier: String?) -> String?
-    static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?, completion: () -> Void)
+    func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus)
     
     func realmSyncOperations() -> [RealmSyncOperation]
-    func realmSyncOperationHTTPMethod() -> RealmSyncOperation.HTTPMethod!
-    func realmSyncOperationPathForHTTPMethod(httpMethod: RealmSyncOperation.HTTPMethod) -> String?
-    func realmSyncOperationParametersForHTTPMethod(httpMethod: RealmSyncOperation.HTTPMethod) -> [String: AnyObject]?
+    func realmSyncOperationMethod() -> RealmKit.Method!
+    func realmSyncOperationPathForMethod(method: RealmKit.Method) -> String?
+    func realmSyncOperationParametersForMethod(method: RealmKit.Method) -> [String: AnyObject]?
     
-    func realmSyncOperationResultWithPath(path: String, parameters: [String: AnyObject]?, httpMethod: RealmSyncOperation.HTTPMethod, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
-    func setSyncStatus(syncStatus: RealmKit.SyncStatus)
+    static func realmSyncOperation(sender: RealmSyncOperation, responseObjectKeyForMethod method: RealmKit.Method, identifier: String?) -> String?
+    static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?, completion: () -> Void)
+    
+    // Networking
+    
+    static func realmRequestResultWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
     
     func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, error: NSError!, primaryKey: String, inRealm realm: Realm)
 }
@@ -38,7 +65,7 @@ public protocol RealmJSONSerializable {
     
     // Methods
     
-    func setSyncStatus(syncStatus: RealmKit.SyncStatus)
+    func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus)
     static func primaryKey() -> String?
     static func defaultPropertyValues() -> [String: AnyObject]
     static func JSONKeyPathsByPropertyKeyWithIdentifier(mappingIdentifier: String?, identifier: String?) -> [String : String]!
@@ -50,6 +77,169 @@ public protocol RealmJSONSerializable {
     static func didCreateOrUpdateRealmObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
     
     static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm) -> [String: AnyObject]
+}
+
+public extension RealmFetchable where Self: RealmJSONSerializable {
+
+    public static func realmFetchObjectsInRealm(realm: Realm, userInfo: [String: AnyObject]? = nil, completion: RealmFetchObjectsCompletionBlock) {
+        if let baseURL = realmFetchBaseURL(), path = realmFetchPath() {
+            let parameters = realmFetchParameters()
+            
+            realmFetchObjectsWithBaseURL(baseURL, path: path, parameters: parameters, mappingIdentifier: nil, identifier: nil, userInfo: userInfo, inRealm: realm, completion: { (request, response, success, responseObject, realmObjectInfos, error) -> Void in
+                
+                completion(request: request, response: response, success: success, responseObject: responseObject, realmObjectInfos: realmObjectInfos, error: error)
+            })
+        }
+    }
+    
+    public static func realmFetchObjectWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: RealmFetchObjectCompletionBlock) {
+        
+        realmFetchObjectsWithBaseURL(baseURL, path: path, parameters: parameters, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm) { (request, response, success, responseObject, realmObjectInfos, error) -> Void in
+         
+            completion(request: request, response: response, success: success, responseObject: responseObject, realmObjectInfo: realmObjectInfos?.first, error: error)
+        }
+    }
+    
+    public static func realmFetchObjectsWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: RealmFetchObjectsCompletionBlock) {
+
+        let dispatchGroup = dispatch_group_create()
+        
+        var completionSuccess = false
+        var completionRequest: NSURLRequest?
+        var completionResponse: NSHTTPURLResponse?
+        var completionResponseObject: AnyObject?
+        var completionRealmObjectInfos: [RealmObjectInfo]?
+        var completionError: NSError?
+        
+        dispatch_group_enter(dispatchGroup)
+        realmRequestResultWithBaseURL(baseURL, path: path, parameters: parameters, method: .GET) { (success, request, response, responseObject, error) -> Void in
+            completionSuccess = success
+            completionRequest = request
+            completionResponse = response
+            completionResponseObject = responseObject
+            completionError = error
+            
+            if let json = responseObject as? [String: AnyObject] {
+                
+                dispatch_group_enter(dispatchGroup)
+                dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), { () -> Void in
+                    var realm: Realm!
+                    
+                    do {
+                        try realm = Realm()
+                    } catch let error as NSError {
+                        NSLog("Realm error: \(error)")
+                    }
+                    
+                    if let realm = realm {
+                        if let responseObjectKey = self.realmFetchResponseObjectKey() {
+                            
+                            // Will Serialize
+                            dispatch_group_enter(dispatchGroup)
+                            realmFetchWillSerializeJSON(json, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
+                                
+                                dispatch_group_leave(dispatchGroup)
+                            })
+                            
+                            // Array
+                            if let jsonArray = json[responseObjectKey] as? NSArray {
+                                dispatch_group_enter(dispatchGroup)
+                                realmObjectsInRealm(realm, withJSONArray: jsonArray, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, completion: { (realmObjectInfos, error) -> Void in
+                                    
+                                    completionRealmObjectInfos = realmObjectInfos
+                                    
+                                    // Did Serialize
+                                    dispatch_group_enter(dispatchGroup)
+                                    realmFetchDidSerializeJSON(json, realmObjectInfos: realmObjectInfos, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
+                                        
+                                        dispatch_group_leave(dispatchGroup)
+                                    })
+                                    
+                                    dispatch_group_leave(dispatchGroup)
+                                })
+                            }
+                            
+                            // Dictionary
+                            if let responseObjectsDictionary = json[responseObjectKey] as? NSDictionary {
+                                dispatch_group_enter(dispatchGroup)
+                                self.realmObjectInRealm(realm, withJSONDictionary: responseObjectsDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, replacingObjectWithPrimaryKey: nil, completion: { (realmObjectInfo, error) -> Void in
+                                    
+                                    if let realmObjectInfo = realmObjectInfo {
+                                        completionRealmObjectInfos = [realmObjectInfo]
+                                    }
+                                    
+                                    // Did Serialize
+                                    dispatch_group_enter(dispatchGroup)
+                                    realmFetchDidSerializeJSON(json, realmObjectInfos: completionRealmObjectInfos, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
+                                        
+                                        dispatch_group_leave(dispatchGroup)
+                                    })
+                                    
+                                    dispatch_group_leave(dispatchGroup)
+                                })
+                            }
+                        }
+                    }
+                    
+                    dispatch_group_leave(dispatchGroup)
+                })
+            }
+            
+            dispatch_group_leave(dispatchGroup)
+        }
+        
+        dispatch_group_notify(dispatchGroup, dispatch_get_main_queue(), {
+            completion(request: completionRequest, response: completionResponse, success: completionSuccess, responseObject: completionResponseObject, realmObjectInfos: completionRealmObjectInfos, error: completionError)
+        })
+    }
+    
+//    class func GETObjectsWithPath(path: String, parameters: [String: AnyObject]?, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, completion: GETCompletionBlock) {
+//    }
+//
+//    class func GETWillSerializeJSON(json: [String: AnyObject], mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, accountId: String, inRealm realm: Realm, completion: () -> Void) {
+//        
+//    }
+//    
+//    class func GETDidSerializeJSON(json: [String: AnyObject], realmObjectInfos: [RealmObjectInfo]?, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, accountId: String, inRealm realm: Realm, completion: () -> Void) {
+//        
+//        // TODO: Orphan objects
+//        
+//        // Display Order
+//        if let realmObjectInfos = realmObjectInfos {
+//            do {
+//                try realm.write({ () -> Void in
+//                    for (index, realmObjectInfo) in realmObjectInfos.enumerate() {
+//                        if let realmObject = realm.objectForPrimaryKey(realmObjectInfo.type, key: realmObjectInfo.primaryKey) as? RealmObject {
+//                            realmObject.displayOrder = index
+//                        }
+//                    }
+//                })
+//            } catch { }
+//        }
+//        
+//        
+//        
+//        //        // Post process serialized realm objects
+//        //        if let realmObjectInfos = realmObjectInfos, account = Account(inRealm: realm, forPrimaryKey: accountId) {
+//        //            realm.transactionWithBlock({ () -> Void in
+//        //                for (index, realmObjectInfo) in enumerate(realmObjectInfos) {
+//        //                    if let realmObject = realmObjectInfo.type(inRealm: realm, forPrimaryKey: realmObjectInfo.primaryKeyValue) as? RealmObject {
+//        //
+//        //                        // Account
+//        //                        realmObject.account = account
+//        //
+//        //                        // DisplayOrder
+//        //                        realmObject.displayOrder = index
+//        //                    }
+//        //                }
+//        //            })
+//        //
+//        //            completion()
+//        //        } else {
+//        //            completion()
+//        //        }
+//    }
+
 }
 
 public extension RealmJSONSerializable {

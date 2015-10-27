@@ -10,10 +10,7 @@ import Foundation
 
 public class RealmKit {
     
-    public enum SyncStatus: String {
-        case Sync = "sync"
-        case Syncing = "syncing"
-        case Synced = "synced"
-        case Failed = "failed"
+    public enum Method: String {
+        case OPTIONS, GET, HEAD, POST, PUT, PATCH, DELETE, TRACE, CONNECT
     }
 }

@@ -17,9 +17,16 @@ public protocol RealmSyncManagerDelegate {
     func realmSyncManager(sender: RealmSyncManager, shouldStartWithSyncOperation syncOperation: RealmSyncOperation) -> Bool
 }
 
-// MARK: - RealmSyncManager
+// MARK: - RealmSync
 
 public class RealmSyncManager {
+    
+    public enum SyncStatus: String {
+        case Sync = "sync"
+        case Syncing = "syncing"
+        case Synced = "synced"
+        case Failed = "failed"
+    }
     
     var registeredTypes = [Object.Type]()
     
@@ -74,7 +81,7 @@ public class RealmSyncManager {
             dispatch_async(syncQueue, {
                 do {
                     let realm = try Realm()
-                    let predicate = NSPredicate(format: "syncStatus == %@", RealmKit.SyncStatus.Sync.rawValue)
+                    let predicate = NSPredicate(format: "syncStatus == %@", RealmSyncManager.SyncStatus.Sync.rawValue)
                     for registeredType in self.registeredTypes {
                         let syncObjects = realm.objects(registeredType).filter(predicate)
                         
@@ -115,7 +122,7 @@ public class RealmSyncManager {
                 if NSStringFromClass(operation.objectType) == NSStringFromClass(syncOperation.objectType) {
                     if operation.primaryKey == syncOperation.primaryKey {
                         if operation.path == syncOperation.path {
-                            if operation.httpMethod.rawValue == syncOperation.httpMethod.rawValue {
+                            if operation.method.rawValue == syncOperation.method.rawValue {
                                 isQueued = true
                             }
                         }
@@ -148,17 +155,11 @@ public class RealmSyncObjectInfo: NSObject {
 
 public class RealmSyncOperation: NSOperation {
     
-    public enum HTTPMethod: String {
-        case GET = "GET"
-        case POST = "POST"
-        case PUT = "PUT"
-        case DELETE = "DELETE"
-    }
-    
     public let objectType: Object.Type
     public let primaryKey: String
     
-    public let httpMethod: HTTPMethod
+    public let method: RealmKit.Method
+    public let baseURL: NSURL
     public let path: String
     public let parameters: [String : AnyObject]?
     
@@ -198,13 +199,14 @@ public class RealmSyncOperation: NSOperation {
     
     // Initializers
     
-    public init(objectType: Object.Type, primaryKey: String, path: String, parameters: [String : AnyObject]?, httpMethod: HTTPMethod) {
+    public init(objectType: Object.Type, primaryKey: String, baseURL: NSURL, path: String, parameters: [String : AnyObject]?, method: RealmKit.Method) {
         self.objectType = objectType
         self.primaryKey = primaryKey
         
+        self.baseURL = baseURL
         self.path = path
         self.parameters = parameters
-        self.httpMethod = httpMethod
+        self.method = method
         
         super.init()
     }
@@ -234,29 +236,19 @@ public class RealmSyncOperation: NSOperation {
         // Start asynchronous API
         dispatch_group_enter(dispatchSessionGroup)
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
-            var realm: Realm?
-            
-            do {
-                try realm = Realm()
-            } catch _ {
+            if let syncType = self.objectType as? RealmSyncable.Type { // object = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable
+                dispatch_group_enter(dispatchSessionGroup)
                 
-            }
-            
-            if let realm = realm {
-                if let object = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
-                    dispatch_group_enter(dispatchSessionGroup)
+                syncType.realmRequestResultWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, responseObject, error) -> Void in
                     
-                    object.realmSyncOperationResultWithPath(self.path, parameters: self.parameters, httpMethod: self.httpMethod, completion: { (success, request, response, responseObject, error) -> Void in
-                        
-                        completionSuccess = success
-                        completionRequest = request
-                        completionResponse = response
-                        completionResponseObject = responseObject
-                        completionError = error
-                        
-                        dispatch_group_leave(dispatchSessionGroup)
-                    })
-                }
+                    completionSuccess = success
+                    completionRequest = request
+                    completionResponse = response
+                    completionResponseObject = responseObject
+                    completionError = error
+                    
+                    dispatch_group_leave(dispatchSessionGroup)
+                })
             }
             
             dispatch_group_leave(dispatchSessionGroup)
@@ -291,7 +283,7 @@ public class RealmSyncOperation: NSOperation {
                 
                 if let realm = realm {
                     if completionSuccess {
-                        if let objectDictionary = self.objectDictionaryFromResponseObject(completionResponseObject, withHTTPMethod: self.httpMethod, identifier: self.identifier) {
+                        if let objectDictionary = self.objectDictionaryFromResponseObject(completionResponseObject, withMethod: self.method, identifier: self.identifier) {
                             
                             dispatch_group_enter(dispatchCompletionGroup)
                             
@@ -305,7 +297,7 @@ public class RealmSyncOperation: NSOperation {
                                     syncType.realmSyncOperationDidSync(self, inRealm: realm, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey, completion: { () -> Void in
                                         
                                         // Delete temp object
-                                        if self.httpMethod == .POST {
+                                        if self.method == .POST {
                                             if let newPrimaryKey = realmObjectInfo?.primaryKey {
                                                 if self.primaryKey != newPrimaryKey {
                                                     if let tempRealmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) {
@@ -366,10 +358,10 @@ public class RealmSyncOperation: NSOperation {
     
     // MARK: Networking
     
-    func objectDictionaryFromResponseObject(responseObject: AnyObject?, withHTTPMethod httpMethod: HTTPMethod?, identifier: String?) -> NSDictionary? {
+    func objectDictionaryFromResponseObject(responseObject: AnyObject?, withMethod method: RealmKit.Method?, identifier: String?) -> NSDictionary? {
         if let responseObject = responseObject as? NSDictionary {
-            if let httpMethod = httpMethod, syncType = objectType as? RealmSyncable.Type {
-                if let responseObjectKey = syncType.realmSyncOperation(self, responseObjectKeyForHTTPMethod: httpMethod, identifier: identifier) {
+            if let method = method, syncType = objectType as? RealmSyncable.Type {
+                if let responseObjectKey = syncType.realmSyncOperation(self, responseObjectKeyForMethod: method, identifier: identifier) {
                     return responseObject.objectForKey(responseObjectKey) as? NSDictionary
                 }
             }
