@@ -214,6 +214,7 @@ public class RealmSyncOperation: NSOperation {
     // Override NSOperation Functions
     
     override public func start() {
+        
         if NSThread.isMainThread() == false {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 self.start()
@@ -236,7 +237,9 @@ public class RealmSyncOperation: NSOperation {
         // Start asynchronous API
         dispatch_group_enter(dispatchSessionGroup)
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
+
             if let syncType = self.objectType as? RealmSyncable.Type { // object = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable
+            
                 dispatch_group_enter(dispatchSessionGroup)
                 
                 syncType.realmRequestResultWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, responseObject, error) -> Void in
@@ -262,7 +265,7 @@ public class RealmSyncOperation: NSOperation {
 //            let requestBody = NSString(data: completionSessionDataTask?.originalRequest?.HTTPBody ?? NSData(), encoding: NSUTF8StringEncoding)
 //            let errorResponse = completionError.userInfo[ErrorResponseObjectKey] as? NSDictionary
             
-//            NSLog("PATH: \(self.path) HTTPMETHOD: \(self.httpMethod.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject?.description)")
+//            NSLog("PATH: \(self.path) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject)")
 
             let dispatchCompletionGroup = dispatch_group_create()
             
@@ -336,7 +339,7 @@ public class RealmSyncOperation: NSOperation {
                             }
                         }
                     } else {
-                        if let objectType = self.objectType as? RealmSyncable {
+                        if let objectType = self.objectType as? RealmSyncable.Type {
                             objectType.handleFailedRequest(completionRequest, response: completionResponse, error: completionError, primaryKey: self.primaryKey, inRealm: realm)
                         }
                     }
