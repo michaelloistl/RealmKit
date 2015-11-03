@@ -86,6 +86,8 @@ public class RealmSyncManager {
                         let syncObjects = realm.objects(registeredType).filter(predicate)
                         
                         for syncObject in syncObjects {
+//                            NSLog("syncObject: \(syncObject)")
+                            
                             if let syncObject = syncObject as? RealmSyncable {
                                 let syncOperations = syncObject.realmSyncOperations()
                                 for syncOperation in syncOperations {
@@ -265,7 +267,7 @@ public class RealmSyncOperation: NSOperation {
 //            let requestBody = NSString(data: completionSessionDataTask?.originalRequest?.HTTPBody ?? NSData(), encoding: NSUTF8StringEncoding)
 //            let errorResponse = completionError.userInfo[ErrorResponseObjectKey] as? NSDictionary
             
-//            NSLog("PATH: \(self.path) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject)")
+            NSLog("PATH: \(self.path) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject)")
 
             let dispatchCompletionGroup = dispatch_group_create()
             
@@ -292,12 +294,12 @@ public class RealmSyncOperation: NSOperation {
                             // Create new Object with ObjectDictionary
                             if let syncType = self.objectType as? RealmSyncable.Type, serializeType = self.objectType as? RealmJSONSerializable.Type {
                                 serializeType.realmObjectInRealm(realm, withJSONDictionary: objectDictionary, mappingIdentifier: nil, identifier: nil, userInfo: nil, replacingObjectWithPrimaryKey: self.primaryKey, completion: { (realmObjectInfo, error) -> Void in
-
+                                    
                                     // Update Realm
                                     realm.refresh()
                                     
                                     syncType.realmSyncOperationDidSync(self, inRealm: realm, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey, completion: { () -> Void in
-                                        
+
                                         // Delete temp object
                                         if let newPrimaryKey = realmObjectInfo?.primaryKey {
                                             if self.primaryKey != newPrimaryKey {
@@ -312,10 +314,16 @@ public class RealmSyncOperation: NSOperation {
                                                         try realm.write({ () -> Void in
                                                             realm.delete(tempRealmObject)
                                                         })
-                                                    } catch {
-                                                        
-                                                    }
+                                                    } catch { }
                                                 }
+                                            }
+                                        } else {
+                                            if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
+                                                do {
+                                                    try realm.write({ () -> Void in
+                                                        realmObject.setSyncStatus(.Synced)
+                                                    })
+                                                } catch { }
                                             }
                                         }
                                         
@@ -329,9 +337,7 @@ public class RealmSyncOperation: NSOperation {
                                     try realm.write({ () -> Void in
                                         realmObject.setSyncStatus(.Synced)
                                     })
-                                } catch {
-                                    
-                                }
+                                } catch { }
                             }
                         }
                     } else {
