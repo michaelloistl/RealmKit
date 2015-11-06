@@ -240,11 +240,11 @@ public class RealmSyncOperation: NSOperation {
         dispatch_group_enter(dispatchSessionGroup)
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
 
-            if let syncType = self.objectType as? RealmSyncable.Type { // object = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable
+            if let syncType = self.objectType as? RealmSyncable.Type {
             
                 dispatch_group_enter(dispatchSessionGroup)
                 
-                syncType.realmRequestResultWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, responseObject, error) -> Void in
+                syncType.realmRequestWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, responseObject, error) -> Void in
                     
                     completionSuccess = success
                     completionRequest = request
