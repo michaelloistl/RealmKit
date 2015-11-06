@@ -30,11 +30,11 @@ public protocol RealmFetchable {
     
     static func realmRequestWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
 
-    static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: NSOperation?, inRealm realm: Realm?)
+    static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
     
-    static func handleSuccessfulRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: NSOperation?, inRealm realm: Realm?)
+    static func handleSuccessfulRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
     
-    static func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: NSOperation?, inRealm realm: Realm?)
+    static func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
 
 public protocol RealmSyncable {
@@ -53,11 +53,11 @@ public protocol RealmSyncable {
     
     static func realmRequestWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
     
-    static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: NSOperation?, inRealm realm: Realm?)
+    static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
     
-    static func handleSuccessfulRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: NSOperation?, inRealm realm: Realm?)
+    static func handleSuccessfulRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
     
-    static func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: NSOperation?, inRealm realm: Realm?)
+    static func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
 
 public protocol RealmJSONSerializable {
