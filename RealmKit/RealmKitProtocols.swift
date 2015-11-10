@@ -22,9 +22,9 @@ public protocol RealmFetchable {
     
     // Serializing
     
-    static func realmFetchWillSerializeJSON(json: [String: AnyObject], mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: () -> Void)
+    static func realmFetchWillSerializeJSON(json: AnyObject, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: () -> Void)
 
-    static func realmFetchDidSerializeJSON(json: [String: AnyObject], realmObjectInfos: [RealmObjectInfo]?, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: () -> Void)
+    static func realmFetchDidSerializeJSON(json: AnyObject, realmObjectInfos: [RealmObjectInfo]?, mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm, completion: () -> Void)
     
     // Networking
     
@@ -127,7 +127,25 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
             completionResponseObject = responseObject
             completionError = error
             
-            if let json = responseObject as? [String: AnyObject] {
+            var json: AnyObject?
+            
+            // responseObject - [String: AnyObject]
+            if let responseDictionary = responseObject as? [String: AnyObject] {
+                if let responseObjectKey = self.realmFetchResponseObjectKey() {
+                    json = responseDictionary[responseObjectKey]
+                } else {
+                    json = responseDictionary
+                }
+            }
+            
+            // responseObject - [AnyObject]
+            else if let responseArray = responseObject as? [AnyObject] {
+                json = responseArray
+            }
+
+            NSLog("json 1")
+            if let json = json {
+                NSLog("json 2: \(json)")
                 
                 dispatch_group_enter(dispatchGroup)
                 dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), { () -> Void in
@@ -140,52 +158,49 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                     }
                     
                     if let realm = realm {
-                        if let responseObjectKey = self.realmFetchResponseObjectKey() {
-                            
-                            // Will Serialize
+                        
+                        // Will Serialize
+                        dispatch_group_enter(dispatchGroup)
+                        realmFetchWillSerializeJSON(json, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
+                            dispatch_group_leave(dispatchGroup)
+                        })
+                        
+                        // Array
+                        if let jsonArray = json as? NSArray {
                             dispatch_group_enter(dispatchGroup)
-                            realmFetchWillSerializeJSON(json, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
+                            realmObjectsInRealm(realm, withJSONArray: jsonArray, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, completion: { (realmObjectInfos, error) -> Void in
+                                
+                                completionRealmObjectInfos = realmObjectInfos
+                                
+                                // Did Serialize
+                                dispatch_group_enter(dispatchGroup)
+                                realmFetchDidSerializeJSON(json, realmObjectInfos: realmObjectInfos, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
+                                    
+                                    dispatch_group_leave(dispatchGroup)
+                                })
                                 
                                 dispatch_group_leave(dispatchGroup)
                             })
-                            
-                            // Array
-                            if let jsonArray = json[responseObjectKey] as? NSArray {
+                        }
+                        
+                        // Dictionary
+                        if let jsonDictionary = json as? NSDictionary {
+                            dispatch_group_enter(dispatchGroup)
+                            self.realmObjectInRealm(realm, withJSONDictionary: jsonDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, replacingObjectWithPrimaryKey: nil, completion: { (realmObjectInfo, error) -> Void in
+                                
+                                if let realmObjectInfo = realmObjectInfo {
+                                    completionRealmObjectInfos = [realmObjectInfo]
+                                }
+                                
+                                // Did Serialize
                                 dispatch_group_enter(dispatchGroup)
-                                realmObjectsInRealm(realm, withJSONArray: jsonArray, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, completion: { (realmObjectInfos, error) -> Void in
-                                    
-                                    completionRealmObjectInfos = realmObjectInfos
-                                    
-                                    // Did Serialize
-                                    dispatch_group_enter(dispatchGroup)
-                                    realmFetchDidSerializeJSON(json, realmObjectInfos: realmObjectInfos, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
-                                        
-                                        dispatch_group_leave(dispatchGroup)
-                                    })
+                                realmFetchDidSerializeJSON(json, realmObjectInfos: completionRealmObjectInfos, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
                                     
                                     dispatch_group_leave(dispatchGroup)
                                 })
-                            }
-                            
-                            // Dictionary
-                            if let responseObjectsDictionary = json[responseObjectKey] as? NSDictionary {
-                                dispatch_group_enter(dispatchGroup)
-                                self.realmObjectInRealm(realm, withJSONDictionary: responseObjectsDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, replacingObjectWithPrimaryKey: nil, completion: { (realmObjectInfo, error) -> Void in
-                                    
-                                    if let realmObjectInfo = realmObjectInfo {
-                                        completionRealmObjectInfos = [realmObjectInfo]
-                                    }
-                                    
-                                    // Did Serialize
-                                    dispatch_group_enter(dispatchGroup)
-                                    realmFetchDidSerializeJSON(json, realmObjectInfos: completionRealmObjectInfos, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm, completion: { () -> Void in
-                                        
-                                        dispatch_group_leave(dispatchGroup)
-                                    })
-                                    
-                                    dispatch_group_leave(dispatchGroup)
-                                })
-                            }
+                                
+                                dispatch_group_leave(dispatchGroup)
+                            })
                         }
                     }
                     
@@ -350,6 +365,8 @@ public extension RealmJSONSerializable {
                 let realmObject = realm.create(type.self, value: keyValueDictionary, update: true)
                 
                 return realmObject
+            } else {
+                NSLog("RealmJSONSerializable Error - There is an issue with the primary key for Type: \(type) Dictionary: \(dictionary) MappingDictionary: \(mappingDictionary)")
             }
         }
         
