@@ -18,7 +18,7 @@ public protocol RealmFetchable {
     static func realmFetchBaseURL() -> NSURL!
     static func realmFetchPath() -> String!
     static func realmFetchParameters() -> [String: AnyObject]?
-    static func realmFetchResponseObjectKey() -> String?
+    static func realmFetchResponseObjectKeyForPath(path: String, identifier: String?) -> String?
     
     // Serializing
     
@@ -131,7 +131,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
             
             // responseObject - [String: AnyObject]
             if let responseDictionary = responseObject as? [String: AnyObject] {
-                if let responseObjectKey = self.realmFetchResponseObjectKey() {
+                if let responseObjectKey = self.realmFetchResponseObjectKeyForPath(path, identifier: identifier) {
                     json = responseDictionary[responseObjectKey]
                 } else {
                     json = responseDictionary
@@ -143,10 +143,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                 json = responseArray
             }
 
-            NSLog("json 1")
-            if let json = json {
-                NSLog("json 2: \(json)")
-                
+            if let json = json {                
                 dispatch_group_enter(dispatchGroup)
                 dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), { () -> Void in
                     var realm: Realm!
