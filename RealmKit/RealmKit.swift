@@ -13,4 +13,14 @@ public class RealmKit {
     public enum Method: String {
         case OPTIONS, GET, HEAD, POST, PUT, PATCH, DELETE, TRACE, CONNECT
     }
+    
+    public class var sharedInstance: RealmKit {
+        struct Singleton {
+            static let instance = RealmKit()
+        }
+        
+        return Singleton.instance
+    }
+    
+    public var debugLogs = false
 }
