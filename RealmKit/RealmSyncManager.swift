@@ -289,12 +289,6 @@ public class RealmSyncOperation: NSOperation {
                 }
                 
                 if let realm = realm {
-                    
-                    // Handle Request
-                    if let objectType = self.objectType as? RealmSyncable.Type {
-                        objectType.handleRequest(completionRequest, response: completionResponse, responseObject: completionResponseObject, error: completionError, syncOperation: self, inRealm: realm)
-                    }
-                    
                     if completionSuccess {
                         if let objectDictionary = self.objectDictionaryFromResponseObject(completionResponseObject, withMethod: self.method, identifier: self.identifier) {
                             dispatch_group_enter(dispatchCompletionGroup)
@@ -348,17 +342,11 @@ public class RealmSyncOperation: NSOperation {
                                 } catch { }
                             }
                         }
-                        
-                        // Handle Successful Request
-                        if let objectType = self.objectType as? RealmSyncable.Type {
-                            objectType.handleSuccessfulRequest(completionRequest, response: completionResponse, responseObject: completionResponseObject, error: completionError, syncOperation: self, inRealm: realm)
-                        }
-                    } else {
-                        
-                        // Handle Failed Request
-                        if let objectType = self.objectType as? RealmSyncable.Type {
-                            objectType.handleFailedRequest(completionRequest, response: completionResponse, responseObject: completionResponseObject, error: completionError, syncOperation: self, inRealm: realm)
-                        }
+                    }
+                    
+                    // Handle Request
+                    if let objectType = self.objectType as? RealmSyncable.Type {
+                        objectType.handleRequest(completionRequest, response: completionResponse, responseObject: completionResponseObject, error: completionError, syncOperation: self, inRealm: realm)
                     }
                 }
                 

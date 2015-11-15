@@ -31,10 +31,6 @@ public protocol RealmFetchable {
     static func realmRequestWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
 
     static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
-    
-    static func handleSuccessfulRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
-    
-    static func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
 
 public protocol RealmSyncable {
@@ -54,10 +50,6 @@ public protocol RealmSyncable {
     static func realmRequestWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError?) -> Void)
     
     static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
-    
-    static func handleSuccessfulRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
-    
-    static func handleFailedRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, responseObject: AnyObject?, error: NSError!, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
 
 public protocol RealmJSONSerializable {
@@ -210,12 +202,6 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         
         dispatch_group_notify(dispatchGroup, dispatch_get_main_queue(), {
             handleRequest(completionRequest, response: completionResponse, responseObject: completionResponseObject, error: completionError, syncOperation: nil, inRealm: nil)
-            
-            if completionSuccess {
-                handleSuccessfulRequest(completionRequest, response: completionResponse, responseObject: completionResponseObject, error: completionError, syncOperation: nil, inRealm: nil)
-            } else {
-                handleFailedRequest(completionRequest, response: completionResponse, responseObject: completionResponseObject, error: completionError, syncOperation: nil, inRealm: nil)
-            }
             
             completion(request: completionRequest, response: completionResponse, success: completionSuccess, responseObject: completionResponseObject, realmObjectInfos: completionRealmObjectInfos, error: completionError)
         })
