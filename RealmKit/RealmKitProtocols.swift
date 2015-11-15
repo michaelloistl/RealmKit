@@ -363,7 +363,9 @@ public extension RealmJSONSerializable {
                 
                 return realmObject
             } else {
-                NSLog("RealmJSONSerializable Error - There is an issue with the primary key for Type: \(type) Dictionary: \(dictionary) MappingDictionary: \(mappingDictionary)")
+                if RealmKit.sharedInstance.debugLogs {
+                    NSLog("RealmJSONSerializable Error - There is an issue with the primary key for Type: \(type) Dictionary: \(dictionary) MappingDictionary: \(mappingDictionary)")
+                }
             }
         }
         

@@ -267,7 +267,9 @@ public class RealmSyncOperation: NSOperation {
 //            let requestBody = NSString(data: completionSessionDataTask?.originalRequest?.HTTPBody ?? NSData(), encoding: NSUTF8StringEncoding)
 //            let errorResponse = completionError.userInfo[ErrorResponseObjectKey] as? NSDictionary
             
-            NSLog("PATH: \(self.path) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject)")
+            if RealmKit.sharedInstance.debugLogs {
+                NSLog("PATH: \(self.path) PARAMETERS: \(self.parameters) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionResponseObject)")
+            }
 
             let dispatchCompletionGroup = dispatch_group_create()
             
