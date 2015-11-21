@@ -74,6 +74,8 @@ public protocol RealmJSONSerializable {
     static func classForParsingJSONDictionary(JSONDictionary: NSDictionary) -> Object.Type
     static func keyValueDictionaryWithPrimaryKeyValue(primaryKeyValue: String) -> [String : String]?
     
+    // This function executes within the transaction block of realmObjectInRealm()
+    // Override to modify initial and new RealmObject within the same transaction block
     static func didCreateOrUpdateRealmObjectInRealm(realm: Realm, withPrimaryKey newPrimaryKey: String?, replacingObjectWithPrimaryKey oldPrimaryKey: String?)
     
     static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], mappingIdentifier: String?, identifier: String?, userInfo: [String: AnyObject]?, inRealm realm: Realm) -> [String: AnyObject]
