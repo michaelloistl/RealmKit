@@ -1,1 +1,4 @@
-# RealmKit
+## Todo's
+
+- [ ] Documentation
+- [ ] Tests
