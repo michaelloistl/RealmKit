@@ -43,7 +43,7 @@ public protocol RealmSyncable {
     func realmSyncOperationParametersForMethod(method: RealmKit.Method) -> [String: AnyObject]?
     
     static func realmSyncOperation(sender: RealmSyncOperation, responseObjectKeyForMethod method: RealmKit.Method, identifier: String?) -> String?
-    static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?, completion: () -> Void)
+    static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?)
     
     // Networking
     
@@ -114,7 +114,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         var completionResponseObject: AnyObject?
         var completionRealmObjectInfos: [RealmObjectInfo]?
         var completionError: NSError?
-        
+
         dispatch_group_enter(dispatchGroup)
         realmRequestWithBaseURL(baseURL, path: path, parameters: parameters, method: .GET) { (success, request, response, responseObject, error) -> Void in
             completionSuccess = success
@@ -122,7 +122,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
             completionResponse = response
             completionResponseObject = responseObject
             completionError = error
-            
+
             var json: AnyObject?
             
             // responseObject - [String: AnyObject]
