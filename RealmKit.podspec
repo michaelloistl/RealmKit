@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name = 'RealmKit'
-    s.version = '0.4.0'
+    s.version = '0.5.0'
     s.license = 'MIT'
     s.summary = 'Networking & JSON Serializer for Realm in Swift'
     s.authors = { 'Michael Loistl' => 'michael@aplo.co' }
