@@ -236,6 +236,8 @@ public class RealmSyncOperation: NSOperation {
         var completionResponseObject: AnyObject?
         var completionError: NSError?
         
+        var realmSyncUserInfo: [String: AnyObject]?
+        
         // Start asynchronous API
         dispatch_group_enter(dispatchSessionGroup)
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
@@ -243,6 +245,9 @@ public class RealmSyncOperation: NSOperation {
             if let syncType = self.objectType as? RealmSyncable.Type {
             
                 dispatch_group_enter(dispatchSessionGroup)
+                
+                // Set lastSyncedAt in userInfo
+                realmSyncUserInfo = ["RealmKit": ["lastSyncedAt": NSDate()]]
                 
                 syncType.realmRequestWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, responseObject, error) -> Void in
                     
@@ -291,7 +296,7 @@ public class RealmSyncOperation: NSOperation {
                             
                             // Create new Object with ObjectDictionary
                             if let syncType = self.objectType as? RealmSyncable.Type, serializeType = self.objectType as? RealmJSONSerializable.Type {
-                                serializeType.realmObjectInRealm(realm, withJSONDictionary: objectDictionary, mappingIdentifier: nil, identifier: nil, userInfo: nil, replacingObjectWithPrimaryKey: self.primaryKey, completion: { (realmObjectInfo, error) -> Void in
+                                serializeType.realmObjectInRealm(realm, withJSONDictionary: objectDictionary, mappingIdentifier: nil, identifier: nil, userInfo: realmSyncUserInfo, replacingObjectWithPrimaryKey: self.primaryKey, completion: { (realmObjectInfo, error) -> Void in
                                     
                                     // Update Realm
                                     realm.refresh()

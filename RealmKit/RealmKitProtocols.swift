@@ -15,6 +15,8 @@ public typealias RealmFetchObjectsCompletionBlock = (request: NSURLRequest!, res
 
 public protocol RealmFetchable {
 
+    var lastFetchedAt: NSDate? { get set }
+    
     static func realmFetchBaseURL() -> NSURL!
     static func realmFetchPath() -> String!
     static func realmFetchParameters() -> [String: AnyObject]?
@@ -59,6 +61,8 @@ public protocol RealmJSONSerializable {
     var id: String { get set }
     var syncStatus: String { get set }
     var deletedAt: NSTimeInterval { get set }
+    
+    var lastSyncedAt: NSDate? { get set }
     
     var server_id: String { get set }
     var server_deletedAt: NSTimeInterval { get set }
@@ -115,6 +119,14 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         var completionRealmObjectInfos: [RealmObjectInfo]?
         var completionError: NSError?
 
+        // Set lastFetchedAt in userInfo
+        var userInfo = userInfo
+        if userInfo == nil {
+            userInfo = [String: AnyObject]()
+        }
+        userInfo?["RealmKit"] = ["lastFetchedAt": NSDate()]
+        
+        // Fecth
         dispatch_group_enter(dispatchGroup)
         realmRequestWithBaseURL(baseURL, path: path, parameters: parameters, method: .GET) { (success, request, response, responseObject, error) -> Void in
             completionSuccess = success
@@ -172,7 +184,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                         // Dictionary
                         if let jsonDictionary = json as? NSDictionary {
                             dispatch_group_enter(dispatchGroup)
-                            self.realmObjectInRealm(realm, withJSONDictionary: jsonDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, replacingObjectWithPrimaryKey: nil, completion: { (realmObjectInfo, error) -> Void in
+                            realmObjectInRealm(realm, withJSONDictionary: jsonDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, replacingObjectWithPrimaryKey: nil, completion: { (realmObjectInfo, error) -> Void in
                                 
                                 if let realmObjectInfo = realmObjectInfo {
                                     completionRealmObjectInfos = [realmObjectInfo]
@@ -336,6 +348,19 @@ public extension RealmJSONSerializable {
             }
             
             keyValueDictionary = keyValueDictionaryForRealmObjectWithType(type, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, mappingIdentifier: mappingIdentifier, identifier: identifier, userInfo: userInfo, inRealm: realm)
+            
+            if let userInfoRealmKit = userInfo?["RealmKit"] as? [String: AnyObject] {
+                
+                // lastFetchedAt
+                if let lastFetchedAt = userInfoRealmKit["lastFetchedAt"] as? NSDate {
+                    keyValueDictionary["lastFetchedAt"] = lastFetchedAt
+                }
+                
+                // lastSyncedAt
+                if let lastSyncedAt = userInfoRealmKit["lastSyncedAt"] as? NSDate {
+                    keyValueDictionary["lastSyncedAt"] = lastSyncedAt
+                }
+            }
             
             if let primaryKey = (type as Object.Type).primaryKey(), _ = keyValueDictionary[primaryKey] as? String {
                 let realmObject = realm.create(type.self, value: keyValueDictionary, update: true)
