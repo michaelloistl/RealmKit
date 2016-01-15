@@ -10,6 +10,7 @@ import Foundation
 import RealmSwift
 
 public let RealmSyncOperationWillDeleteObjectNotification = "com.aplo.RealmSyncOperationWillDeleteObjectNotification"
+public let RealmSyncOperationDidCompleteNotification = "com.aplo.RealmSyncOperationDidCompleteNotification"
 
 // MARK: - RealmSyncManagerDelegate
 
@@ -352,6 +353,8 @@ public class RealmSyncOperation: NSOperation {
                 }
                 
                 dispatch_group_notify(dispatchCompletionGroup, dispatch_get_main_queue(), {
+                    
+                    NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationDidCompleteNotification, object:self)
                     
                     // Set NSOperation status
                     self.executing = false
