@@ -23,4 +23,5 @@ public class RealmKit {
     }
     
     public var debugLogs = false
+
 }
