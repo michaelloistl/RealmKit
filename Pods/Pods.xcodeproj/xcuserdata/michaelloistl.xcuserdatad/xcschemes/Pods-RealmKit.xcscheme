@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8E1C1B8DE01156DA2B35E6AD6AF74B2B"
-               BlueprintName = "Pods-RealmKit"
-               ReferencedContainer = "container:Pods.xcodeproj"
-               BuildableName = "Pods_RealmKit.framework">
+               BuildableIdentifier = 'primary'
+               BlueprintIdentifier = '49EE0600A0250BA984E11D90'
+               BlueprintName = 'Pods-RealmKit'
+               ReferencedContainer = 'container:Pods.xcodeproj'
+               BuildableName = 'Pods_RealmKit.framework'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

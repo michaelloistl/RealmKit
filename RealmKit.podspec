@@ -14,5 +14,5 @@ Pod::Spec.new do |s|
 
     s.requires_arc = true
 
-    s.dependency 'RealmSwift'
+    s.dependency 'RealmSwift', '0.97.1'
 end
