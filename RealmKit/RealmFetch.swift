@@ -56,7 +56,7 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
     // MARK: Required
     
     static func realmFetchPathForPrimaryKey(primaryKey: String?) -> String!
-    static func realmFetchParameters() -> [String: AnyObject]?
+    static func realmFetchParametersForPrimaryKey(primaryKey: String?) -> [String: AnyObject]?
     static func realmFetchJSONResponseKey() -> String?
     
     // MARK: Optional
@@ -72,7 +72,7 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
 public extension RealmFetchable where Self: RealmJSONSerializable {
     
     public static func realmFetchObjects(completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
-        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(nil), parameters: realmFetchParameters(), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
+        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(nil), parameters: realmFetchParametersForPrimaryKey(nil), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
         
         return realmFetch(fetchInfo, completion: { (request, response, success, jsonResponse, realmObjectInfos, error) -> Void in
             
@@ -81,7 +81,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
     }
     
     public static func realmFetchObjectWithPrimaryKey(primaryKey: String?, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
-        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(primaryKey), parameters: realmFetchParameters(), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
+        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(primaryKey), parameters: realmFetchParametersForPrimaryKey(primaryKey), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
         
         return realmFetch(fetchInfo, completion: { (request, response, success, jsonResponse, realmObjectInfos, error) -> Void in
             

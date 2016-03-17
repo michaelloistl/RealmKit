@@ -200,8 +200,8 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return nil
     }
     
-    public class func realmFetchParameters() -> [String: AnyObject]? {
-        print("# RealmKit: Please override realmFetchParameters in \(self)")
+    public class func realmFetchParametersForPrimaryKey(primaryKey: String?) -> [String: AnyObject]? {
+        print("# RealmKit: Please override realmFetchParametersForPrimaryKey: in \(self)")
         
         return nil
     }
