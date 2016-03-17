@@ -227,7 +227,9 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     // MARK: RealmSyncable
     
     public func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus) {
-        self.syncStatus = syncStatus.rawValue
+        if !invalidated {
+            self.syncStatus = syncStatus.rawValue
+        }
     }
     
     public func realmSyncOperations() -> [RealmSyncOperation] {
