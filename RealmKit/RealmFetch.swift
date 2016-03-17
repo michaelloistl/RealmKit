@@ -55,7 +55,7 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
     
     // MARK: Required
     
-    static func realmFetchPath() -> String!
+    static func realmFetchPathForPrimaryKey(primaryKey: String?) -> String!
     static func realmFetchParameters() -> [String: AnyObject]?
     static func realmFetchJSONResponseKey() -> String?
     
@@ -71,8 +71,17 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
 
 public extension RealmFetchable where Self: RealmJSONSerializable {
     
-    public static func realmFetch(completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
-        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPath(), parameters: realmFetchParameters(), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
+    public static func realmFetchObjects(completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
+        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(nil), parameters: realmFetchParameters(), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
+        
+        return realmFetch(fetchInfo, completion: { (request, response, success, jsonResponse, realmObjectInfos, error) -> Void in
+            
+            completion(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, error: error)
+        })
+    }
+    
+    public static func realmFetchObjectWithPrimaryKey(primaryKey: String?, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
+        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(primaryKey), parameters: realmFetchParameters(), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
         
         return realmFetch(fetchInfo, completion: { (request, response, success, jsonResponse, realmObjectInfos, error) -> Void in
             

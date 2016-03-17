@@ -194,8 +194,8 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     // MARK: RealmFetchable
     
-    public class func realmFetchPath() -> String! {
-        print("# RealmKit: Please override realmFetchPath in \(self)")
+    public class func realmFetchPathForPrimaryKey(primaryKey: String?) -> String! {
+        print("# RealmKit: Please override realmFetchPathForPrimaryKey: in \(self)")
         
         return nil
     }
