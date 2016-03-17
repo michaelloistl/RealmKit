@@ -34,7 +34,7 @@ public protocol RealmKitObjectProtocol {
     static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
 
-public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable, RealmFetchable, RealmSyncable {
+public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable, RealmFetchable, RealmFetchPagable, RealmSyncable {
     
     // MARK: - Properties
     
@@ -139,7 +139,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
                 }
             }
                 
-                // Old and New Objects are different (POST)
+            // Old and New Objects are different (POST)
             else {
                 
                 // Set SyncStatus to "Synced" for initial (old) object
@@ -194,34 +194,70 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     // MARK: RealmFetchable
     
-    public class func realmFetchPathForPrimaryKey(primaryKey: String?) -> String! {
-        print("# RealmKit: Please override realmFetchPathForPrimaryKey: in \(self)")
+    public class func realmFetchWillSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) {
+        
+    }
+    
+    public class func realmFetchDidSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, jsonResponse: AnyObject?, realmObjectInfos: [RealmObjectInfo]?, inRealm realm: Realm) {
+        
+    }
+    
+    // MARK: RealmFetchPagable
+    
+    public class func pagingParametersForFetchRequest(fetchRequest: FetchRequest, pageType: PageInfo.PageType) -> [String: AnyObject]? {
+        print("# RealmKit: Please override pagingParametersForFetchRequest:pageType: in \(self)")
         
         return nil
+        
+//        if pageType == .Next {
+//            var lastSynced: NSTimeInterval = 0
+//            if let pageableType = type as? RealmFetchPagable.Type, lastSyncedTimeInterval = pageableType.lastSyncedTimeIntervalForFetchRequest(fetchRequest) {
+//                lastSynced = lastSyncedTimeInterval
+//            }
+//            let lastSyncedTimeInterval = (lastSynced > 0) ? lastSynced : lastSyncedFallback
+//            let timeInterval = from ?? lastSyncedTimeInterval
+//            
+//            parameters["timestamp"] = NSNumber(double: timeInterval)
+//            
+//            //                NSLog("startRequest .Next path: \(self.fetchInfo.path) lastSynced: \(lastSynced) parameters: \(parameters)")
+//        } else if pageType == .Previous {
+//            let timeInterval = from ?? NSDate().timeIntervalSince1970
+//            parameters["backwards_from"] = NSNumber(double: timeInterval)
+//            
+//            //                NSLog("startRequest .Previous path: \(self.fetchInfo.path) parameters: \(parameters)")
+//        }
+
     }
     
-    public class func realmFetchParametersForPrimaryKey(primaryKey: String?) -> [String: AnyObject]? {
-        print("# RealmKit: Please override realmFetchParametersForPrimaryKey: in \(self)")
+    public class func realmFetchPageInfoFromResponse(response: NSHTTPURLResponse?, jsonResponse: AnyObject?) -> PageInfo? {
+        print("# RealmKit: Please override realmFetchPageInfoFromResponse:jsonResponse: in \(self)")
         
         return nil
-    }
-    
-    public class func realmFetchJSONResponseKey() -> String? {
-        print("# RealmKit: Please override realmFetchJSONResponseKey: in \(self)")
         
-        return nil
-    }
-    
-    public class func realmFetchUserInfo(identifier: String?) -> [String: AnyObject]? {
-        return nil
-    }
-    
-    public class func realmFetchWillSerializeJSON(json: AnyObject, fetchInfo: FetchInfo, inRealm realm: Realm) {
-        
-    }
-    
-    public class func realmFetchDidSerializeJSON(json: AnyObject, fetchInfo: FetchInfo, jsonResponse: AnyObject?, realmObjectInfos: [RealmObjectInfo]?, inRealm realm: Realm) {
-        
+//        if let jsonDictionary = jsonResponse as? [String: AnyObject], pageInfo = jsonDictionary["page_info"] as? [String: AnyObject] {
+//            
+//            let currentPageNumber = pageInfo["current_page"] as? NSNumber
+//            let currentPage = currentPageNumber?.integerValue ?? 0
+//            
+//            let totalPagesNumber = pageInfo["total_pages"] as? NSNumber
+//            let totalPages = totalPagesNumber?.integerValue ?? 0
+//            
+//            let totalItemsNumber = pageInfo["total_items"] as? NSNumber
+//            let totalItems = totalItemsNumber?.integerValue ?? 0
+//            
+//            var previousPageURL: NSURL?
+//            if let previousPageUrl = pageInfo["previous_page_url"] as? String {
+//                previousPageURL = NSURL(string: previousPageUrl)
+//            }
+//            
+//            var nextPageURL: NSURL?
+//            if let nextPageUrl = pageInfo["next_page_url"] as? String {
+//                nextPageURL = NSURL(string: nextPageUrl)
+//            }
+//            
+//            return PageInfo(currentPage: currentPage, totalPages: totalPages, totalItems: totalItems, previousPageURL: previousPageURL, nextPageURL: nextPageURL, jsonResponse: jsonResponse as? [String: AnyObject])
+//        }
+
     }
     
     // MARK: RealmSyncable

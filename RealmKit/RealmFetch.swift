@@ -9,39 +9,59 @@
 import Foundation
 import RealmSwift
 
-public typealias RealmFetchCompletionBlock = (request: NSURLRequest!, response: NSHTTPURLResponse!, success: Bool, jsonResponse: AnyObject?, realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void
+public typealias RealmFetchCompletionBlock = (fetchResult: FetchResult) -> Void
 
-public struct FetchInfo {
+public struct FetchRequest {
     
     // MARK: Required
     
     public let baseURL: NSURL
-    public var path: String
+    public let path: String
     
     // MARK: Optional
     
-    public var parameters: [String: AnyObject]?
-    public var jsonResponseKey: String?
-    public var identifier: String?
-    public var serializationIdentifier: String?
-    public var userInfo: [String: AnyObject]?
+    public let parameters: [String: AnyObject]?
+    public let jsonResponseKey: String?
+    public let userInfo: [String: AnyObject]?
     
     public init(
         baseURL: NSURL,
-        path: String!,
+        path: String,
         parameters: [String: AnyObject]? = nil,
         jsonResponseKey: String? = nil,
-        identifier: String? = nil,
-        serializationIdentifier: String? = nil,
         userInfo: [String: AnyObject]? = nil
         ) {
         self.baseURL = baseURL
         self.path = path
         self.parameters = parameters
         self.jsonResponseKey = jsonResponseKey
-        self.identifier = identifier
-        self.serializationIdentifier = serializationIdentifier
         self.userInfo = userInfo
+    }
+}
+
+public struct FetchResult {
+
+    public let request: NSURLRequest!
+    public let response: NSHTTPURLResponse!
+    public let success: Bool
+    public let jsonResponse: AnyObject?
+    public let realmObjectInfos: [RealmObjectInfo]?
+    public let error: NSError?
+
+    public init(
+        request: NSURLRequest!,
+        response: NSHTTPURLResponse!,
+        success: Bool,
+        jsonResponse: AnyObject? = nil,
+        realmObjectInfos: [RealmObjectInfo]? = nil,
+        error: NSError? = nil
+        ) {
+        self.request = request
+        self.response = response
+        self.success = success
+        self.jsonResponse = jsonResponse
+        self.realmObjectInfos = realmObjectInfos
+        self.error = error
     }
 }
 
@@ -53,43 +73,17 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
     
     // MARK: - Methods
     
-    // MARK: Required
-    
-    static func realmFetchPathForPrimaryKey(primaryKey: String?) -> String!
-    static func realmFetchParametersForPrimaryKey(primaryKey: String?) -> [String: AnyObject]?
-    static func realmFetchJSONResponseKey() -> String?
-    
     // MARK: Optional
     
-    static func realmFetchUserInfo(identifier: String?) -> [String: AnyObject]?
-    
-    static func realmFetchWillSerializeJSON(json: AnyObject, fetchInfo: FetchInfo, inRealm realm: Realm)
-    static func realmFetchDidSerializeJSON(json: AnyObject, fetchInfo: FetchInfo, jsonResponse: AnyObject?, realmObjectInfos: [RealmObjectInfo]?, inRealm realm: Realm)
+    static func realmFetchWillSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm)
+    static func realmFetchDidSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, jsonResponse: AnyObject?, realmObjectInfos: [RealmObjectInfo]?, inRealm realm: Realm)
 }
 
 // MARK: - Extension for method implementations
 
 public extension RealmFetchable where Self: RealmJSONSerializable {
     
-    public static func realmFetchObjects(completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
-        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(nil), parameters: realmFetchParametersForPrimaryKey(nil), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
-        
-        return realmFetch(fetchInfo, completion: { (request, response, success, jsonResponse, realmObjectInfos, error) -> Void in
-            
-            completion(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, error: error)
-        })
-    }
-    
-    public static func realmFetchObjectWithPrimaryKey(primaryKey: String?, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
-        let fetchInfo = FetchInfo(baseURL: baseURL(), path: realmFetchPathForPrimaryKey(primaryKey), parameters: realmFetchParametersForPrimaryKey(primaryKey), identifier: nil, serializationIdentifier: nil, userInfo: realmFetchUserInfo(nil))
-        
-        return realmFetch(fetchInfo, completion: { (request, response, success, jsonResponse, realmObjectInfos, error) -> Void in
-            
-            completion(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, error: error)
-        })
-    }
-    
-    public static func realmFetch(fetchInfo: FetchInfo, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
+    public static func realmFetch(fetchRequest: FetchRequest, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
         let dispatchGroup = dispatch_group_create()
     
         var completionSuccess = false
@@ -99,18 +93,11 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         var completionRealmObjectInfos: [RealmObjectInfo]?
         var completionError: NSError?
         var sessionTask: NSURLSessionTask?
-        
-        // Set lastFetchedAt in userInfo
-        var userInfo = fetchInfo.userInfo
-        if userInfo == nil {
-            userInfo = [String: AnyObject]()
-        }
-        userInfo?["RealmKit"] = ["lastFetchedAt": NSDate().timeIntervalSince1970]
-        
+                
         // Fecth
         dispatch_group_enter(dispatchGroup)
         
-        sessionTask = requestWithBaseURL(fetchInfo.baseURL, path: fetchInfo.path, parameters: fetchInfo.parameters, method: .GET) { (success, request, response, jsonResponse, error) -> Void in
+        sessionTask = requestWithBaseURL(fetchRequest.baseURL, path: fetchRequest.path, parameters: fetchRequest.parameters, method: .GET) { (success, request, response, jsonResponse, error) -> Void in
             
             completionSuccess = success
             completionRequest = request
@@ -122,14 +109,14 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
             
             // jsonResponse - [String: AnyObject]
             if let jsonDictionary = jsonResponse as? [String: AnyObject] {
-                if let jsonObjectKey = fetchInfo.jsonResponseKey ?? self.realmFetchJSONResponseKey() {
+                if let jsonObjectKey = fetchRequest.jsonResponseKey {
                     json = jsonDictionary[jsonObjectKey]
                 } else {
                     json = jsonDictionary
                 }
             }
                 
-                // jsonResponse - [AnyObject]
+            // jsonResponse - [AnyObject]
             else if let jsonArray = jsonResponse as? [AnyObject] {
                 json = jsonArray
             }
@@ -144,10 +131,10 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                     } catch { }
                     
                     if let realm = realm {
-                        let serializationInfo = SerializationInfo(realm: realm, method: .GET, identifier: fetchInfo.identifier, serializationIdentifier: fetchInfo.serializationIdentifier, userInfo: fetchInfo.userInfo)
+                        let serializationInfo = SerializationInfo(realm: realm, method: .GET, userInfo: fetchRequest.userInfo)
                         
                         // Will Serialize
-                        realmFetchWillSerializeJSON(json, fetchInfo: fetchInfo, inRealm: realm)
+                        realmFetchWillSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm)
                         
                         // Array
                         if let jsonArray = json as? NSArray {
@@ -157,7 +144,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                                 completionRealmObjectInfos = realmObjectInfos
                                 
                                 // Did Serialize
-                                realmFetchDidSerializeJSON(json, fetchInfo: fetchInfo, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, inRealm: realm)
+                                realmFetchDidSerializeJSON(json, fetchRequest: fetchRequest, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, inRealm: realm)
                                 
                                 dispatch_group_leave(dispatchGroup)
                             })
@@ -174,7 +161,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                                 }
                                 
                                 // Did Serialize
-                                realmFetchDidSerializeJSON(json, fetchInfo: fetchInfo, jsonResponse: jsonResponse, realmObjectInfos: completionRealmObjectInfos, inRealm: realm)
+                                realmFetchDidSerializeJSON(json, fetchRequest: fetchRequest, jsonResponse: jsonResponse, realmObjectInfos: completionRealmObjectInfos, inRealm: realm)
                                 
                                 dispatch_group_leave(dispatchGroup)
                             })
@@ -191,7 +178,9 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         dispatch_group_notify(dispatchGroup, dispatch_get_main_queue(), {
             handleRequest(completionRequest, response: completionResponse, jsonResponse: completionJSONResponse, error: completionError, fetchOperation: nil, syncOperation: nil, inRealm: nil)
             
-            completion(request: completionRequest, response: completionResponse, success: completionSuccess, jsonResponse: completionJSONResponse, realmObjectInfos: completionRealmObjectInfos, error: completionError)
+            let fetchResult = FetchResult(request: completionRequest, response: completionResponse, success: completionSuccess, jsonResponse: completionJSONResponse, realmObjectInfos: completionRealmObjectInfos, error: completionError)
+            
+            completion(fetchResult: fetchResult)
         })
         
         return sessionTask

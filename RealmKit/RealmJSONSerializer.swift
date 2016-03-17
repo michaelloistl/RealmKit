@@ -19,22 +19,18 @@ public struct SerializationInfo {
     
     // MARK: Optional
     
-    public var method: RealmKit.Method?
-    public var identifier: String?
-    public var serializationIdentifier: String?
-    public var userInfo: [String: AnyObject]?
+    public let method: RealmKit.Method?
+    public let userInfo: [String: AnyObject]?
     
-    public var oldPrimaryKey: String?
+    public let oldPrimaryKey: String?
     public var newPrimaryKey: String?
     
-    public var syncOperation: RealmSyncOperation?
-    public var fetchOperation: RealmFetchOperation?
+    public let syncOperation: RealmSyncOperation?
+    public let fetchOperation: RealmFetchOperation?
     
     public init(
         realm: Realm,
         method: RealmKit.Method? = nil,
-        identifier: String? = nil,
-        serializationIdentifier: String? = nil,
         userInfo: [String: AnyObject]? = nil,
         oldPrimaryKey: String? = nil,
         newPrimaryKey: String? = nil,
@@ -43,8 +39,6 @@ public struct SerializationInfo {
         ) {
             self.realm = realm
             self.method = method
-            self.identifier = identifier
-            self.serializationIdentifier = serializationIdentifier
             self.userInfo = userInfo
             self.oldPrimaryKey = oldPrimaryKey
             self.newPrimaryKey = newPrimaryKey
@@ -225,17 +219,12 @@ public extension RealmJSONSerializable  {
             // Modify keyValueDictionary
             keyValueDictionary = keyValueDictionaryForRealmObjectWithType(type, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
             
-            if let userInfoRealmKit = serializationInfo.userInfo?["RealmKit"] as? [String: AnyObject] {
-                
-                // lastFetchedAt
-                if let lastFetchedAt = userInfoRealmKit["lastFetchedAt"] as? NSDate {
-                    NSLog("SET lastFetchedAt ...: \(self)")
-                    keyValueDictionary["lastFetchedAt"] = lastFetchedAt
-                }
-                
-                // lastSyncedAt
-                if let lastSyncedAt = userInfoRealmKit["lastSyncedAt"] as? NSDate {
-                    keyValueDictionary["lastSyncedAt"] = lastSyncedAt
+            // Set lastFetchedAt / lastSyncedAt
+            if let method = serializationInfo.method {
+                if method == .GET {
+                    keyValueDictionary["lastFetchedAt"] = NSDate()
+                } else {
+                    keyValueDictionary["lastSyncedAt"] = NSDate()
                 }
             }
             
@@ -323,13 +312,13 @@ public class RealmValueTransformer: NSValueTransformer {
 
 public extension RealmValueTransformer {
     
-    public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType<T: RealmKitObject>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             
             // TODO: Direct value for primary key
             
-            if let dictionary = value as? NSDictionary, _type = type as? RealmJSONSerializable.Type {
-                return _type.realmObjectWithType(type, withJSONDictionary: dictionary, serializationInfo: serializationInfo)
+            if let dictionary = value as? NSDictionary {
+                return (type as RealmJSONSerializable.Type).realmObjectWithType(type, withJSONDictionary: dictionary, serializationInfo: serializationInfo)
             } else {
                 return nil
             }
@@ -343,7 +332,7 @@ public extension RealmValueTransformer {
         })
     }
     
-    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType<T: RealmKitObject>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
         let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, serializationInfo: serializationInfo)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
@@ -359,21 +348,17 @@ public extension RealmValueTransformer {
                 let list = List<T>()
                 for string in stringArray {
                     if let primaryKey = (type as Object.Type).primaryKey() {
+                        var keyValueDictionary = (type as RealmJSONSerializable.Type).keyValueDictionaryWithPrimaryKeyValue(string)
                         
-                        // Type specific property mapping
-                        if let _type = type as? RealmJSONSerializable.Type {
-                            var keyValueDictionary = _type.keyValueDictionaryWithPrimaryKeyValue(string)
-
-                            // Default fallback
-                            if keyValueDictionary == nil {
-                                keyValueDictionary = [primaryKey: string]
-                            }
-                            
-                            if let keyValueDictionary = keyValueDictionary {
-                                if let _: AnyObject = keyValueDictionary[primaryKey] {
-                                    let realmObject = serializationInfo.realm.create(T.self, value: keyValueDictionary, update: true)
-                                    list.append(realmObject)
-                                }
+                        // Default fallback
+                        if keyValueDictionary == nil {
+                            keyValueDictionary = [primaryKey: string]
+                        }
+                        
+                        if let keyValueDictionary = keyValueDictionary {
+                            if let _: AnyObject = keyValueDictionary[primaryKey] {
+                                let realmObject = serializationInfo.realm.create(T.self, value: keyValueDictionary, update: true)
+                                list.append(realmObject)
                             }
                         }
                     }
