@@ -9,40 +9,6 @@
 import Foundation
 import RealmSwift
 
-public struct SyncInfo {
-    
-    // MARK: Required
-    
-    public var baseURL: NSURL!
-    public var path: String!
-    public var method: RealmKit.Method!
-    
-    // MARK: Optional
-    
-    public var parameters: [String: AnyObject]?
-    public var identifier: String?
-    public var serializationIdentifier: String?
-    public var userInfo: [String: AnyObject]?
-    
-    public init(
-        baseURL: NSURL!,
-        path: String!,
-        method: RealmKit.Method!,
-        parameters: [String: AnyObject]? = nil,
-        identifier: String? = nil,
-        serializationIdentifier: String? = nil,
-        userInfo: [String: AnyObject]? = nil
-        ) {
-            self.baseURL = baseURL
-            self.path = path
-            self.method = method
-            self.parameters = parameters
-            self.identifier = identifier
-            self.serializationIdentifier = serializationIdentifier
-            self.userInfo = userInfo
-    }
-}
-
 public protocol RealmSyncable: RealmKitObjectProtocol {
     
     // MARK: - Properties
