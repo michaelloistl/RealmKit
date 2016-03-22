@@ -84,11 +84,11 @@ public protocol RealmJSONSerializable: RealmSyncable, RealmFetchable {
     
     static func didCreateOrUpdateRealmObject(serializationInfo: SerializationInfo?)
     
-    static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo?) -> [String: AnyObject]
+    static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> [String: AnyObject]
     
-    static func modifiedRealmObject(realmObject: Object, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo?) -> Object?
+    static func modifiedRealmObject(realmObject: Object, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object?
     
-    static func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, serializationInfo: SerializationInfo?) -> Bool
+    static func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, serializationInfo: SerializationInfo) -> Bool
 }
 
 // MARK: - Extension for method implementations

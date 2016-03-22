@@ -119,7 +119,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         var completionRealmObjectInfos: [RealmObjectInfo]?
         var completionError: NSError?
         var sessionTask: NSURLSessionTask?
-                
+        
         // Fecth
         dispatch_group_enter(dispatchGroup)
         
