@@ -22,14 +22,14 @@ public struct FetchRequest {
     
     public let parameters: [String: AnyObject]?
     public let jsonResponseKey: String?
-    public let userInfo: [String: AnyObject]?
+    public let userInfo: [String: AnyObject]
     
     public init(
         baseURL: NSURL,
         path: String,
         parameters: [String: AnyObject]? = nil,
         jsonResponseKey: String? = nil,
-        userInfo: [String: AnyObject]? = nil
+        userInfo: [String: AnyObject] = [String: AnyObject]()
         ) {
         self.baseURL = baseURL
         self.path = path

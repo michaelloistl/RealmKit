@@ -20,7 +20,7 @@ public struct SerializationInfo {
     // MARK: Optional
     
     public let method: RealmKit.Method?
-    public let userInfo: [String: AnyObject]?
+    public var userInfo: [String: AnyObject]
     
     public let oldPrimaryKey: String?
     public var newPrimaryKey: String?
@@ -31,7 +31,7 @@ public struct SerializationInfo {
     public init(
         realm: Realm,
         method: RealmKit.Method? = nil,
-        userInfo: [String: AnyObject]? = nil,
+        userInfo: [String: AnyObject] = [String: AnyObject](),
         oldPrimaryKey: String? = nil,
         newPrimaryKey: String? = nil,
         syncOperation: RealmSyncOperation? = nil,

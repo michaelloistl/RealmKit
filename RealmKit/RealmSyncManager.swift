@@ -166,11 +166,11 @@ public class RealmSyncOperation: NSOperation {
     public let baseURL: NSURL
     public let path: String
     public let parameters: [String : AnyObject]?
-    
-    public var identifier: String?
-    public var syncIdentifier: String?
+    public let userInfo = [String : AnyObject]()
     
     public var sessionTask: NSURLSessionTask?
+    
+    public var syncIdentifier: String?
     
     private var _executing: Bool = false
     override public var executing: Bool {
@@ -257,17 +257,12 @@ public class RealmSyncOperation: NSOperation {
         var completionJSONResponse: AnyObject?
         var completionError: NSError?
         
-        var realmSyncUserInfo: [String: AnyObject]?
-        
         // Start asynchronous API
         dispatch_group_enter(dispatchSessionGroup)
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
 
             if let syncType = self.objectType as? RealmSyncable.Type {
             
-                // Set lastSyncedAt in userInfo
-                realmSyncUserInfo = ["RealmKit": ["lastSyncedAt": NSDate()]]
-                
                 dispatch_group_enter(dispatchSessionGroup)
                 
                 self.sessionTask = syncType.requestWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, jsonResponse, error) -> Void in
@@ -311,12 +306,13 @@ public class RealmSyncOperation: NSOperation {
                 
                 if let realm = realm {
                     if completionSuccess {
-                        if let objectDictionary = self.objectDictionaryFromJSONResponse(completionJSONResponse, withMethod: self.method, identifier: self.identifier) {
+                        let serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, syncOperation: self)
+                        
+                        if let objectDictionary = self.objectDictionaryFromJSONResponse(completionJSONResponse, serializationInfo: serializationInfo) {
                             dispatch_group_enter(dispatchCompletionGroup)
                             
                             // Create new Object with ObjectDictionary
                             if let syncType = self.objectType as? RealmSyncable.Type, serializeType = self.objectType as? RealmJSONSerializable.Type {
-                                let serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: realmSyncUserInfo, oldPrimaryKey: self.primaryKey, syncOperation: self)
                                 
                                 serializeType.realmObjectWithJSONDictionary(objectDictionary, serializationInfo: serializationInfo, completion: { (realmObjectInfo, error) -> Void in
                                     
@@ -391,10 +387,10 @@ public class RealmSyncOperation: NSOperation {
     
     // MARK: Networking
     
-    func objectDictionaryFromJSONResponse(jsonResponse: AnyObject?, withMethod method: RealmKit.Method?, identifier: String?) -> NSDictionary? {
+    func objectDictionaryFromJSONResponse(jsonResponse: AnyObject?, serializationInfo: SerializationInfo) -> NSDictionary? {
         if let jsonResponse = jsonResponse as? NSDictionary {
-            if let method = method, syncType = objectType as? RealmSyncable.Type {
-                if let responseObjectKey = syncType.realmSyncJSONResponseKey(method, identifier: identifier) {
+            if let method = serializationInfo.method, syncType = objectType as? RealmSyncable.Type {
+                if let responseObjectKey = syncType.realmSyncJSONResponseKey(method, userInfo: serializationInfo.userInfo) {
                     return jsonResponse.objectForKey(responseObjectKey) as? NSDictionary
                 } else {
                     return jsonResponse

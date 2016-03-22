@@ -273,8 +273,8 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return nil
     }
     
-    public class func realmSyncJSONResponseKey(method: RealmKit.Method, identifier: String? = nil) -> String? {
-        print("# RealmKit: Please override realmSyncJSONResponseKey:identifier: in \(self)")
+    public class func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]? = nil) -> String? {
+        print("# RealmKit: Please override realmSyncJSONResponseKey:userInfo: in \(self)")
         
         return nil
     }
