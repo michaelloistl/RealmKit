@@ -121,7 +121,7 @@ public class RealmFetchManager {
         resumeTimer = nil
         
         if duration > 0 {
-            resumeTimer = NSTimer(timeInterval: duration, target: RealmFetchManager.sharedManager, selector: Selector("resumeFetchOperations"), userInfo: nil, repeats: false)
+            resumeTimer = NSTimer(timeInterval: duration, target: RealmFetchManager.sharedManager, selector: #selector(RealmFetchManager.resumeFetchOperations), userInfo: nil, repeats: false)
             if let resumeTimer = resumeTimer {
                 NSRunLoop.mainRunLoop().addTimer(resumeTimer, forMode: NSRunLoopCommonModes)
             }
@@ -129,12 +129,10 @@ public class RealmFetchManager {
     }
     
     public func resumeFetchOperations() {
-        NSLog("resumeFetchOperations... INSTANCE")
         fetchOperationQueue.suspended = false
     }
     
-    public class func resumeFetchOperations() {
-        NSLog("resumeFetchOperations... CLASS")
+    @objc public class func resumeFetchOperations() {
         sharedManager.fetchOperationQueue.suspended = false
     }
 }
