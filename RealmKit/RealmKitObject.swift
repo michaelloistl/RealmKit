@@ -194,6 +194,12 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     // MARK: RealmFetchable
     
+    public class func fetchRequestWithId(id: String?, identifier: String?) -> FetchRequest! {
+        print("# RealmKit: Please override fetchRequestWithId:identifier: in \(self)")
+        
+        return nil
+    }
+    
     public class func realmFetchWillSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) {
         
     }

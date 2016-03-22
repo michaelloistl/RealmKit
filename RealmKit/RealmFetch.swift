@@ -73,6 +73,8 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
     
     // MARK: - Methods
     
+    static func fetchRequestWithId(id: String?, identifier: String?) -> FetchRequest!
+    
     // MARK: Optional
     
     static func realmFetchWillSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm)
@@ -83,7 +85,31 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
 
 public extension RealmFetchable where Self: RealmJSONSerializable {
     
-    public static func realmFetch(fetchRequest: FetchRequest, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
+    public static func fetchId(id: String, completion: RealmFetchCompletionBlock) {
+        if let fetchRequest = fetchRequestWithId(id, identifier: nil) {
+            fetch(fetchRequest) { (fetchResult) in
+                completion(fetchResult: fetchResult)
+            }
+        }
+    }
+    
+    public static func fetchPaged(pageType: PageInfo.PageType, pageLimit: Int = 1, from: NSTimeInterval?, progress: RealmFetchPagedProgressBlock, completion: RealmFetchPagedCompletionBlock) {
+        if let fetchRequest = fetchRequestWithId(nil, identifier: nil), type = self as? Object.Type {
+            let realmFetchPaged = RealmFetchPaged(type: type, fetchRequest: fetchRequest, pageType: pageType, from: from, progress: { (realmFetchPaged) in
+                
+                progress(realmFetchPaged: realmFetchPaged)
+                }, completion: { (realmFetchPaged) in
+                    completion(realmFetchPaged: realmFetchPaged)
+            })
+            
+            realmFetchPaged.pageLimit = pageLimit
+            realmFetchPaged.startRequest()
+        } else {
+            completion(realmFetchPaged: nil)
+        }
+    }
+    
+    public static func fetch(fetchRequest: FetchRequest, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
         let dispatchGroup = dispatch_group_create()
     
         var completionSuccess = false

@@ -10,7 +10,7 @@ import Foundation
 import RealmSwift
 
 public typealias RealmFetchPagedProgressBlock = (realmFetchPaged: RealmFetchPaged) -> Void
-public typealias RealmFetchPagedCompletionBlock = (realmFetchPaged: RealmFetchPaged) -> Void
+public typealias RealmFetchPagedCompletionBlock = (realmFetchPaged: RealmFetchPaged!) -> Void
 
 public struct PageInfo {
     
@@ -144,7 +144,7 @@ public class RealmFetchPaged {
         fetchRequest = FetchRequest(baseURL: self.fetchRequest.baseURL, path: self.fetchRequest.path, parameters: parameters, jsonResponseKey: self.fetchRequest.jsonResponseKey, userInfo: self.fetchRequest.userInfo)
         
         if let fetchableType = type as? RealmFetchable.Type, serializableType = fetchableType as? RealmJSONSerializable.Type {
-            serializableType.realmFetch(fetchRequest) { (fetchResult) in
+            serializableType.fetch(fetchRequest) { (fetchResult) in
                 self.success = fetchResult.success
                 self.error = fetchResult.error
                 
