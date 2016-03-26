@@ -47,6 +47,7 @@ public struct FetchResult {
     public let jsonResponse: AnyObject?
     public let realmObjectInfos: [RealmObjectInfo]?
     public let error: NSError?
+    public let userInfo: [String: AnyObject]
 
     public init(
         request: NSURLRequest!,
@@ -54,7 +55,8 @@ public struct FetchResult {
         success: Bool,
         jsonResponse: AnyObject? = nil,
         realmObjectInfos: [RealmObjectInfo]? = nil,
-        error: NSError? = nil
+        error: NSError? = nil,
+        userInfo: [String: AnyObject] = [String: AnyObject]()
         ) {
         self.request = request
         self.response = response
@@ -62,6 +64,7 @@ public struct FetchResult {
         self.jsonResponse = jsonResponse
         self.realmObjectInfos = realmObjectInfos
         self.error = error
+        self.userInfo = userInfo
     }
 }
 
