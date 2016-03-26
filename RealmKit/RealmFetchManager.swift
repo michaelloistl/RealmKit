@@ -142,12 +142,9 @@ public class RealmFetchManager {
 public class RealmFetchOperation: NSOperation {
     
     public typealias OrpandObjectsClosure = (completion: OrpandObjectsCompletionBlock) -> Void
-    public typealias FetchClosure = (completion: FetchCompletionBlock) -> NSURLSessionTask?
+    public typealias FetchClosure = (completion: (fetchResult: FetchResult) -> Void) -> NSURLSessionTask?
     
     public typealias OrpandObjectsCompletionBlock = (realmObjectInfos: [RealmObjectInfo]?) -> Void
-    
-    public typealias FetchCompletionBlock = (request: NSURLRequest!, response: NSHTTPURLResponse!, success: Bool, jsonResponse: AnyObject?, realmObjectInfos: [RealmObjectInfo]?, error: NSError?, accountId: String?) -> Void
-    
     
     public let objectType: Object.Type
     public let orpandObjectsClosure: OrpandObjectsClosure
@@ -212,7 +209,6 @@ public class RealmFetchOperation: NSOperation {
         }
         
         if self.cancelled {
-            NSLog("CANCELED 1")
             return
         }
         
@@ -228,13 +224,7 @@ public class RealmFetchOperation: NSOperation {
         let dispatchFetchObjectsGroup = dispatch_group_create()
         
         var orpandRealmObjectInfos: [RealmObjectInfo]?
-        var fetchedRealmObjectInfos: [RealmObjectInfo]?
-        var fetchedResponseStatusCode: Int = 0
-        var fetchedResponseObject: AnyObject?
-        
-        var fetchedRequest: NSURLRequest!
-        var fetchedResponse: NSHTTPURLResponse!
-        var fetchedError: NSError?
+        var fetchClosureResult: FetchResult?
         
         if self.cancelled == false {
             
@@ -261,14 +251,8 @@ public class RealmFetchOperation: NSOperation {
                     
                     if self.cancelled == false {
                         dispatch_group_enter(dispatchFetchObjectsGroup)
-                        self.sessionTask = self.fetchClosure(completion: { (request, response, success, responseObject, realmObjectInfos, error, accountId) -> Void in
-                            fetchedResponseStatusCode = response?.statusCode ?? 0
-                            fetchedResponseObject = responseObject
-                            fetchedRealmObjectInfos = realmObjectInfos
-                            
-                            fetchedRequest = request
-                            fetchedResponse = response
-                            fetchedError = error
+                        self.sessionTask = self.fetchClosure(completion: { (fetchResult) in
+                            fetchClosureResult = fetchResult
                             
                             dispatch_group_leave(dispatchFetchObjectsGroup)
                         })
@@ -282,7 +266,7 @@ public class RealmFetchOperation: NSOperation {
         }
         
         dispatch_group_notify(dispatchFetchObjectsGroup, dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), {
-            let success = fetchedResponseStatusCode >= 200 && fetchedResponseStatusCode < 300
+            let success = fetchClosureResult?.response?.statusCode >= 200 && fetchClosureResult?.response?.statusCode < 300
             
             var realm: Realm?
             
@@ -293,7 +277,7 @@ public class RealmFetchOperation: NSOperation {
             if success && self.cancelled == false {
                 // TODO: There might be an issue when response is paged...
                 
-                if let orpandRealmObjectInfos = orpandRealmObjectInfos, fetchedRealmObjectInfos = fetchedRealmObjectInfos {
+                if let orpandRealmObjectInfos = orpandRealmObjectInfos, fetchedRealmObjectInfos = fetchClosureResult?.realmObjectInfos {
                     var deleteOrpandRealmObjectInfos = [RealmObjectInfo]()
                     for orpandRealmObjectInfo in orpandRealmObjectInfos {
                         if fetchedRealmObjectInfos.contains({ $0.primaryKey == orpandRealmObjectInfo.primaryKey }) == false {
@@ -316,7 +300,7 @@ public class RealmFetchOperation: NSOperation {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 if self.cancelled == false {
                     if let realmKitType = self.objectType as? RealmKitObject.Type {
-                        realmKitType.handleRequest(fetchedRequest, response: fetchedResponse, jsonResponse: fetchedResponseObject, error: fetchedError, fetchOperation: self, syncOperation: nil, inRealm: nil)
+                        realmKitType.handleRequest(fetchClosureResult?.request, response: fetchClosureResult?.response, jsonResponse: fetchClosureResult?.jsonResponse, error: fetchClosureResult?.error, fetchOperation: self, syncOperation: nil, inRealm: nil)
                     }
                     
                     NSNotificationCenter.defaultCenter().postNotificationName(RealmFetchOperationDidFinishNotification, object: self)
