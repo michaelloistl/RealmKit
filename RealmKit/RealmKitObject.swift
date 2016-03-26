@@ -113,7 +113,6 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return self
     }
     
-    // Optional
     public class func didCreateOrUpdateRealmObject(serializationInfo: SerializationInfo?) {
         if let newPrimaryKey = serializationInfo?.newPrimaryKey, oldPrimaryKey = serializationInfo?.oldPrimaryKey, realm = serializationInfo?.realm {
             
@@ -194,8 +193,8 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     // MARK: RealmFetchable
     
-    public class func fetchRequestWithId(id: String?, identifier: String?) -> FetchRequest! {
-        print("# RealmKit: Please override fetchRequestWithId:identifier: in \(self)")
+    public class func fetchRequestWithId(id: String?, userInfo: [String: AnyObject] = [String: AnyObject]()) -> FetchRequest? {
+        print("# RealmKit: Please override fetchRequestWithId:userInfo: in \(self)")
         
         return nil
     }
@@ -273,7 +272,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return nil
     }
     
-    public class func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]? = nil) -> String? {
+    public class func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]) -> String? {
         print("# RealmKit: Please override realmSyncJSONResponseKey:userInfo: in \(self)")
         
         return nil

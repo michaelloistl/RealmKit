@@ -312,13 +312,13 @@ public class RealmValueTransformer: NSValueTransformer {
 
 public extension RealmValueTransformer {
     
-    public class func JSONDictionaryTransformerWithObjectType<T: RealmKitObject>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             
             // TODO: Direct value for primary key
             
             if let dictionary = value as? NSDictionary {
-                return (type as RealmJSONSerializable.Type).realmObjectWithType(type, withJSONDictionary: dictionary, serializationInfo: serializationInfo)
+                return (type as? RealmJSONSerializable.Type)?.realmObjectWithType(type, withJSONDictionary: dictionary, serializationInfo: serializationInfo)
             } else {
                 return nil
             }
@@ -332,10 +332,11 @@ public extension RealmValueTransformer {
         })
     }
     
-    public class func JSONArrayTransformerWithObjectType<T: RealmKitObject>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
         let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, serializationInfo: serializationInfo)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
+            
             if let dictionaryArray = value as? [NSDictionary] {
                 let list = List<T>()
                 for dictionary in dictionaryArray {
@@ -344,17 +345,18 @@ public extension RealmValueTransformer {
                     }
                 }
                 return list
-            } else if let stringArray = value as? [String] { // Assuming that string is the primary Key
+            }
+            else if let stringArray = value as? [String] { // Assuming that string is the primary Key
                 let list = List<T>()
                 for string in stringArray {
-                    if let primaryKey = (type as Object.Type).primaryKey() {
-                        var keyValueDictionary = (type as RealmJSONSerializable.Type).keyValueDictionaryWithPrimaryKeyValue(string)
+                    if let primaryKey = type.primaryKey() {
+                        var keyValueDictionary = (type as? RealmJSONSerializable.Type)?.keyValueDictionaryWithPrimaryKeyValue(string)
                         
                         // Default fallback
                         if keyValueDictionary == nil {
                             keyValueDictionary = [primaryKey: string]
                         }
-                        
+
                         if let keyValueDictionary = keyValueDictionary {
                             if let _: AnyObject = keyValueDictionary[primaryKey] {
                                 let realmObject = serializationInfo.realm.create(T.self, value: keyValueDictionary, update: true)
@@ -367,6 +369,7 @@ public extension RealmValueTransformer {
             } else {
                 return nil
             }
+            
             }, reverseClosure: { (value) -> AnyObject? in
                 if let _ = value as? List {
                     // TODO: Implement JSONDictionaryFromRealmArray:

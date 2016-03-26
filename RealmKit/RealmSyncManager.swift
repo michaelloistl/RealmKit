@@ -166,8 +166,8 @@ public class RealmSyncOperation: NSOperation {
     public let baseURL: NSURL
     public let path: String
     public let parameters: [String : AnyObject]?
-    public let userInfo = [String : AnyObject]()
     
+    public var userInfo = [String : AnyObject]()
     public var sessionTask: NSURLSessionTask?
     
     public var syncIdentifier: String?

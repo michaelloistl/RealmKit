@@ -28,7 +28,7 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     func realmSyncPath(method: RealmKit.Method) -> String?
     func realmSyncParameters(method: RealmKit.Method) -> [String: AnyObject]?
     
-    static func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]?) -> String?
+    static func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]) -> String?
     
     // MARK: Optional
     
