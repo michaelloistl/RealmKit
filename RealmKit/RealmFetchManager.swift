@@ -19,7 +19,7 @@ public protocol RealmFetchManagerDelegate {
 
 public class RealmFetchManager {
     
-    var syncQueue: dispatch_queue_t = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)
+    var fetchQueue: dispatch_queue_t = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
     
     var resumeTimer: NSTimer?
     
@@ -235,7 +235,7 @@ public class RealmFetchOperation: NSOperation {
             
             // Before Fetch
             dispatch_group_enter(dispatchBeforeFetchGroup)
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), { () -> Void in
+            dispatch_async(RealmFetchManager.sharedManager.fetchQueue, { () -> Void in
                 
                 if self.cancelled == false {
                     dispatch_group_enter(dispatchBeforeFetchGroup)
@@ -251,29 +251,23 @@ public class RealmFetchOperation: NSOperation {
 
             // Fetch
             dispatch_group_enter(dispatchFetchObjectsGroup)
-            dispatch_group_notify(dispatchBeforeFetchGroup, dispatch_get_main_queue(), {
+            dispatch_group_notify(dispatchBeforeFetchGroup, RealmFetchManager.sharedManager.fetchQueue, {
                 
-                dispatch_group_enter(dispatchFetchObjectsGroup)
-                dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), { () -> Void in
-                    
-                    if self.cancelled == false {
-                        dispatch_group_enter(dispatchFetchObjectsGroup)
-                        self.sessionTask = self.fetchClosure(completion: { (fetchResult) in
-                            self.fetchResult = fetchResult
-                            
-                            dispatch_group_leave(dispatchFetchObjectsGroup)
-                        })
-                    }
-                    
-                    dispatch_group_leave(dispatchFetchObjectsGroup)
-                })
+                if self.cancelled == false {
+                    dispatch_group_enter(dispatchFetchObjectsGroup)
+                    self.sessionTask = self.fetchClosure(completion: { (fetchResult) in
+                        self.fetchResult = fetchResult
+                        
+                        dispatch_group_leave(dispatchFetchObjectsGroup)
+                    })
+                }
                 
                 dispatch_group_leave(dispatchFetchObjectsGroup)
             })
             
             // After Fetch
             dispatch_group_enter(dispatchAfterFetchGroup)
-            dispatch_group_notify(dispatchFetchObjectsGroup, dispatch_get_main_queue(), {
+            dispatch_group_notify(dispatchFetchObjectsGroup, RealmFetchManager.sharedManager.fetchQueue, {
 
                 if self.cancelled == false {
                     dispatch_group_enter(dispatchAfterFetchGroup)
