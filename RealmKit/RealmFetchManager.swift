@@ -191,7 +191,7 @@ public class RealmFetchOperation: NSOperation {
     
     // Initializers
     
-    public init<T: Object>(type: T.Type, beforeFetchClosure: BeforeFetchClosure, fetchClosure: FetchClosure, afterFetchClosure: AfterFetchClosure, identifier: String) {
+    public init<T: Object>(type: T.Type, beforeFetchClosure: BeforeFetchClosure, fetchClosure: FetchClosure, afterFetchClosure: AfterFetchClosure, queuePriority: NSOperationQueuePriority = .Normal, identifier: String) {
         self.objectType = type
         self.beforeFetchClosure = beforeFetchClosure
         self.fetchClosure = fetchClosure
@@ -199,6 +199,8 @@ public class RealmFetchOperation: NSOperation {
         self.identifier = identifier
         
         super.init()
+        
+        self.queuePriority = queuePriority
     }
     
     // MARK: - Methods
