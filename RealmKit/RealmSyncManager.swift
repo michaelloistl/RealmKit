@@ -170,9 +170,8 @@ public class RealmSyncOperation: NSOperation {
     public var userInfo = [String : AnyObject]()
     public var sessionTask: NSURLSessionTask?
     
-    public var syncIdentifier: String?
-    
-    var syncResult: SyncResult?
+    public var serializationInfo: SerializationInfo?
+    public var syncResult: SyncResult?
     
     private var _executing: Bool = false
     override public var executing: Bool {
@@ -263,7 +262,7 @@ public class RealmSyncOperation: NSOperation {
                 
                 self.sessionTask = syncType.requestWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, jsonResponse, error) -> Void in
                     
-                    self.syncResult = SyncResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: nil, oldPrimaryKey: self.primaryKey, error: error, userInfo: self.userInfo)
+                    self.syncResult = SyncResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: nil, error: error, userInfo: self.userInfo)
                     
                     dispatch_group_leave(dispatchSessionGroup)
                 })
@@ -298,21 +297,21 @@ public class RealmSyncOperation: NSOperation {
                 
                 if let realm = realm {
                     if self.syncResult?.success == true {
-                        let serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, syncOperation: self)
+                        self.serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, syncOperation: self)
                         
-                        if let objectDictionary = self.objectDictionaryFromJSONResponse(self.syncResult?.jsonResponse, serializationInfo: serializationInfo) {
+                        if let objectDictionary = self.objectDictionaryFromJSONResponse(self.syncResult?.jsonResponse, serializationInfo: self.serializationInfo!) {
                             dispatch_group_enter(dispatchCompletionGroup)
                             
                             // Create new Object with ObjectDictionary
                             if let syncType = self.objectType as? RealmSyncable.Type, serializeType = self.objectType as? RealmJSONSerializable.Type {
                                 
                                 // Should serialize?
-                                if syncType.realmSyncShouldSerializeJSON(objectDictionary, serializationInfo: serializationInfo, inRealm: realm) {
+                                if syncType.realmSyncShouldSerializeJSON(objectDictionary, serializationInfo: self.serializationInfo!, inRealm: realm) {
                                     
                                     // Will Serialize
-                                    syncType.realmSyncWillSerializeJSON(objectDictionary, serializationInfo: serializationInfo, inRealm: realm)
+                                    syncType.realmSyncWillSerializeJSON(objectDictionary, serializationInfo: self.serializationInfo!, inRealm: realm)
                                     
-                                    serializeType.realmObjectWithJSONDictionary(objectDictionary, serializationInfo: serializationInfo, completion: { (realmObjectInfo, error) -> Void in
+                                    serializeType.realmObjectWithJSONDictionary(objectDictionary, serializationInfo: self.serializationInfo!, completion: { (realmObjectInfo, error) -> Void in
                                         
                                         // Update Realm
                                         realm.refresh()
@@ -322,10 +321,12 @@ public class RealmSyncOperation: NSOperation {
                                             realmObjectInfos = [realmObjectInfo]
                                         }
                                         
-                                        self.syncResult = SyncResult(request: self.syncResult?.request, response: self.syncResult?.response, success: self.syncResult?.success ?? false, jsonResponse: self.syncResult?.jsonResponse, realmObjectInfos: realmObjectInfos, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey, error: self.syncResult?.error, userInfo: self.userInfo)
+                                        self.syncResult = SyncResult(request: self.syncResult?.request, response: self.syncResult?.response, success: self.syncResult?.success ?? false, jsonResponse: self.syncResult?.jsonResponse, realmObjectInfos: realmObjectInfos, error: self.syncResult?.error, userInfo: self.userInfo)
                                         
+                                        self.serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey, syncOperation: self)
+
                                         // Did Serialize
-                                        syncType.realmSyncDidSerializeJSON(objectDictionary, serializationInfo: serializationInfo, syncResult: self.syncResult, inRealm: realm)
+                                        syncType.realmSyncDidSerializeJSON(objectDictionary, serializationInfo: self.serializationInfo!, syncResult: self.syncResult, inRealm: realm)
                                         
                                         // Delete temp object
                                         if let newPrimaryKey = realmObjectInfo?.primaryKey {

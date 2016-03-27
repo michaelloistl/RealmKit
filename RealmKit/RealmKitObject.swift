@@ -116,25 +116,9 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     public class func didCreateOrUpdateRealmObject(serializationInfo: SerializationInfo?) {
         if let newPrimaryKey = serializationInfo?.newPrimaryKey, oldPrimaryKey = serializationInfo?.oldPrimaryKey, realm = serializationInfo?.realm {
             
-            // Setting syncIdentifier on newObject
-            if var newObject = realm.objectForPrimaryKey(self, key: newPrimaryKey) as? RealmJSONSerializable, oldObject = realm.objectForPrimaryKey(self, key: oldPrimaryKey) as? RealmJSONSerializable {
-                
-                newObject.syncIdentifier = oldObject.syncIdentifier
-            }
-            
             // Old and New Objects are the same (PUT, DELETE)
             if newPrimaryKey == oldPrimaryKey {
                 if let newObject = realm.objectForPrimaryKey(self, key: newPrimaryKey) as? RealmJSONSerializable {
-                    
-                    // Update syncIdentifier
-                    if let syncIdentifier = serializationInfo?.syncOperation?.syncIdentifier {
-                        newObject.removeSyncIdentifier(syncIdentifier)
-                    }
-                    
-                    // setSyncStatus only if there is no syncIdentifier left
-                    if newObject.syncIdentifiers().count == 0 {
-                        newObject.setSyncStatus(.Synced)
-                    }
                     newObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                 }
             }
@@ -144,16 +128,6 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
                 
                 // Set SyncStatus to "Synced" for initial (old) object
                 if var oldObject = realm.objectForPrimaryKey(self, key: oldPrimaryKey) as? RealmJSONSerializable {
-                    
-                    // Update syncIdentifier
-                    if let syncIdentifier = serializationInfo?.syncOperation?.syncIdentifier {
-                        oldObject.removeSyncIdentifier(syncIdentifier)
-                    }
-                    
-                    // setSyncStatus only if there is no syncIdentifier left
-                    if oldObject.syncIdentifiers().count == 0 {
-                        oldObject.setSyncStatus(.Synced)
-                    }
                     oldObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                     
                     // Mark temp object deleted
@@ -162,16 +136,6 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
                 
                 // Set SyncStatus to "Synced" for new object
                 if let newObject = realm.objectForPrimaryKey(self, key: newPrimaryKey) as? RealmJSONSerializable {
-                    
-                    // Update syncIdentifier
-                    if let syncIdentifier = serializationInfo?.syncOperation?.syncIdentifier {
-                        newObject.removeSyncIdentifier(syncIdentifier)
-                    }
-                    
-                    // setSyncStatus only if there is no syncIdentifier left
-                    if newObject.syncIdentifiers().count == 0 {
-                        newObject.setSyncStatus(.Synced)
-                    }
                     newObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                 }
             }

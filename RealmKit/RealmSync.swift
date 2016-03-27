@@ -19,17 +19,12 @@ public struct SyncResult {
     public let error: NSError?
     public let userInfo: [String: AnyObject]
     
-    public let oldPrimaryKey: String?
-    public let newPrimaryKey: String?
-    
     public init(
         request: NSURLRequest!,
         response: NSHTTPURLResponse!,
         success: Bool,
         jsonResponse: AnyObject? = nil,
         realmObjectInfos: [RealmObjectInfo]? = nil,
-        oldPrimaryKey: String,
-        newPrimaryKey: String? = nil,
         error: NSError? = nil,
         userInfo: [String: AnyObject] = [String: AnyObject]()
         ) {
@@ -38,8 +33,6 @@ public struct SyncResult {
         self.success = success
         self.jsonResponse = jsonResponse
         self.realmObjectInfos = realmObjectInfos
-        self.oldPrimaryKey = oldPrimaryKey
-        self.newPrimaryKey = newPrimaryKey
         self.error = error
         self.userInfo = userInfo
     }
@@ -51,7 +44,6 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     
     var lastSyncedAt: NSDate? { get set }
     var syncStatus: String { get set }
-    var syncIdentifier: String? { get set }
 
     // MARK: - Methods
     
@@ -67,14 +59,12 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     static func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]) -> String?
     
     // MARK: Optional
-    
-    func addSyncIdentifier(syncIdentifier: String)
-    func removeSyncIdentifier(syncIdentifier: String)
-    func syncIdentifiers() -> [String]
 
     static func realmSyncWillSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm)
     static func realmSyncShouldSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool
     static func realmSyncDidSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm)
+    
+    
     
     static func realmSyncOperationDidSync(sender: RealmSyncOperation, syncResult: SyncResult!, inRealm realm: Realm)
 }
