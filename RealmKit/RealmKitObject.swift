@@ -203,6 +203,10 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         
     }
     
+    public class func realmFetchShouldSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) -> Bool {
+        return true
+    }
+    
     public class func realmFetchDidSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, fetchResult: FetchResult!, inRealm realm: Realm) {
         
     }

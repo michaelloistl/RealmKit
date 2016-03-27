@@ -81,6 +81,7 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
     // MARK: Optional
     
     static func realmFetchWillSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm)
+    static func realmFetchShouldSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) -> Bool
     static func realmFetchDidSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, fetchResult: FetchResult!, inRealm realm: Realm)
 }
 
@@ -157,43 +158,45 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                         } catch { }
                         
                         if let realm = realm {
-                            let serializationInfo = SerializationInfo(realm: realm, method: .GET, userInfo: fetchRequest.userInfo)
-                            
-                            // Will Serialize
-                            realmFetchWillSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm)
-                            
-                            // Array
-                            if let jsonArray = json as? NSArray {
-                                dispatch_group_enter(dispatchGroup)
+                            if realmFetchShouldSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm) {
+                                let serializationInfo = SerializationInfo(realm: realm, method: .GET, userInfo: fetchRequest.userInfo)
                                 
-                                realmObjectsWithJSONArray(jsonArray, serializationInfo: serializationInfo, completion: { (realmObjectInfos, error) -> Void in
-                                    
-                                    // Set fetchResult again  after serializing
-                                    fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, error: error)
-                                    
-                                    // Did Serialize
-                                    realmFetchDidSerializeJSON(json, fetchRequest: fetchRequest, fetchResult: fetchResult, inRealm: realm)
-                                    
-                                    dispatch_group_leave(dispatchGroup)
-                                })
-                            }
-                            
-                            // Dictionary
-                            if let jsonDictionary = json as? NSDictionary {
-                                dispatch_group_enter(dispatchGroup)
+                                // Will Serialize
+                                realmFetchWillSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm)
                                 
-                                realmObjectWithJSONDictionary(jsonDictionary, serializationInfo: serializationInfo, completion: { (realmObjectInfo, error) -> Void in
+                                // Array
+                                if let jsonArray = json as? NSArray {
+                                    dispatch_group_enter(dispatchGroup)
                                     
-                                    // Set fetchResult again  after serializing
-                                    if let realmObjectInfo = realmObjectInfo {
-                                        fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: [realmObjectInfo], error: error)
-                                    }
+                                    realmObjectsWithJSONArray(jsonArray, serializationInfo: serializationInfo, completion: { (realmObjectInfos, error) -> Void in
+                                        
+                                        // Set fetchResult again  after serializing
+                                        fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, error: error)
+                                        
+                                        // Did Serialize
+                                        realmFetchDidSerializeJSON(json, fetchRequest: fetchRequest, fetchResult: fetchResult, inRealm: realm)
+                                        
+                                        dispatch_group_leave(dispatchGroup)
+                                    })
+                                }
+                                
+                                // Dictionary
+                                if let jsonDictionary = json as? NSDictionary {
+                                    dispatch_group_enter(dispatchGroup)
                                     
-                                    // Did Serialize
-                                    realmFetchDidSerializeJSON(json, fetchRequest: fetchRequest, fetchResult: fetchResult, inRealm: realm)
-                                    
-                                    dispatch_group_leave(dispatchGroup)
-                                })
+                                    realmObjectWithJSONDictionary(jsonDictionary, serializationInfo: serializationInfo, completion: { (realmObjectInfo, error) -> Void in
+                                        
+                                        // Set fetchResult again  after serializing
+                                        if let realmObjectInfo = realmObjectInfo {
+                                            fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: [realmObjectInfo], error: error)
+                                        }
+                                        
+                                        // Did Serialize
+                                        realmFetchDidSerializeJSON(json, fetchRequest: fetchRequest, fetchResult: fetchResult, inRealm: realm)
+                                        
+                                        dispatch_group_leave(dispatchGroup)
+                                    })
+                                }
                             }
                         }
                         
