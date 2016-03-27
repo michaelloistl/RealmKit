@@ -143,7 +143,7 @@ public class RealmFetchOperation: NSOperation {
     
     public typealias BeforeFetchClosure = (completion: (beforeData: [String: AnyObject]?) -> Void) -> Void
     public typealias FetchClosure = (completion: (fetchResult: FetchResult) -> Void) -> NSURLSessionTask?
-    public typealias AfterFetchClosure = (beforeData: [String: AnyObject]?, completion: (afterData: [String: AnyObject]?) -> Void) -> Void
+    public typealias AfterFetchClosure = (beforeData: [String: AnyObject]?, fetchResult: FetchResult!, completion: (afterData: [String: AnyObject]?) -> Void) -> Void
     
     public let objectType: Object.Type
     public let beforeFetchClosure: BeforeFetchClosure
@@ -275,7 +275,7 @@ public class RealmFetchOperation: NSOperation {
 
                 if self.cancelled == false {
                     dispatch_group_enter(dispatchAfterFetchGroup)
-                    self.afterFetchClosure(beforeData: self.beforeData, completion: { (afterData) in
+                    self.afterFetchClosure(beforeData: self.beforeData, fetchResult: self.fetchResult, completion: { (afterData) in
                         self.afterData = afterData
 
                         dispatch_group_leave(dispatchAfterFetchGroup)
@@ -301,31 +301,3 @@ public class RealmFetchOperation: NSOperation {
         }
     }
 }
-
-
-
-
-//var realm = try? Realm()
-//
-//if success && self.cancelled == false {
-//    // TODO: There might be an issue when response is paged...
-//    
-//    if let orpandRealmObjectInfos = orpandRealmObjectInfos, fetchedRealmObjectInfos = fetchClosureResult?.realmObjectInfos {
-//        var deleteOrpandRealmObjectInfos = [RealmObjectInfo]()
-//        for orpandRealmObjectInfo in orpandRealmObjectInfos {
-//            if fetchedRealmObjectInfos.contains({ $0.primaryKey == orpandRealmObjectInfo.primaryKey }) == false {
-//                deleteOrpandRealmObjectInfos.append(orpandRealmObjectInfo)
-//            }
-//        }
-//        
-//        do {
-//            try realm?.write({ () -> Void in
-//                for realmObjectInfo in deleteOrpandRealmObjectInfos {
-//                    if let realmObject = realm?.objectForPrimaryKey(realmObjectInfo.type, key: realmObjectInfo.primaryKey) as? RealmKitObject {
-//                        realmObject.deletedAt = NSDate().timeIntervalSince1970
-//                    }
-//                }
-//            })
-//        } catch { }
-//    }
-//}
