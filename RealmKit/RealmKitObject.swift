@@ -54,7 +54,6 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     public dynamic var lastSyncedAt: NSDate?
     public dynamic var syncStatus: String = RealmSyncManager.SyncStatus.Synced.rawValue
-    public dynamic var syncIdentifier: String?
     
     // MARK: - Protocols
     
@@ -247,18 +246,6 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         print("# RealmKit: Please override realmSyncJSONResponseKey:userInfo: in \(self)")
         
         return nil
-    }
-    
-    public func addSyncIdentifier(syncIdentifier: String) {
-        
-    }
-    
-    public func removeSyncIdentifier(syncIdentifier: String) {
-        
-    }
-    
-    public func syncIdentifiers() -> [String] {
-        return syncIdentifier?.componentsSeparatedByString(",") ?? [String]()
     }
     
     public class func realmSyncWillSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) {
