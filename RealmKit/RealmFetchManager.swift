@@ -141,9 +141,9 @@ public class RealmFetchManager {
 
 public class RealmFetchOperation: NSOperation {
     
-    public typealias BeforeFetchClosure = (completion: (beforeData: [String: AnyObject]?) -> Void) -> Void
+    public typealias BeforeFetchClosure = (completion: (beforeData: [String: Any]?) -> Void) -> Void
     public typealias FetchClosure = (completion: (fetchResult: FetchResult) -> Void) -> NSURLSessionTask?
-    public typealias AfterFetchClosure = (beforeData: [String: AnyObject]?, fetchResult: FetchResult!, completion: (afterData: [String: AnyObject]?) -> Void) -> Void
+    public typealias AfterFetchClosure = (beforeData: [String: Any]?, fetchResult: FetchResult!, completion: (afterData: [String: Any]?) -> Void) -> Void
     
     public let objectType: Object.Type
     public let beforeFetchClosure: BeforeFetchClosure
@@ -151,9 +151,9 @@ public class RealmFetchOperation: NSOperation {
     public let afterFetchClosure: AfterFetchClosure
     public let identifier: String
     
-    var beforeData: [String: AnyObject]?
+    var beforeData: [String: Any]?
     var fetchResult: FetchResult?
-    var afterData: [String: AnyObject]?
+    var afterData: [String: Any]?
     
     public var sessionTask: NSURLSessionTask?
     
