@@ -135,6 +135,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
                     if newObject.syncIdentifiers().count == 0 {
                         newObject.setSyncStatus(.Synced)
                     }
+                    newObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                 }
             }
                 
@@ -153,6 +154,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
                     if oldObject.syncIdentifiers().count == 0 {
                         oldObject.setSyncStatus(.Synced)
                     }
+                    oldObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                     
                     // Mark temp object deleted
                     oldObject.deletedAt = NSDate().timeIntervalSince1970
@@ -170,6 +172,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
                     if newObject.syncIdentifiers().count == 0 {
                         newObject.setSyncStatus(.Synced)
                     }
+                    newObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                 }
             }
         }
@@ -227,7 +230,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     // MARK: RealmSyncable
     
-    public func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus) {
+    public func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo?) {
         if !invalidated {
             self.syncStatus = syncStatus.rawValue
         }

@@ -348,7 +348,7 @@ public class RealmSyncOperation: NSOperation {
                                             if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
                                                 do {
                                                     try realm.write({ () -> Void in
-                                                        realmObject.setSyncStatus(.Synced)
+                                                        realmObject.setSyncStatus(.Synced, serializationInfo: self.serializationInfo)
                                                     })
                                                 } catch { }
                                             }
@@ -364,7 +364,7 @@ public class RealmSyncOperation: NSOperation {
                             if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
                                 do {
                                     try realm.write({ () -> Void in
-                                        realmObject.setSyncStatus(.Synced)
+                                        realmObject.setSyncStatus(.Synced, serializationInfo: self.serializationInfo)
                                     })
                                 } catch { }
                             }

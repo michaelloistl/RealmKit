@@ -57,7 +57,7 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     
     // MARK: Required
     
-    func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus)
+    func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo?)
     
     func realmSyncOperations() -> [RealmSyncOperation]
     func realmSyncMethod() -> RealmKit.Method!
