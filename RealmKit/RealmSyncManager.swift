@@ -263,7 +263,7 @@ public class RealmSyncOperation: NSOperation {
                 
                 self.sessionTask = syncType.requestWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, jsonResponse, error) -> Void in
                     
-                    self.syncResult = SyncResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: nil, error: error, userInfo: self.userInfo)
+                    self.syncResult = SyncResult(request: request, response: response, success: success, jsonResponse: jsonResponse, oldPrimaryKey: self.primaryKey, error: error, userInfo: self.userInfo)
                     
                     dispatch_group_leave(dispatchSessionGroup)
                 })
@@ -322,7 +322,7 @@ public class RealmSyncOperation: NSOperation {
                                             realmObjectInfos = [realmObjectInfo]
                                         }
                                         
-                                        self.syncResult = SyncResult(request: self.syncResult?.request, response: self.syncResult?.response, success: self.syncResult?.success ?? false, jsonResponse: self.syncResult?.jsonResponse, realmObjectInfos: realmObjectInfos, error: self.syncResult?.error, userInfo: self.userInfo)
+                                        self.syncResult = SyncResult(request: self.syncResult?.request, response: self.syncResult?.response, success: self.syncResult?.success ?? false, jsonResponse: self.syncResult?.jsonResponse, realmObjectInfos: realmObjectInfos, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey, error: self.syncResult?.error, userInfo: self.userInfo)
                                         
                                         self.serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey, syncOperation: self)
 

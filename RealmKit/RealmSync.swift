@@ -16,6 +16,8 @@ public struct SyncResult {
     public let success: Bool
     public let jsonResponse: AnyObject?
     public let realmObjectInfos: [RealmObjectInfo]?
+    public let oldPrimaryKey: String?
+    public let newPrimaryKey: String?
     public let error: NSError?
     public let userInfo: [String: AnyObject]
     
@@ -25,6 +27,8 @@ public struct SyncResult {
         success: Bool,
         jsonResponse: AnyObject? = nil,
         realmObjectInfos: [RealmObjectInfo]? = nil,
+        oldPrimaryKey: String?,
+        newPrimaryKey: String? = nil,
         error: NSError? = nil,
         userInfo: [String: AnyObject] = [String: AnyObject]()
         ) {
@@ -33,6 +37,8 @@ public struct SyncResult {
         self.success = success
         self.jsonResponse = jsonResponse
         self.realmObjectInfos = realmObjectInfos
+        self.oldPrimaryKey = oldPrimaryKey
+        self.newPrimaryKey = newPrimaryKey
         self.error = error
         self.userInfo = userInfo
     }
