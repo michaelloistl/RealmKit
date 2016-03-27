@@ -141,15 +141,19 @@ public class RealmFetchManager {
 
 public class RealmFetchOperation: NSOperation {
     
-    public typealias OrpandObjectsClosure = (completion: OrpandObjectsCompletionBlock) -> Void
+    public typealias BeforeFetchClosure = (completion: (beforeData: [String: AnyObject]?) -> Void) -> Void
     public typealias FetchClosure = (completion: (fetchResult: FetchResult) -> Void) -> NSURLSessionTask?
-    
-    public typealias OrpandObjectsCompletionBlock = (realmObjectInfos: [RealmObjectInfo]?) -> Void
+    public typealias AfterFetchClosure = (beforeData: [String: AnyObject]?, completion: (afterData: [String: AnyObject]?) -> Void) -> Void
     
     public let objectType: Object.Type
-    public let orpandObjectsClosure: OrpandObjectsClosure
+    public let beforeFetchClosure: BeforeFetchClosure
     public let fetchClosure: FetchClosure
+    public let afterFetchClosure: AfterFetchClosure
     public let identifier: String
+    
+    var beforeData: [String: AnyObject]?
+    var fetchResult: FetchResult?
+    var afterData: [String: AnyObject]?
     
     public var sessionTask: NSURLSessionTask?
     
@@ -187,10 +191,11 @@ public class RealmFetchOperation: NSOperation {
     
     // Initializers
     
-    public init<T: Object>(type: T.Type, orpandObjectsClosure: OrpandObjectsClosure, fetchClosure: FetchClosure, identifier: String) {
+    public init<T: Object>(type: T.Type, beforeFetchClosure: BeforeFetchClosure, fetchClosure: FetchClosure, afterFetchClosure: AfterFetchClosure, identifier: String) {
         self.objectType = type
-        self.orpandObjectsClosure = orpandObjectsClosure
+        self.beforeFetchClosure = beforeFetchClosure
         self.fetchClosure = fetchClosure
+        self.afterFetchClosure = afterFetchClosure
         self.identifier = identifier
         
         super.init()
@@ -220,31 +225,31 @@ public class RealmFetchOperation: NSOperation {
             NSNotificationCenter.defaultCenter().postNotificationName(RealmFetchOperationDidStartNotification, object: self)
         })
         
-        let dispatchOrpandObjectsGroup = dispatch_group_create()
+        let dispatchBeforeFetchGroup = dispatch_group_create()
         let dispatchFetchObjectsGroup = dispatch_group_create()
-        
-        var orpandRealmObjectInfos: [RealmObjectInfo]?
-        var fetchClosureResult: FetchResult?
+        let dispatchAfterFetchGroup = dispatch_group_create()
         
         if self.cancelled == false {
             
-            // Orpand Objects
-            dispatch_group_enter(dispatchOrpandObjectsGroup)
+            // Before Fetch
+            dispatch_group_enter(dispatchBeforeFetchGroup)
             dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), { () -> Void in
                 
-                dispatch_group_enter(dispatchOrpandObjectsGroup)
-                self.orpandObjectsClosure(completion: { (realmObjectInfos) -> Void in
-                    orpandRealmObjectInfos = realmObjectInfos
-                    
-                    dispatch_group_leave(dispatchOrpandObjectsGroup)
-                })
-                
-                dispatch_group_leave(dispatchOrpandObjectsGroup)
+                if self.cancelled == false {
+                    dispatch_group_enter(dispatchBeforeFetchGroup)
+                    self.beforeFetchClosure(completion: { (beforeData) in
+                        self.beforeData = beforeData
+
+                        dispatch_group_leave(dispatchBeforeFetchGroup)
+                    })
+                }
+
+                dispatch_group_leave(dispatchBeforeFetchGroup)
             })
 
-            // Fetch Objects
+            // Fetch
             dispatch_group_enter(dispatchFetchObjectsGroup)
-            dispatch_group_notify(dispatchOrpandObjectsGroup, dispatch_get_main_queue(), {
+            dispatch_group_notify(dispatchBeforeFetchGroup, dispatch_get_main_queue(), {
                 
                 dispatch_group_enter(dispatchFetchObjectsGroup)
                 dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), { () -> Void in
@@ -252,7 +257,7 @@ public class RealmFetchOperation: NSOperation {
                     if self.cancelled == false {
                         dispatch_group_enter(dispatchFetchObjectsGroup)
                         self.sessionTask = self.fetchClosure(completion: { (fetchResult) in
-                            fetchClosureResult = fetchResult
+                            self.fetchResult = fetchResult
                             
                             dispatch_group_leave(dispatchFetchObjectsGroup)
                         })
@@ -263,53 +268,64 @@ public class RealmFetchOperation: NSOperation {
                 
                 dispatch_group_leave(dispatchFetchObjectsGroup)
             })
+            
+            // After Fetch
+            dispatch_group_enter(dispatchAfterFetchGroup)
+            dispatch_group_notify(dispatchFetchObjectsGroup, dispatch_get_main_queue(), {
+
+                if self.cancelled == false {
+                    dispatch_group_enter(dispatchAfterFetchGroup)
+                    self.afterFetchClosure(beforeData: self.beforeData, completion: { (afterData) in
+                        self.afterData = afterData
+
+                        dispatch_group_leave(dispatchAfterFetchGroup)
+                    })
+                }
+                
+                dispatch_group_leave(dispatchAfterFetchGroup)
+            })
         }
         
-        dispatch_group_notify(dispatchFetchObjectsGroup, dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), {
-            let success = fetchClosureResult?.response?.statusCode >= 200 && fetchClosureResult?.response?.statusCode < 300
-            
-            var realm: Realm?
-            
-            do {
-                realm = try Realm()
-            } catch { }
-            
-            if success && self.cancelled == false {
-                // TODO: There might be an issue when response is paged...
-                
-                if let orpandRealmObjectInfos = orpandRealmObjectInfos, fetchedRealmObjectInfos = fetchClosureResult?.realmObjectInfos {
-                    var deleteOrpandRealmObjectInfos = [RealmObjectInfo]()
-                    for orpandRealmObjectInfo in orpandRealmObjectInfos {
-                        if fetchedRealmObjectInfos.contains({ $0.primaryKey == orpandRealmObjectInfo.primaryKey }) == false {
-                            deleteOrpandRealmObjectInfos.append(orpandRealmObjectInfo)
-                        }
-                    }
-                    
-                    do {
-                        try realm?.write({ () -> Void in
-                            for realmObjectInfo in deleteOrpandRealmObjectInfos {
-                                if let realmObject = realm?.objectForPrimaryKey(realmObjectInfo.type, key: realmObjectInfo.primaryKey) as? RealmKitObject {
-                                    realmObject.deletedAt = NSDate().timeIntervalSince1970
-                                }
-                            }
-                        })
-                    } catch { }
+        dispatch_group_notify(dispatchAfterFetchGroup, dispatch_get_main_queue()) {
+            if self.cancelled == false {
+                if let realmKitType = self.objectType as? RealmKitObject.Type {
+                    realmKitType.handleRequest(self.fetchResult?.request, response: self.fetchResult?.response, jsonResponse: self.fetchResult?.jsonResponse, error: self.fetchResult?.error, fetchOperation: self, syncOperation: nil, inRealm: nil)
                 }
+                
+                NSNotificationCenter.defaultCenter().postNotificationName(RealmFetchOperationDidFinishNotification, object: self)
             }
             
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                if self.cancelled == false {
-                    if let realmKitType = self.objectType as? RealmKitObject.Type {
-                        realmKitType.handleRequest(fetchClosureResult?.request, response: fetchClosureResult?.response, jsonResponse: fetchClosureResult?.jsonResponse, error: fetchClosureResult?.error, fetchOperation: self, syncOperation: nil, inRealm: nil)
-                    }
-                    
-                    NSNotificationCenter.defaultCenter().postNotificationName(RealmFetchOperationDidFinishNotification, object: self)
-                }
-                
-                // Set NSOperation status
-                self.executing = false
-                self.finished = true
-            })
-        })
+            // Set NSOperation status
+            self.executing = false
+            self.finished = true
+        }
     }
 }
+
+
+
+
+//var realm = try? Realm()
+//
+//if success && self.cancelled == false {
+//    // TODO: There might be an issue when response is paged...
+//    
+//    if let orpandRealmObjectInfos = orpandRealmObjectInfos, fetchedRealmObjectInfos = fetchClosureResult?.realmObjectInfos {
+//        var deleteOrpandRealmObjectInfos = [RealmObjectInfo]()
+//        for orpandRealmObjectInfo in orpandRealmObjectInfos {
+//            if fetchedRealmObjectInfos.contains({ $0.primaryKey == orpandRealmObjectInfo.primaryKey }) == false {
+//                deleteOrpandRealmObjectInfos.append(orpandRealmObjectInfo)
+//            }
+//        }
+//        
+//        do {
+//            try realm?.write({ () -> Void in
+//                for realmObjectInfo in deleteOrpandRealmObjectInfos {
+//                    if let realmObject = realm?.objectForPrimaryKey(realmObjectInfo.type, key: realmObjectInfo.primaryKey) as? RealmKitObject {
+//                        realmObject.deletedAt = NSDate().timeIntervalSince1970
+//                    }
+//                }
+//            })
+//        } catch { }
+//    }
+//}
