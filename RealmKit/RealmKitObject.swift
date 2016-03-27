@@ -295,6 +295,9 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     }
     
     public class func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?) {
+    public class func realmSyncShouldSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool {
+        return true
+    }
         
     }
 }

@@ -315,6 +315,8 @@ public class RealmSyncOperation: NSOperation {
                             if let syncType = self.objectType as? RealmSyncable.Type, serializeType = self.objectType as? RealmJSONSerializable.Type {
                                 
                                 serializeType.realmObjectWithJSONDictionary(objectDictionary, serializationInfo: serializationInfo, completion: { (realmObjectInfo, error) -> Void in
+                                // Should serialize?
+                                if syncType.realmSyncShouldSerializeJSON(objectDictionary, serializationInfo: serializationInfo, inRealm: realm) {
                                     
                                     // Update Realm
                                     realm.refresh()
@@ -353,6 +355,7 @@ public class RealmSyncOperation: NSOperation {
                                     
                                     dispatch_group_leave(dispatchCompletionGroup)
                                 })
+                                }
                             }
                         } else {
                             if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {

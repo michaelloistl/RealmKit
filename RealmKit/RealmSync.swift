@@ -37,4 +37,5 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     func syncIdentifiers() -> [String]
 
     static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?)
+    static func realmSyncShouldSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool
 }
