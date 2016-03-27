@@ -124,12 +124,15 @@ public class RealmSyncManager {
             if let operation = operation as? RealmSyncOperation {
                 if NSStringFromClass(operation.objectType) == NSStringFromClass(syncOperation.objectType) {
                     if operation.primaryKey == syncOperation.primaryKey {
-                        if operation.path == syncOperation.path {
-                            if operation.method.rawValue == syncOperation.method.rawValue {
-                                isQueued = true
-                                break
-                            }
-                        }
+                        isQueued = true
+                        break
+                        
+
+// Only checking for type and primary key in order to only allow one sync operation per object instance
+//                        if operation.path == syncOperation.path {
+//                            if operation.method.rawValue == syncOperation.method.rawValue {
+//                            }
+//                        }
                     }
                 }
             }
