@@ -142,8 +142,6 @@ public class RealmSyncManager {
     }
 }
 
-
-
 // MARK: - RealmSyncObjectInfo
 
 public class RealmSyncObjectInfo: NSObject {

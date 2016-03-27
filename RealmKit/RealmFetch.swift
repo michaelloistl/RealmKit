@@ -117,7 +117,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         }
     }
     
-    public static func fetch(fetchRequest: FetchRequest!, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
+    public static func fetch(fetchRequest: FetchRequest!, serialize: Bool = true, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
         let dispatchGroup = dispatch_group_create()
     
         var sessionTask: NSURLSessionTask?
@@ -158,7 +158,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                         } catch { }
                         
                         if let realm = realm {
-                            if realmFetchShouldSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm) {
+                            if serialize && realmFetchShouldSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm) {
                                 let serializationInfo = SerializationInfo(realm: realm, method: .GET, userInfo: fetchRequest.userInfo)
                                 
                                 // Will Serialize
