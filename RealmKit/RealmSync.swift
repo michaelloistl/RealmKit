@@ -9,6 +9,42 @@
 import Foundation
 import RealmSwift
 
+public struct SyncResult {
+    
+    public let request: NSURLRequest!
+    public let response: NSHTTPURLResponse!
+    public let success: Bool
+    public let jsonResponse: AnyObject?
+    public let realmObjectInfos: [RealmObjectInfo]?
+    public let error: NSError?
+    public let userInfo: [String: AnyObject]
+    
+    public let oldPrimaryKey: String?
+    public let newPrimaryKey: String?
+    
+    public init(
+        request: NSURLRequest!,
+        response: NSHTTPURLResponse!,
+        success: Bool,
+        jsonResponse: AnyObject? = nil,
+        realmObjectInfos: [RealmObjectInfo]? = nil,
+        oldPrimaryKey: String,
+        newPrimaryKey: String? = nil,
+        error: NSError? = nil,
+        userInfo: [String: AnyObject] = [String: AnyObject]()
+        ) {
+        self.request = request
+        self.response = response
+        self.success = success
+        self.jsonResponse = jsonResponse
+        self.realmObjectInfos = realmObjectInfos
+        self.oldPrimaryKey = oldPrimaryKey
+        self.newPrimaryKey = newPrimaryKey
+        self.error = error
+        self.userInfo = userInfo
+    }
+}
+
 public protocol RealmSyncable: RealmKitObjectProtocol {
     
     // MARK: - Properties
@@ -36,6 +72,9 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     func removeSyncIdentifier(syncIdentifier: String)
     func syncIdentifiers() -> [String]
 
-    static func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?)
+    static func realmSyncWillSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm)
     static func realmSyncShouldSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool
+    static func realmSyncDidSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm)
+    
+    static func realmSyncOperationDidSync(sender: RealmSyncOperation, syncResult: SyncResult!, inRealm realm: Realm)
 }

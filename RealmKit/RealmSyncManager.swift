@@ -172,6 +172,8 @@ public class RealmSyncOperation: NSOperation {
     
     public var syncIdentifier: String?
     
+    var syncResult: SyncResult?
+    
     private var _executing: Bool = false
     override public var executing: Bool {
         get {
@@ -251,12 +253,6 @@ public class RealmSyncOperation: NSOperation {
         
         let dispatchSessionGroup = dispatch_group_create()
         
-        var completionSuccess = false
-        var completionRequest: NSURLRequest!
-        var completionResponse: NSHTTPURLResponse!
-        var completionJSONResponse: AnyObject?
-        var completionError: NSError?
-        
         // Start asynchronous API
         dispatch_group_enter(dispatchSessionGroup)
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
@@ -267,11 +263,7 @@ public class RealmSyncOperation: NSOperation {
                 
                 self.sessionTask = syncType.requestWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, jsonResponse, error) -> Void in
                     
-                    completionSuccess = success
-                    completionRequest = request
-                    completionResponse = response
-                    completionJSONResponse = jsonResponse
-                    completionError = error
+                    self.syncResult = SyncResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: nil, oldPrimaryKey: self.primaryKey, error: error, userInfo: self.userInfo)
                     
                     dispatch_group_leave(dispatchSessionGroup)
                 })
@@ -285,7 +277,7 @@ public class RealmSyncOperation: NSOperation {
             
             // Debug logging
             if RealmKit.sharedInstance.debugLogs {
-                print("PATH: \(self.path) PARAMETERS: \(self.parameters) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(completionResponse?.statusCode) RESPONSE: \(completionJSONResponse)")
+                print("PATH: \(self.path) PARAMETERS: \(self.parameters) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(self.syncResult?.response?.statusCode) RESPONSE: \(self.syncResult?.jsonResponse)")
             }
 
             let dispatchCompletionGroup = dispatch_group_create()
@@ -305,56 +297,67 @@ public class RealmSyncOperation: NSOperation {
                 
                 
                 if let realm = realm {
-                    if completionSuccess {
+                    if self.syncResult?.success == true {
                         let serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, syncOperation: self)
                         
-                        if let objectDictionary = self.objectDictionaryFromJSONResponse(completionJSONResponse, serializationInfo: serializationInfo) {
+                        if let objectDictionary = self.objectDictionaryFromJSONResponse(self.syncResult?.jsonResponse, serializationInfo: serializationInfo) {
                             dispatch_group_enter(dispatchCompletionGroup)
                             
                             // Create new Object with ObjectDictionary
                             if let syncType = self.objectType as? RealmSyncable.Type, serializeType = self.objectType as? RealmJSONSerializable.Type {
                                 
-                                serializeType.realmObjectWithJSONDictionary(objectDictionary, serializationInfo: serializationInfo, completion: { (realmObjectInfo, error) -> Void in
                                 // Should serialize?
                                 if syncType.realmSyncShouldSerializeJSON(objectDictionary, serializationInfo: serializationInfo, inRealm: realm) {
                                     
-                                    // Update Realm
-                                    realm.refresh()
+                                    // Will Serialize
+                                    syncType.realmSyncWillSerializeJSON(objectDictionary, serializationInfo: serializationInfo, inRealm: realm)
                                     
-                                    // realmSyncOperationDidSync to process client side
-                                    syncType.realmSyncOperationDidSync(self, inRealm: realm, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey)
-                                    
-                                    // Delete temp object
-                                    if let newPrimaryKey = realmObjectInfo?.primaryKey {
-                                        if self.primaryKey != newPrimaryKey {
-                                            if let tempRealmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) {
-                                                let realmSyncObjectInfo = RealmSyncObjectInfo(type: self.objectType, oldPrimaryKey: self.primaryKey, newPrimaryKey: newPrimaryKey)
-                                                
-                                                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                                    NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
-                                                })
-                                                
+                                    serializeType.realmObjectWithJSONDictionary(objectDictionary, serializationInfo: serializationInfo, completion: { (realmObjectInfo, error) -> Void in
+                                        
+                                        // Update Realm
+                                        realm.refresh()
+                                        
+                                        var realmObjectInfos = [RealmObjectInfo]()
+                                        if let realmObjectInfo = realmObjectInfo {
+                                            realmObjectInfos = [realmObjectInfo]
+                                        }
+                                        
+                                        self.syncResult = SyncResult(request: self.syncResult?.request, response: self.syncResult?.response, success: self.syncResult?.success ?? false, jsonResponse: self.syncResult?.jsonResponse, realmObjectInfos: realmObjectInfos, oldPrimaryKey: self.primaryKey, newPrimaryKey: realmObjectInfo?.primaryKey, error: self.syncResult?.error, userInfo: self.userInfo)
+                                        
+                                        // Did Serialize
+                                        syncType.realmSyncDidSerializeJSON(objectDictionary, serializationInfo: serializationInfo, syncResult: self.syncResult, inRealm: realm)
+                                        
+                                        // Delete temp object
+                                        if let newPrimaryKey = realmObjectInfo?.primaryKey {
+                                            if self.primaryKey != newPrimaryKey {
+                                                if let tempRealmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) {
+                                                    let realmSyncObjectInfo = RealmSyncObjectInfo(type: self.objectType, oldPrimaryKey: self.primaryKey, newPrimaryKey: newPrimaryKey)
+                                                    
+                                                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                                        NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
+                                                    })
+                                                    
+                                                    do {
+                                                        try realm.write({ () -> Void in
+                                                            realm.delete(tempRealmObject)
+                                                        })
+                                                    } catch { }
+                                                }
+                                            }
+                                        } else {
+                                            if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
                                                 do {
                                                     try realm.write({ () -> Void in
-                                                        realm.delete(tempRealmObject)
+                                                        realmObject.setSyncStatus(.Synced)
                                                     })
                                                 } catch { }
                                             }
                                         }
-                                    } else {
-                                        if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
-                                            do {
-                                                try realm.write({ () -> Void in
-                                                    realmObject.setSyncStatus(.Synced)
-                                                })
-                                            } catch { }
-                                        }
-                                    }
-                                    
-                                    // Update syncStatus & syncIdentifier
-                                    
-                                    dispatch_group_leave(dispatchCompletionGroup)
-                                })
+                                        
+                                        // Update syncStatus & syncIdentifier
+                                        
+                                        dispatch_group_leave(dispatchCompletionGroup)
+                                    })
                                 }
                             }
                         } else {
@@ -368,9 +371,13 @@ public class RealmSyncOperation: NSOperation {
                         }
                     }
                     
-                    // Handle Request
-                    if let objectType = self.objectType as? RealmSyncable.Type {
-                        objectType.handleRequest(completionRequest, response: completionResponse, jsonResponse: completionJSONResponse, error: completionError, fetchOperation: nil, syncOperation: self, inRealm: realm)
+                    if let syncType = self.objectType as? RealmSyncable.Type {
+                        
+                        // Did Sync
+                        syncType.realmSyncOperationDidSync(self, syncResult: self.syncResult, inRealm: realm)
+                        
+                        // Handle Request
+                        syncType.handleRequest(self.syncResult?.request, response: self.syncResult?.response, jsonResponse: self.syncResult?.jsonResponse, error: self.syncResult?.error, fetchOperation: nil, syncOperation: self, inRealm: realm)
                     }
                 }
                 

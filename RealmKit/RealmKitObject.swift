@@ -294,10 +294,19 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return syncIdentifier?.componentsSeparatedByString(",") ?? [String]()
     }
     
-    public class func realmSyncOperationDidSync(sender: RealmSyncOperation, inRealm realm: Realm, oldPrimaryKey: String?, newPrimaryKey: String?) {
+    public class func realmSyncWillSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) {
+        
+    }
+    
     public class func realmSyncShouldSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool {
         return true
     }
+    
+    public class func realmSyncDidSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm) {
+        
+    }
+    
+    public class func realmSyncOperationDidSync(sender: RealmSyncOperation, syncResult: SyncResult!, inRealm realm: Realm) {
         
     }
 }
