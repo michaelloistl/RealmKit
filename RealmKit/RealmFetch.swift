@@ -130,7 +130,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
             sessionTask = requestWithBaseURL(fetchRequest.baseURL, path: fetchRequest.path, parameters: fetchRequest.parameters, method: .GET) { (success, request, response, jsonResponse, error) -> Void in
                 
                 // Set fetchResult before serializing
-                fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: nil, error: error)
+                fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: nil, error: error, userInfo: fetchRequest.userInfo)
                 
                 var json: AnyObject?
                 
@@ -171,7 +171,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                                     realmObjectsWithJSONArray(jsonArray, serializationInfo: serializationInfo, completion: { (realmObjectInfos, error) -> Void in
                                         
                                         // Set fetchResult again  after serializing
-                                        fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, error: error)
+                                        fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: realmObjectInfos, error: error, userInfo: fetchRequest.userInfo)
                                         
                                         // Did Serialize
                                         realmFetchDidSerializeJSON(json, fetchRequest: fetchRequest, fetchResult: fetchResult, inRealm: realm)
@@ -188,7 +188,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                                         
                                         // Set fetchResult again  after serializing
                                         if let realmObjectInfo = realmObjectInfo {
-                                            fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: [realmObjectInfo], error: error)
+                                            fetchResult = FetchResult(request: request, response: response, success: success, jsonResponse: jsonResponse, realmObjectInfos: [realmObjectInfo], error: error, userInfo: fetchRequest.userInfo)
                                         }
                                         
                                         // Did Serialize
