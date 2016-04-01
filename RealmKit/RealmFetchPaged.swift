@@ -9,8 +9,7 @@
 import Foundation
 import RealmSwift
 
-public typealias RealmFetchPagedProgressBlock = (realmFetchPaged: RealmFetchPaged) -> Void
-public typealias RealmFetchPagedCompletionBlock = (realmFetchPaged: RealmFetchPaged!) -> Void
+public typealias RealmFetchPagedCompletionBlock = (realmFetchPaged: RealmFetchPaged!, completed: Bool) -> Void
 
 public struct PageInfo {
     
@@ -66,7 +65,7 @@ public class RealmFetchPaged {
             var requestStarted = false
             if let pageInfo = pageInfo {
                 if fetchResult?.success == true && (pageLimit == 0 || pageInfo.currentPage < pageLimit) && pageInfo.currentPage < pageInfo.totalPages {
-                    progress(realmFetchPaged: self)
+                    completion(realmFetchPaged: self, completed: false)
                     
                     startRequest()
                     requestStarted = true
@@ -74,13 +73,11 @@ public class RealmFetchPaged {
             }
             
             if !requestStarted {
-                progress(realmFetchPaged: self)
-                completion(realmFetchPaged: self)
+                completion(realmFetchPaged: self, completed: true)
             }
         }
     }
     
-    var progress: RealmFetchPagedProgressBlock
     var completion: RealmFetchPagedCompletionBlock
     
     public var fetchResult: FetchResult?
@@ -92,14 +89,13 @@ public class RealmFetchPaged {
     
     // MARK: - Initializers
     
-    public required init(type: Object.Type, fetchRequest: FetchRequest, pageType: PageInfo.PageType, from: NSTimeInterval? = nil, lastSyncedFallback: NSTimeInterval = 0, progress: RealmFetchPagedProgressBlock, completion: RealmFetchPagedCompletionBlock) {
+    public required init(type: Object.Type, fetchRequest: FetchRequest, pageType: PageInfo.PageType, from: NSTimeInterval? = nil, lastSyncedFallback: NSTimeInterval = 0, completion: RealmFetchPagedCompletionBlock) {
         self.type = type
         self.fetchRequest = fetchRequest
         self.pageType = pageType
         self.from = from
         self.lastSyncedFallback = lastSyncedFallback
         
-        self.progress = progress
         self.completion = completion
     }
     
@@ -158,8 +154,7 @@ public class RealmFetchPaged {
         return nil
     }
     
-    public func startRequestWithProgress(progress: RealmFetchPagedProgressBlock, completion: RealmFetchPagedCompletionBlock) -> NSURLSessionTask? {
-        self.progress = progress
+    public func startRequestWithProgress(completion: RealmFetchPagedCompletionBlock) -> NSURLSessionTask? {
         self.completion = completion
         
         return startRequest()

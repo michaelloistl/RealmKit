@@ -101,19 +101,16 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
         return nil
     }
     
-    public static func fetchPaged(pageType: PageInfo.PageType, pageLimit: Int = 1, from: NSTimeInterval? = nil, userInfo: [String: AnyObject] = [String: AnyObject](), progress: RealmFetchPagedProgressBlock, completion: RealmFetchPagedCompletionBlock) {
+    public static func fetchPaged(pageType: PageInfo.PageType, pageLimit: Int = 1, from: NSTimeInterval? = nil, userInfo: [String: AnyObject] = [String: AnyObject](), completion: RealmFetchPagedCompletionBlock) {
         if let fetchRequest = fetchRequestWithId(nil, userInfo: userInfo), type = self as? Object.Type {
-            let realmFetchPaged = RealmFetchPaged(type: type, fetchRequest: fetchRequest, pageType: pageType, from: from, progress: { (realmFetchPaged) in
-                
-                progress(realmFetchPaged: realmFetchPaged)
-                }, completion: { (realmFetchPaged) in
-                    completion(realmFetchPaged: realmFetchPaged)
+            let realmFetchPaged = RealmFetchPaged(type: type, fetchRequest: fetchRequest, pageType: pageType, from: from, completion: { (realmFetchPaged, completed) in
+                completion(realmFetchPaged: realmFetchPaged, completed: completed)
             })
             
             realmFetchPaged.pageLimit = pageLimit
             realmFetchPaged.startRequest()
         } else {
-            completion(realmFetchPaged: nil)
+            completion(realmFetchPaged: nil, completed: true)
         }
     }
     
