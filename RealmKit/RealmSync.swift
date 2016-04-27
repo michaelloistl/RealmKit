@@ -9,6 +9,8 @@
 import Foundation
 import RealmSwift
 
+public typealias RealmSyncCompletionBlock = (syncResult: SyncResult!) -> Void
+
 public struct SyncResult {
     
     public let request: NSURLRequest!
@@ -27,7 +29,7 @@ public struct SyncResult {
         success: Bool,
         jsonResponse: AnyObject? = nil,
         realmObjectInfos: [RealmObjectInfo]? = nil,
-        oldPrimaryKey: String?,
+        oldPrimaryKey: String? = nil,
         newPrimaryKey: String? = nil,
         error: NSError? = nil,
         userInfo: [String: AnyObject] = [String: AnyObject]()
@@ -65,12 +67,11 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     static func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]) -> String?
     
     // MARK: Optional
+    
+    static func realmSyncOperation(sender: RealmSyncOperation, willSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm)
+    static func realmSyncOperation(sender: RealmSyncOperation, shouldSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool
+    static func realmSyncOperation(sender: RealmSyncOperation, didSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm)
+    
+    static func realmSyncOperation(sender: RealmSyncOperation, didSync syncResult: SyncResult!, inRealm realm: Realm)
 
-    static func realmSyncWillSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm)
-    static func realmSyncShouldSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool
-    static func realmSyncDidSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm)
-    
-    
-    
-    static func realmSyncOperationDidSync(sender: RealmSyncOperation, syncResult: SyncResult!, inRealm realm: Realm)
 }

@@ -71,7 +71,6 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
             "server_deletedAt": 0,
             
             "syncStatus": RealmSyncManager.SyncStatus.Synced.rawValue,
-            "syncIdentifier": ""
         ]
     }
     
@@ -173,16 +172,24 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     // MARK: RealmFetchPagable
     
-    public class func pagingParametersForRealmFetchPaged(realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]? {
-        print("# RealmKit: Please override pagingParametersForRealmFetchPaged: in \(self)")
+    public class func fetchPagingParametersForRealmFetchPaged(realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]? {
+        print("# RealmKit: Please override fetchPagingParametersForRealmFetchPaged: in \(self)")
         
         return nil
     }
     
-    public class func realmFetchPageInfoFromResponse(response: NSHTTPURLResponse?, jsonResponse: AnyObject?) -> PageInfo? {
-        print("# RealmKit: Please override realmFetchPageInfoFromResponse:jsonResponse: in \(self)")
+    public class func fetchPageInfoFromFetchResult(fetchResult: FetchResult?) -> PageInfo? {
+        print("# RealmKit: Please override fetchPageInfoFromFetchResult: in \(self)")
         
         return nil
+    }
+    
+    public class func fetchPagedDidProcess(realmFetchPaged: RealmFetchPaged) {
+        
+    }
+    
+    public class func fetchPagedDidComplete(realmFetchPaged: RealmFetchPaged) {
+        
     }
     
     // MARK: RealmSyncable
@@ -242,19 +249,19 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return nil
     }
     
-    public class func realmSyncWillSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) {
+    public class func realmSyncOperation(sender: RealmSyncOperation, willSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) {
         
     }
     
-    public class func realmSyncShouldSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool {
+    public class func realmSyncOperation(sender: RealmSyncOperation, shouldSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool {
         return true
     }
     
-    public class func realmSyncDidSerializeJSON(json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm) {
+    public class func realmSyncOperation(sender: RealmSyncOperation, didSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm) {
         
     }
     
-    public class func realmSyncOperationDidSync(sender: RealmSyncOperation, syncResult: SyncResult!, inRealm realm: Realm) {
+    public class func realmSyncOperation(sender: RealmSyncOperation, didSync syncResult: SyncResult!, inRealm realm: Realm) {
         
     }
 }

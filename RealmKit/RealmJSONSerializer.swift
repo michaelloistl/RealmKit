@@ -22,6 +22,8 @@ public struct SerializationInfo {
     public let method: RealmKit.Method?
     public var userInfo: [String: AnyObject]
     
+    public var json: [String: AnyObject]?
+    
     public let oldPrimaryKey: String?
     public var newPrimaryKey: String?
     
@@ -187,6 +189,7 @@ public extension RealmJSONSerializable  {
         // Object key -> JSON keyPath
         if let mappingDictionary = JSONKeyPathsByPropertyKey(serializationInfo) {
             var keyValueDictionary = [String: AnyObject]()
+            var serializationInfo = serializationInfo
             
             for (key, keyPath) in mappingDictionary {
                 if let jsonValue: AnyObject = dictionary.valueForKeyPath(keyPath) {
@@ -203,6 +206,7 @@ public extension RealmJSONSerializable  {
                     } else {
                         
                         // ValueTransformer
+                        serializationInfo.json = dictionary as? [String: AnyObject]
                         if let valueTransformer = JSONTransformerForKey(key, serializationInfo: serializationInfo) {
                             if let value: AnyObject = valueTransformer.transformedValue(jsonValue) {
                                 keyValueDictionary[key] = value
@@ -227,6 +231,9 @@ public extension RealmJSONSerializable  {
                     keyValueDictionary["lastSyncedAt"] = NSDate()
                 }
             }
+            
+//            NSLog("__realmObjectWithType ... id: \(keyValueDictionary["id"]) participants: \(keyValueDictionary["participants"])")
+//            NSLog("__realmObjectWithType ... keyValueDictionary: \(keyValueDictionary)")
             
             if let primaryKey = (type as Object.Type).primaryKey(), primaryKeyValue = keyValueDictionary[primaryKey] as? String {
                 
@@ -336,7 +343,6 @@ public extension RealmValueTransformer {
         let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, serializationInfo: serializationInfo)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
-            
             if let dictionaryArray = value as? [NSDictionary] {
                 let list = List<T>()
                 for dictionary in dictionaryArray {
