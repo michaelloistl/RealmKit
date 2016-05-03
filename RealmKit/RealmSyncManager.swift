@@ -331,7 +331,7 @@ public class RealmSyncOperation: NSOperation {
                                         // Delete temp object
                                         if let newPrimaryKey = realmObjectInfo?.primaryKey {
                                             if self.primaryKey != newPrimaryKey {
-                                                if let tempRealmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) {
+                                                if var tempRealmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmKitObjectProtocol {
                                                     let realmSyncObjectInfo = RealmSyncObjectInfo(type: self.objectType, oldPrimaryKey: self.primaryKey, newPrimaryKey: newPrimaryKey)
                                                     
                                                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -340,7 +340,7 @@ public class RealmSyncOperation: NSOperation {
                                                     
                                                     do {
                                                         try realm.write({ () -> Void in
-                                                            realm.delete(tempRealmObject)
+                                                            tempRealmObject.deletedAt = NSDate().timeIntervalSince1970
                                                         })
                                                     } catch { }
                                                 }
