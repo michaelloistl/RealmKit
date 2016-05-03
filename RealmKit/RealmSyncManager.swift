@@ -86,6 +86,8 @@ public class RealmSyncManager {
                     realm = try Realm()
                 } catch { }
                 
+                realm?.refresh()
+                
                 let predicate = NSPredicate(format: "syncStatus == %@", RealmSyncManager.SyncStatus.Sync.rawValue)
                 for registeredType in self.registeredTypes {
                         if let syncObjects = realm?.objects(registeredType).filter(predicate) {
