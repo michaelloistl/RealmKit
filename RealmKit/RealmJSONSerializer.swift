@@ -230,7 +230,7 @@ public extension RealmJSONSerializable  {
             
             // Set lastFetchedAt / lastSyncedAt
             if let method = serializationInfo.method {
-                if method == .GET {
+                if method == .get {
                     keyValueDictionary["lastFetchedAt"] = Date() as AnyObject?
                 } else {
                     keyValueDictionary["lastSyncedAt"] = Date() as AnyObject?

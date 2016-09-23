@@ -241,12 +241,12 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
     
     open func realmSyncMethod() -> RealmKit.HTTPMethod! {
         if deletedAt > 0 {
-            return .DELETE
+            return .delete
         } else {
             if id == server_id {
-                return .PUT
+                return .put
             } else {
-                return .POST
+                return .post
             }
         }
     }
