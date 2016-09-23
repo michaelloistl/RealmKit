@@ -15,10 +15,10 @@ public protocol RealmKitObjectProtocol {
     // MARK: - Properties
     
     var id: String { get set }
-    var deletedAt: NSTimeInterval { get set }
+    var deletedAt: TimeInterval { get set }
     
     var server_id: String { get set }
-    var server_deletedAt: NSTimeInterval { get set }
+    var server_deletedAt: TimeInterval { get set }
 
     // MARK: - Methods
     
@@ -28,97 +28,97 @@ public protocol RealmKitObjectProtocol {
     
     static func defaultPropertyValues() -> [String: AnyObject]
     
-    static func baseURL() -> NSURL!
+    static func baseURL() -> URL!
     
-    static func requestWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, jsonResponse: AnyObject?, error: NSError?) -> Void) -> NSURLSessionTask?
+    static func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask?
     
-    static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
+    static func handleRequest(_ request: URLRequest!, response: HTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
 
 @available(OSX 10.10, *)
-public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable, RealmFetchable, RealmFetchPagable, RealmSyncable {
+open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable, RealmFetchable, RealmFetchPagable, RealmSyncable {
     
     // MARK: - Properties
     
     // MARK: RealmKitObjectProtocol
     
-    public dynamic var id: String = NSUUID().UUIDString
-    public dynamic var deletedAt: NSTimeInterval = 0
+    open dynamic var id: String = UUID().uuidString
+    open dynamic var deletedAt: TimeInterval = 0
     
-    public dynamic var server_id: String = ""
-    public dynamic var server_deletedAt: NSTimeInterval = 0
+    open dynamic var server_id: String = ""
+    open dynamic var server_deletedAt: TimeInterval = 0
     
     // MARK: RealmFetchable
     
-    public dynamic var lastFetchedAt: NSDate?
+    open dynamic var lastFetchedAt: Date?
     
     // MARK: RealmSyncable
     
-    public dynamic var lastSyncedAt: NSDate?
-    public dynamic var syncStatus: String = RealmSyncManager.SyncStatus.Synced.rawValue
+    open dynamic var lastSyncedAt: Date?
+    open dynamic var syncStatus: String = RealmSyncManager.SyncStatus.Synced.rawValue
     
     // MARK: - Protocols
     
     // MARK: RealmKitObjectProtocol
     
-    public override class func primaryKey() -> String? {
+    open override class func primaryKey() -> String? {
         return "id"
     }
     
-    public class func defaultPropertyValues() -> [String: AnyObject] {
+    open class func defaultPropertyValues() -> [String: AnyObject] {
         return [
-            "id": NSUUID().UUIDString,
-            "deletedAt": 0,
-            "server_id": "",
-            "server_deletedAt": 0,
+            "id": UUID().uuidString as AnyObject,
+            "deletedAt": 0 as AnyObject,
+            "server_id": "" as AnyObject,
+            "server_deletedAt": 0 as AnyObject,
             
-            "syncStatus": RealmSyncManager.SyncStatus.Synced.rawValue,
+            "syncStatus": RealmSyncManager.SyncStatus.Synced.rawValue as AnyObject,
         ]
     }
     
-    public class func baseURL() -> NSURL! {
+    open class func baseURL() -> URL! {
         print("# RealmKit: Please override baseURL in \(self)")
         
         return nil
     }
     
-    public class func requestWithBaseURL(baseURL: NSURL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (success: Bool, request: NSURLRequest!, response: NSHTTPURLResponse!, jsonResponse: AnyObject?, error: NSError?) -> Void) -> NSURLSessionTask? {
+    open class func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask? {
 
         print("# RealmKit: Please override requestWithBaseURL:path:parameters:method:completion: in \(self)")
         
         return nil
     }
     
-    public class func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?) {
+    open class func handleRequest(_ request: URLRequest!, response: HTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?) {
         
         print("# RealmKit: Please override handleRequest:response:jsonResponse:error:fetchOperation:syncOperation:inRealm: in \(self)")
     }
     
     // MARK: RealmJSONSerializable
     
-    public class func JSONKeyPathsByPropertyKey(serializationInfo: SerializationInfo) -> [String : String]! {
+    open class func jsonKeyPathsByPropertyKey(with serializationInfo: SerializationInfo) -> [String : String]! {
         print("# RealmKit: Please override JSONKeyPathsByPropertyKey: in \(self)")
         
         return nil
     }
     
-    public class func JSONTransformerForKey(key: String!, serializationInfo: SerializationInfo) -> NSValueTransformer! {
+    open class func jsonTransformerForKey(_ key: String!, serializationInfo: SerializationInfo) -> ValueTransformer!{
         print("# RealmKit: Please override JSONTransformerForKey: in \(self)")
         
         return nil
     }
     
     // Optional
-    public class func classForParsingJSONDictionary(JSONDictionary: NSDictionary) -> Object.Type {
+    open class func classForParsing(_ jsonDictionary: NSDictionary) -> Object.Type {
         return self
     }
     
-    public class func didCreateOrUpdateRealmObject(serializationInfo: SerializationInfo?) {
-        if let newPrimaryKey = serializationInfo?.newPrimaryKey, oldPrimaryKey = serializationInfo?.oldPrimaryKey, realm = serializationInfo?.realm {
+    open class func didCreateOrUpdateRealmObject(with serializationInfo: SerializationInfo?) {
+        if let newPrimaryKey = serializationInfo?.newPrimaryKey, let oldPrimaryKey = serializationInfo?.oldPrimaryKey, let realm = serializationInfo?.realm {
             
             // Old and New Objects are the same (PUT, DELETE)
             if newPrimaryKey == oldPrimaryKey {
-                if let newObject = realm.objectForPrimaryKey(self, key: newPrimaryKey) as? RealmJSONSerializable {
+                if let newObject = realm.object(ofType: self, forPrimaryKey: newPrimaryKey) as? RealmJSONSerializable {
                     newObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                 }
             }
@@ -127,85 +127,85 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
             else {
                 
                 // Set SyncStatus to "Synced" for initial (old) object
-                if var oldObject = realm.objectForPrimaryKey(self, key: oldPrimaryKey) as? RealmJSONSerializable {
+                if var oldObject = realm.object(ofType:self, forPrimaryKey: oldPrimaryKey) as? RealmJSONSerializable {
                     oldObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                     
                     let realmSyncObjectInfo = RealmSyncObjectInfo(type: self, oldPrimaryKey: oldPrimaryKey, newPrimaryKey: newPrimaryKey)
 
-                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
+                    DispatchQueue.main.async(execute: { () -> Void in
+                        NotificationCenter.default.post(name: RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
                     })
 
                     // Mark temp object deleted
-                    oldObject.deletedAt = NSDate().timeIntervalSince1970
+                    oldObject.deletedAt = Date().timeIntervalSince1970
                 }
                 
                 // Set SyncStatus to "Synced" for new object
-                if let newObject = realm.objectForPrimaryKey(self, key: newPrimaryKey) as? RealmJSONSerializable {
+                if let newObject = realm.object(ofType: self, forPrimaryKey: newPrimaryKey) as? RealmJSONSerializable {
                     newObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                 }
             }
         }
     }
     
-    public class func keyValueDictionaryWithPrimaryKeyValue(primaryKeyValue: String) -> [String : String]? {
+    open class func keyValueDictionary(with primaryKeyValue: String) -> [String : String]? {
         return nil
     }
     
-    public class func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> [String: AnyObject] {
+    open class func keyValueDictionary<T: Object>(for type: T.Type, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> [String: AnyObject] {
         return keyValueDictionary
     }
     
-    public class func modifiedRealmObject(realmObject: Object, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object? {
+    open class func modifiedRealmObject(_ realmObject: Object, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object? {
         return realmObject
     }
     
-    public class func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool {
+    open class func shouldCreateOrUpdate<T: Object>(_ type: T.Type, primaryKey: String, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool {
         return true
     }
     
     // MARK: RealmFetchable
     
-    public class func realmFetchWillSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) {
+    open class func realmFetchWillSerialize(_ json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) {
         
     }
     
-    public class func realmFetchShouldSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) -> Bool {
+    open class func realmFetchShouldSerialize(_ json: AnyObject, fetchRequest: FetchRequest, inRealm realm: Realm) -> Bool {
         return true
     }
     
-    public class func realmFetchDidSerializeJSON(json: AnyObject, fetchRequest: FetchRequest, fetchResult: FetchResult!, inRealm realm: Realm) {
+    open class func realmFetchDidSerialize(_ json: AnyObject, fetchRequest: FetchRequest, fetchResult: FetchResult!, inRealm realm: Realm) {
         
     }
     
     // MARK: RealmFetchPagable
     
-    public class func fetchPagingParametersForRealmFetchPaged(realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]? {
-        print("# RealmKit: Please override fetchPagingParametersForRealmFetchPaged: in \(self)")
+    open class func fetchPagingParameters(for realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]? {
+        print("# RealmKit: Please override fetchPagingParametersFor:realmFetchPaged in \(self)")
         
         return nil
     }
     
-    public class func fetchPageInfoFromFetchResult(fetchResult: FetchResult?) -> PageInfo? {
-        print("# RealmKit: Please override fetchPageInfoFromFetchResult: in \(self)")
+    open class func fetchPageInfo( from fetchResult: FetchResult?) -> PageInfo? {
+        print("# RealmKit: Please override fetchPageInfoFrom:fetchResult in \(self)")
         
         return nil
     }
     
-    public class func fetchPagedDidProcess(realmFetchPaged: RealmFetchPaged) {
+    open class func fetchPagedDidProcess(_ realmFetchPaged: RealmFetchPaged) {
         
     }
     
-    public class func fetchPagedDidComplete(realmFetchPaged: RealmFetchPaged) {
+    open class func fetchPagedDidComplete(_ realmFetchPaged: RealmFetchPaged) {
         
     }
     
     // MARK: RealmSyncable
     
-    public func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo? = nil) {
-        if !invalidated {
+    open func setSyncStatus(_ syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo? = nil) {
+        if !isInvalidated {
             var inWriteTransaction = false
-            if realm?.inWriteTransaction == false {
+            if realm?.isInWriteTransaction == false {
                 realm?.beginWrite()
                 inWriteTransaction = true
             }
@@ -220,17 +220,17 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         }
     }
     
-    public func realmSyncOperations() -> [RealmSyncOperation] {
+    open func realmSyncOperations() -> [RealmSyncOperation] {
         var syncOperations = [RealmSyncOperation]()
         
-        let objectType = self.dynamicType
+        let objectType = type(of: self)
         let primaryKey = id
         let method = realmSyncMethod()
         let baseURL = objectType.baseURL()
-        let parameters = realmSyncParameters(method)
-        let path = realmSyncPath(method)
+        let parameters = realmSyncParameters(method!)
+        let path = realmSyncPath(method!)
         
-        if let path = path {
+        if let path = path, let method = method, let baseURL = baseURL {
             let syncOperation = RealmSyncOperation(objectType: objectType, primaryKey: primaryKey, baseURL: baseURL, path: path, parameters: parameters, method: method)
             
             syncOperations.append(syncOperation)
@@ -239,7 +239,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return syncOperations
     }
     
-    public func realmSyncMethod() -> RealmKit.Method! {
+    open func realmSyncMethod() -> RealmKit.Method! {
         if deletedAt > 0 {
             return .DELETE
         } else {
@@ -251,37 +251,37 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         }
     }
     
-    public func realmSyncPath(method: RealmKit.Method) -> String? {
+    open func realmSyncPath(_ method: RealmKit.Method) -> String? {
         print("# RealmKit: Please override realmSyncPath: in \(self)")
         
         return nil
     }
     
-    public func realmSyncParameters(method: RealmKit.Method) -> [String: AnyObject]? {
+    open func realmSyncParameters(_ method: RealmKit.Method) -> [String: AnyObject]? {
         print("# RealmKit: Please override realmSyncParameters: in \(self)")
         
         return nil
     }
     
-    public class func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]) -> String? {
+    open class func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: AnyObject]) -> String? {
         print("# RealmKit: Please override realmSyncJSONResponseKey:userInfo: in \(self)")
         
         return nil
     }
     
-    public class func realmSyncOperation(sender: RealmSyncOperation, willSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) {
+    open class func realmSyncOperation(_ sender: RealmSyncOperation, willSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) {
         
     }
     
-    public class func realmSyncOperation(sender: RealmSyncOperation, shouldSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool {
+    open class func realmSyncOperation(_ sender: RealmSyncOperation, shouldSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool {
         return true
     }
     
-    public class func realmSyncOperation(sender: RealmSyncOperation, didSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm) {
+    open class func realmSyncOperation(_ sender: RealmSyncOperation, didSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm) {
         
     }
     
-    public class func realmSyncOperation(sender: RealmSyncOperation, didSync syncResult: SyncResult!, inRealm realm: Realm) {
+    open class func realmSyncOperation(_ sender: RealmSyncOperation, didSync syncResult: SyncResult!, inRealm realm: Realm) {
         
     }
 }

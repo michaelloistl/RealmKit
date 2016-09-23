@@ -9,12 +9,12 @@
 import Foundation
 import RealmSwift
 
-public typealias RealmSyncCompletionBlock = (syncResult: SyncResult!) -> Void
+public typealias RealmSyncCompletionBlock = (_ syncResult: SyncResult?) -> Void
 
 public struct SyncResult {
     
-    public let request: NSURLRequest!
-    public let response: NSHTTPURLResponse!
+    public let request: URLRequest!
+    public let response: HTTPURLResponse!
     public let success: Bool
     public let jsonResponse: AnyObject?
     public let realmObjectInfos: [RealmObjectInfo]?
@@ -24,8 +24,8 @@ public struct SyncResult {
     public let userInfo: [String: AnyObject]
     
     public init(
-        request: NSURLRequest!,
-        response: NSHTTPURLResponse!,
+        request: URLRequest!,
+        response: HTTPURLResponse!,
         success: Bool,
         jsonResponse: AnyObject? = nil,
         realmObjectInfos: [RealmObjectInfo]? = nil,
@@ -51,28 +51,28 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     
     // MARK: - Properties
     
-    var lastSyncedAt: NSDate? { get set }
+    var lastSyncedAt: Date? { get set }
     var syncStatus: String { get set }
 
     // MARK: - Methods
     
     // MARK: Required
     
-    func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo?)
+    func setSyncStatus(_ syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo?)
     
     func realmSyncOperations() -> [RealmSyncOperation]
     func realmSyncMethod() -> RealmKit.Method!
-    func realmSyncPath(method: RealmKit.Method) -> String?
-    func realmSyncParameters(method: RealmKit.Method) -> [String: AnyObject]?
+    func realmSyncPath(_ method: RealmKit.Method) -> String?
+    func realmSyncParameters(_ method: RealmKit.Method) -> [String: AnyObject]?
     
-    static func realmSyncJSONResponseKey(method: RealmKit.Method, userInfo: [String: AnyObject]) -> String?
+    static func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: AnyObject]) -> String?
     
     // MARK: Optional
     
-    static func realmSyncOperation(sender: RealmSyncOperation, willSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm)
-    static func realmSyncOperation(sender: RealmSyncOperation, shouldSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool
-    static func realmSyncOperation(sender: RealmSyncOperation, didSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm)
+    static func realmSyncOperation(_ sender: RealmSyncOperation, willSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm)
+    static func realmSyncOperation(_ sender: RealmSyncOperation, shouldSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, inRealm realm: Realm) -> Bool
+    static func realmSyncOperation(_ sender: RealmSyncOperation, didSerializeJSON json: AnyObject, serializationInfo: SerializationInfo, syncResult: SyncResult!, inRealm realm: Realm)
     
-    static func realmSyncOperation(sender: RealmSyncOperation, didSync syncResult: SyncResult!, inRealm realm: Realm)
+    static func realmSyncOperation(_ sender: RealmSyncOperation, didSync syncResult: SyncResult!, inRealm realm: Realm)
 
 }

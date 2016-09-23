@@ -30,11 +30,11 @@ class RealmJSONSerializerTests: RealmTestCase {
     
     // MARK: - Helpers
     
-    func jsonRespondWithFilename(filename: String) -> [String : AnyObject]! {
-        let path = NSBundle(forClass: RealmJSONSerializerTests.self).pathForResource(filename, ofType: "json")
-        let jsonData = try? NSData(contentsOfFile: path!, options: .DataReadingMappedIfSafe)
+    func jsonRespondWithFilename(_ filename: String) -> [String : AnyObject]! {
+        let path = Bundle(for: RealmJSONSerializerTests.self).path(forResource: filename, ofType: "json")
+        let jsonData = try? Data(contentsOf: URL(fileURLWithPath: path!), options: .mappedIfSafe)
         
-        return (try! NSJSONSerialization.JSONObjectWithData(jsonData!, options: NSJSONReadingOptions.MutableContainers)) as! [String : AnyObject]
+        return (try! JSONSerialization.jsonObject(with: jsonData!, options: JSONSerialization.ReadingOptions.mutableContainers)) as! [String : AnyObject]
     }
     
     // MARK: - Tests

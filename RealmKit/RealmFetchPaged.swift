@@ -10,21 +10,21 @@ import Foundation
 import RealmSwift
 
 @available(OSX 10.10, *)
-public typealias RealmFetchPagedCompletionBlock = (realmFetchPaged: RealmFetchPaged!, completed: Bool) -> Void
+public typealias RealmFetchPagedCompletionBlock = (RealmFetchPaged?, Bool) -> Void
 
 public struct PageInfo {
     
     public enum PageType {
-        case Next
-        case Previous
-        case None
+        case next
+        case previous
+        case none
     }
     
     public let currentPage: Int
     public let totalPages: Int
     public let totalItems: Int
-    public let previousPageURL: NSURL?
-    public let nextPageURL: NSURL?
+    public let previousPageURL: URL?
+    public let nextPageURL: URL?
     
     public var description: String {
         return "currentPage: \(currentPage); totalPages: \(totalPages); totalItems: \(totalItems); previousPageURL: \(previousPageURL); nextPageURL: \(nextPageURL)"
@@ -34,8 +34,8 @@ public struct PageInfo {
         currentPage: Int,
         totalPages: Int,
         totalItems: Int,
-        previousPageURL: NSURL?,
-        nextPageURL: NSURL?
+        previousPageURL: URL?,
+        nextPageURL: URL?
         ) {
         self.currentPage = currentPage
         self.totalPages = totalPages
@@ -49,41 +49,41 @@ public struct PageInfo {
 public protocol RealmFetchPagable: RealmKitObjectProtocol {
     
     // MARK: Required
-    static func fetchPagingParametersForRealmFetchPaged(realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]?
-    static func fetchPageInfoFromFetchResult(fetchResult: FetchResult?) -> PageInfo?
+    static func fetchPagingParameters(for realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]?
+    static func fetchPageInfo(from fetchResult: FetchResult?) -> PageInfo?
     
     // MARK: Optional
-    static func fetchPagedDidProcess(realmFetchPaged: RealmFetchPaged)
-    static func fetchPagedDidComplete(realmFetchPaged: RealmFetchPaged)
+    static func fetchPagedDidProcess(_ realmFetchPaged: RealmFetchPaged)
+    static func fetchPagedDidComplete(_ realmFetchPaged: RealmFetchPaged)
 }
 
 @available(OSX 10.10, *)
-public class RealmFetchPaged {
+open class RealmFetchPaged {
     
-    public let type: Object.Type
-    public let pageType: PageInfo.PageType
-    public let from: NSTimeInterval?
-    public let lastSyncedFallback: NSTimeInterval
-    public let usePagingParameter: Bool
+    open let type: Object.Type
+    open let pageType: PageInfo.PageType
+    open let from: TimeInterval?
+    open let lastSyncedFallback: TimeInterval
+    open let usePagingParameter: Bool
     
-    public var fetchRequest: FetchRequest
-    public var pageLimit = 1
-    public var pageInfo: PageInfo? {
+    open var fetchRequest: FetchRequest
+    open var pageLimit = 1
+    open var pageInfo: PageInfo? {
         didSet {
             var requestStarted = false
             if let pageInfo = pageInfo {
                 if fetchResult?.success == true && (pageLimit == 0 || pageInfo.currentPage < pageLimit) && pageInfo.currentPage < pageInfo.totalPages {
-                    completion(realmFetchPaged: self, completed: false)
+                    completion(self, false)
                     
                     (type as? RealmFetchPagable.Type)?.fetchPagedDidProcess(self)
                     
-                    startRequest()
+                    let _ = startRequest()
                     requestStarted = true
                 }
             }
             
             if !requestStarted {
-                completion(realmFetchPaged: self, completed: true)
+                completion(self, true)
                 
                 (type as? RealmFetchPagable.Type)?.fetchPagedDidComplete(self)
             }
@@ -92,16 +92,16 @@ public class RealmFetchPaged {
     
     var completion: RealmFetchPagedCompletionBlock
     
-    public var fetchResult: FetchResult?
-    public var realmObjectInfos = [RealmObjectInfo]()
+    open var fetchResult: FetchResult?
+    open var realmObjectInfos = [RealmObjectInfo]()
     
-    public var success: Bool {
+    open var success: Bool {
         return fetchResult?.success ?? false
     }
     
     // MARK: - Initializers
     
-    public required init(type: Object.Type, fetchRequest: FetchRequest, pageType: PageInfo.PageType, from: NSTimeInterval? = nil, lastSyncedFallback: NSTimeInterval = 0, usePagingParameter: Bool = true, completion: RealmFetchPagedCompletionBlock) {
+    public required init(type: Object.Type, fetchRequest: FetchRequest, pageType: PageInfo.PageType, from: TimeInterval? = nil, lastSyncedFallback: TimeInterval = 0, usePagingParameter: Bool = true, completion: @escaping RealmFetchPagedCompletionBlock) {
         self.type = type
         self.fetchRequest = fetchRequest
         self.pageType = pageType
@@ -114,10 +114,10 @@ public class RealmFetchPaged {
     
     // MARK: - Methods
     
-    public func startRequest(addPagingParameters: Bool = true) -> NSURLSessionTask? {
+    open func startRequest(_ addPagingParameters: Bool = true) -> URLSessionTask? {
         var parameters = fetchRequest.parameters ?? [String: AnyObject]()
         
-        if let pagingParameters = (type as? RealmFetchPagable.Type)?.fetchPagingParametersForRealmFetchPaged(self) where addPagingParameters {
+        if let pagingParameters = (type as? RealmFetchPagable.Type)?.fetchPagingParameters(for: self) , addPagingParameters {
             pagingParameters.forEach({ (key, value) in
                 parameters[key] = value
             })
@@ -125,22 +125,22 @@ public class RealmFetchPaged {
         
         fetchRequest = FetchRequest(baseURL: self.fetchRequest.baseURL, path: self.fetchRequest.path, parameters: parameters, jsonResponseKey: self.fetchRequest.jsonResponseKey, userInfo: self.fetchRequest.userInfo)
         
-        if let fetchableType = type as? RealmFetchable.Type, serializableType = fetchableType as? RealmJSONSerializable.Type {
+        if let fetchableType = type as? RealmFetchable.Type, let serializableType = fetchableType as? RealmJSONSerializable.Type {
             return serializableType.fetch(fetchRequest) { (fetchResult) in
                 self.fetchResult = fetchResult
                 
-                if let realmObjectInfos = fetchResult.realmObjectInfos {
+                if let realmObjectInfos = fetchResult?.realmObjectInfos {
                     self.realmObjectInfos += realmObjectInfos
                 }
                 
-                self.pageInfo = (self.type as? RealmFetchPagable.Type)?.fetchPageInfoFromFetchResult(fetchResult)
+                self.pageInfo = (self.type as? RealmFetchPagable.Type)?.fetchPageInfo(from: fetchResult)
             }
         }
         
         return nil
     }
     
-    public func startRequestWithCompletion(addPagingParameters: Bool = true, completion: RealmFetchPagedCompletionBlock) -> NSURLSessionTask? {
+    open func startRequestWithCompletion(_ addPagingParameters: Bool = true, completion: @escaping RealmFetchPagedCompletionBlock) -> URLSessionTask? {
         self.completion = completion
         
         return startRequest(addPagingParameters)

@@ -56,12 +56,12 @@ public struct SerializationInfo {
 public struct RealmObjectInfo {
     public let type: Object.Type
     public let primaryKey: String
-    public var indexPath: NSIndexPath?
+    public var indexPath: IndexPath?
     
     public init(
         type: Object.Type,
         primaryKey: String,
-        indexPath: NSIndexPath? = nil
+        indexPath: IndexPath? = nil
         ) {
             self.type = type
             self.primaryKey = primaryKey
@@ -75,27 +75,27 @@ public protocol RealmJSONSerializable: RealmSyncable, RealmFetchable {
     
     // MARK: Required
     
-    static func JSONKeyPathsByPropertyKey(serializationInfo: SerializationInfo) -> [String : String]!
-    static func JSONTransformerForKey(key: String!, serializationInfo: SerializationInfo) -> NSValueTransformer!
+    static func jsonKeyPathsByPropertyKey(with serializationInfo: SerializationInfo) -> [String : String]!
+    static func jsonTransformerForKey(_ key: String!, serializationInfo: SerializationInfo) -> ValueTransformer!
     
-    static func classForParsingJSONDictionary(JSONDictionary: NSDictionary) -> Object.Type
+    static func classForParsing(_ jsonDictionary: NSDictionary) -> Object.Type
     
     // MARK: Optional
     
-    static func keyValueDictionaryWithPrimaryKeyValue(primaryKeyValue: String) -> [String : String]?
+    static func keyValueDictionary(with primaryKeyValue: String) -> [String : String]?
 
     /*
     This function executes within the transaction block of realmObjectInRealm()
     Override to modify initial and new RealmObject within the same transaction block
     */
     
-    static func didCreateOrUpdateRealmObject(serializationInfo: SerializationInfo?)
+    static func didCreateOrUpdateRealmObject(with serializationInfo: SerializationInfo?)
     
-    static func keyValueDictionaryForRealmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> [String: AnyObject]
+    static func keyValueDictionary<T: Object>(for type: T.Type, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> [String: AnyObject]
     
-    static func modifiedRealmObject(realmObject: Object, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object?
+    static func modifiedRealmObject(_ realmObject: Object, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object?
     
-    static func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool
+    static func shouldCreateOrUpdate<T: Object>(_ type: T.Type, primaryKey: String, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool
 }
 
 // MARK: - Extension for method implementations
@@ -104,7 +104,7 @@ public protocol RealmJSONSerializable: RealmSyncable, RealmFetchable {
 public extension RealmJSONSerializable  {
     
     static func hasPrimaryKey() -> Bool {
-        if let primaryKey = primaryKey() where primaryKey.characters.count > 0 {
+        if let primaryKey = primaryKey() , primaryKey.characters.count > 0 {
             return true
         }
         return false
@@ -112,7 +112,7 @@ public extension RealmJSONSerializable  {
     
     // MARK: CreateOrUpdate objects with JSON Array
     
-    public static func realmObjectsWithJSONArray(array: NSArray, serializationInfo: SerializationInfo, completion: (realmObjectInfos: [RealmObjectInfo]?, error: NSError?) -> Void) {
+    public static func realmObjectsWithJSONArray(_ array: NSArray, serializationInfo: SerializationInfo, completion: (_ realmObjectInfos: [RealmObjectInfo]?, _ error: NSError?) -> Void) {
         
         if hasPrimaryKey() {
             var completionRealmObjectInfos = [RealmObjectInfo]()
@@ -120,11 +120,11 @@ public extension RealmJSONSerializable  {
                 try serializationInfo.realm.write({ () -> Void in
                     for object in array {
                         if let dictionary = object as? NSDictionary {
-                            let type = classForParsingJSONDictionary(dictionary)
+                            let type = classForParsing(dictionary)
                             
-                            if let realmObject = self.realmObjectWithType(type.self, withJSONDictionary: dictionary, serializationInfo: serializationInfo) {
+                            if let realmObject = self.realmObject(type.self, jsonDictionary: dictionary, serializationInfo: serializationInfo) {
                                 if let primaryKey = type.primaryKey() {
-                                    if let primaryKey = realmObject.valueForKey(primaryKey) as? String {
+                                    if let primaryKey = realmObject.value(forKey: primaryKey) as? String {
                                         let realmObjectInfo = RealmObjectInfo(type: type.self, primaryKey: primaryKey)
                                         completionRealmObjectInfos.append(realmObjectInfo)
                                         
@@ -132,7 +132,7 @@ public extension RealmJSONSerializable  {
                                         var serializationInfo = serializationInfo
                                         serializationInfo.newPrimaryKey = primaryKey
                                         
-                                        didCreateOrUpdateRealmObject(serializationInfo)
+                                        didCreateOrUpdateRealmObject(with: serializationInfo)
                                     }
                                 }
                             }
@@ -143,27 +143,27 @@ public extension RealmJSONSerializable  {
                 
             }
             
-            completion(realmObjectInfos: completionRealmObjectInfos, error: nil)
+            completion(completionRealmObjectInfos, nil)
         } else {
             let error = NSError(domain: RealmJSONSerializerErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Class doesn't define a valid primaryKey"])
-            completion(realmObjectInfos: nil, error: error)
+            completion(nil, error)
         }
     }
     
     // MARK: CreateOrUpdate object with JSON Dictionary
     
-    public static func realmObjectWithJSONDictionary(dictionary: NSDictionary, serializationInfo: SerializationInfo, completion: (realmObjectInfo: RealmObjectInfo?, error: NSError?) -> Void) {
+    public static func realmObjectWithJSONDictionary(_ dictionary: NSDictionary, serializationInfo: SerializationInfo, completion: (_ realmObjectInfo: RealmObjectInfo?, _ error: NSError?) -> Void) {
         
         if hasPrimaryKey() {
             var completionRealmObjectInfo: RealmObjectInfo?
             
             do {
                 try serializationInfo.realm.write({ () -> Void in
-                    let type = classForParsingJSONDictionary(dictionary)
+                    let type = classForParsing(dictionary)
                     
-                    if let realmObject = self.realmObjectWithType(type.self, withJSONDictionary: dictionary, serializationInfo: serializationInfo) {
+                    if let realmObject = self.realmObject(type.self, jsonDictionary: dictionary, serializationInfo: serializationInfo) {
                         if let primaryKey = type.primaryKey() {
-                            if let newPrimaryKey = realmObject.valueForKey(primaryKey) as? String {
+                            if let newPrimaryKey = realmObject.value(forKey: primaryKey) as? String {
                                 let realmObjectInfo = RealmObjectInfo(type: type.self, primaryKey: newPrimaryKey)
                                 completionRealmObjectInfo = realmObjectInfo
                                 
@@ -171,22 +171,7 @@ public extension RealmJSONSerializable  {
                                 var serializationInfo = serializationInfo
                                 serializationInfo.newPrimaryKey = newPrimaryKey
                                 
-//                                // Delete temp object in same write transaction
-//                                if let oldPrimaryKey = oldPrimaryKey {
-//                                    if var oldRealmObject = serializationInfo.realm.objectForPrimaryKey(type.self, key: oldPrimaryKey) as? RealmKitObjectProtocol {
-//                                        let realmSyncObjectInfo = RealmSyncObjectInfo(type: type.self, oldPrimaryKey: oldPrimaryKey, newPrimaryKey: newPrimaryKey)
-//                                        
-//                                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-//                                            NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
-//                                        })
-//                                        
-//                                        oldRealmObject.deletedAt = NSDate().timeIntervalSince1970
-//                                        
-//                                        NSLog("oldRealmObject: \(oldRealmObject)")
-//                                    }
-//                                }
-                                
-                                didCreateOrUpdateRealmObject(serializationInfo)
+                                didCreateOrUpdateRealmObject(with: serializationInfo)
                             }
                         }
                     }
@@ -195,24 +180,24 @@ public extension RealmJSONSerializable  {
                 
             }
             
-            completion(realmObjectInfo: completionRealmObjectInfo, error: nil)
+            completion(completionRealmObjectInfo, nil)
         } else {
             let error = NSError(domain: RealmJSONSerializerErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Class doesn't define a valid primaryKey"])
-            completion(realmObjectInfo: nil, error: error)
+            completion(nil, error)
         }
     }
     
     // MARK: CreateOrUpdate RealmObject with mapping
     
-    public static func realmObjectWithType<T: Object>(type: T.Type, withJSONDictionary dictionary: NSDictionary, serializationInfo: SerializationInfo) -> Object? {
+    public static func realmObject<T: Object>(_ type: T.Type, jsonDictionary: NSDictionary, serializationInfo: SerializationInfo) -> Object? {
         
         // Object key -> JSON keyPath
-        if let mappingDictionary = JSONKeyPathsByPropertyKey(serializationInfo) {
+        if let mappingDictionary = jsonKeyPathsByPropertyKey(with: serializationInfo) {
             var keyValueDictionary = [String: AnyObject]()
             var serializationInfo = serializationInfo
             
             for (key, keyPath) in mappingDictionary {
-                if let jsonValue: AnyObject = dictionary.valueForKeyPath(keyPath) {
+                if let jsonValue: AnyObject = jsonDictionary.value(forKeyPath: keyPath) as AnyObject? {
                     if let _ = jsonValue as? NSNull {
                         
                         // Default Value if it's not primary key
@@ -226,9 +211,9 @@ public extension RealmJSONSerializable  {
                     } else {
                         
                         // ValueTransformer
-                        serializationInfo.json = dictionary as? [String: AnyObject]
-                        if let valueTransformer = JSONTransformerForKey(key, serializationInfo: serializationInfo) {
-                            if let value: AnyObject = valueTransformer.transformedValue(jsonValue) {
+                        serializationInfo.json = jsonDictionary as? [String: AnyObject]
+                        if let valueTransformer = jsonTransformerForKey(key, serializationInfo: serializationInfo) {
+                            if let value: AnyObject = valueTransformer.transformedValue(jsonValue) as AnyObject? {
                                 keyValueDictionary[key] = value
                             }
                         } else {
@@ -241,31 +226,31 @@ public extension RealmJSONSerializable  {
             }
             
             // Modify keyValueDictionary
-            keyValueDictionary = keyValueDictionaryForRealmObjectWithType(type, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
+            keyValueDictionary = self.keyValueDictionary(for: type, jsonDictionary: jsonDictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
             
             // Set lastFetchedAt / lastSyncedAt
             if let method = serializationInfo.method {
                 if method == .GET {
-                    keyValueDictionary["lastFetchedAt"] = NSDate()
+                    keyValueDictionary["lastFetchedAt"] = Date() as AnyObject?
                 } else {
-                    keyValueDictionary["lastSyncedAt"] = NSDate()
+                    keyValueDictionary["lastSyncedAt"] = Date() as AnyObject?
                 }
             }
             
 //            NSLog("__realmObjectWithType: \(type.self) __keyValueDictionary: \(keyValueDictionary) __JSON: \(dictionary)")
             
-            if let primaryKey = (type as Object.Type).primaryKey(), primaryKeyValue = keyValueDictionary[primaryKey] as? String {
-                if shouldCreateOrUpdateRealmObjectWithType(type, primaryKey: primaryKeyValue, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo) {
+            if let primaryKey = (type as Object.Type).primaryKey(), let primaryKeyValue = keyValueDictionary[primaryKey] as? String {
+                if shouldCreateOrUpdate(type, primaryKey: primaryKeyValue, jsonDictionary: jsonDictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo) {
                     let realmObject = serializationInfo.realm.create(type.self, value: keyValueDictionary, update: true)
-                    return self.modifiedRealmObject(realmObject, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
+                    return self.modifiedRealmObject(realmObject, jsonDictionary: jsonDictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
                 } else {
-                    if let realmObject = serializationInfo.realm.objectForPrimaryKey(type.self, key: primaryKey) {
-                        return self.modifiedRealmObject(realmObject, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
+                    if let realmObject = serializationInfo.realm.object(ofType: type.self, forPrimaryKey: primaryKey) {
+                        return self.modifiedRealmObject(realmObject, jsonDictionary: jsonDictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
                     }
                 }
             } else {
                 if RealmKit.sharedInstance.debugLogs {
-                    print("# RealmKit: There is a serialization issue with the primary key for Type: \(type) Dictionary: \(dictionary) MappingDictionary: \(mappingDictionary) KeyValueDictionary: \(keyValueDictionary)")
+                    print("# RealmKit: There is a serialization issue with the primary key for Type: \(type) JSON Dictionary: \(jsonDictionary) MappingDictionary: \(mappingDictionary) KeyValueDictionary: \(keyValueDictionary)" as Any)
                 }
             }
         }
@@ -276,10 +261,10 @@ public extension RealmJSONSerializable  {
 
 // MARK: - ValueTransformers
 
-public class RealmValueTransformer: NSValueTransformer {
+open class RealmValueTransformer: ValueTransformer {
     
-    var forwardClosure: ((value: AnyObject?) -> AnyObject?)?
-    var reverseClosure: ((value: AnyObject?) -> AnyObject?)?
+    var forwardClosure: ((_ value: AnyObject?) -> AnyObject?)?
+    var reverseClosure: ((_ value: AnyObject?) -> AnyObject?)?
     
     // MARK: Initializers
     
@@ -287,7 +272,7 @@ public class RealmValueTransformer: NSValueTransformer {
         super.init()
     }
     
-    convenience init(forwardClosure: ((value: AnyObject?) -> AnyObject?)?, reverseClosure: ((value: AnyObject?) -> AnyObject?)?) {
+    convenience init(forwardClosure: ((_ value: AnyObject?) -> AnyObject?)?, reverseClosure: ((_ value: AnyObject?) -> AnyObject?)?) {
         self.init()
         
         self.forwardClosure = forwardClosure
@@ -298,34 +283,34 @@ public class RealmValueTransformer: NSValueTransformer {
     
     // Returns a transformer which transforms values using the given closure.
     // Reverse transformations will not be allowed.
-    public class func transformerWithClosure(closure: (value: AnyObject?) -> AnyObject?) -> NSValueTransformer! {
+    open class func transformerWithClosure(_ closure: @escaping (_ value: AnyObject?) -> AnyObject?) -> ValueTransformer! {
         return RealmValueTransformer(forwardClosure: closure, reverseClosure: nil)
     }
     
     // Returns a transformer which transforms values using the given closure, for
     // forward or reverse transformations.
-    public class func reversibleTransformerWithClosure(closure: (value: AnyObject?) -> AnyObject?) -> NSValueTransformer! {
+    open class func reversibleTransformerWithClosure(_ closure: @escaping (_ value: AnyObject?) -> AnyObject?) -> ValueTransformer! {
         return reversibleTransformerWithForwardBlock(closure, reverseClosure: closure)
     }
     
     // Returns a transformer which transforms values using the given closures.
-    public class func reversibleTransformerWithForwardBlock(forwardClosure: (value: AnyObject?) -> AnyObject?, reverseClosure: (value: AnyObject?) -> AnyObject?) -> NSValueTransformer! {
+    open class func reversibleTransformerWithForwardBlock(_ forwardClosure: @escaping (_ value: AnyObject?) -> AnyObject?, reverseClosure: @escaping (_ value: AnyObject?) -> AnyObject?) -> ValueTransformer! {
         return RealmReversibleValueTransformer(forwardClosure: forwardClosure, reverseClosure: reverseClosure)
     }
     
     // MARK: ValueTransformer
     
-    override public class func allowsReverseTransformation() -> Bool {
+    override open class func allowsReverseTransformation() -> Bool {
         return false
     }
     
-    override public class func transformedValueClass() -> AnyClass {
+    override open class func transformedValueClass() -> AnyClass {
         return NSObject.self
     }
     
-    override public func transformedValue(value: AnyObject?) -> AnyObject? {
+    override open func transformedValue(_ value: Any?) -> Any? {
         if let forwardClosure = forwardClosure {
-            return forwardClosure(value: value)
+            return forwardClosure(value as AnyObject?)
         }
         return nil
     }
@@ -337,13 +322,13 @@ public class RealmValueTransformer: NSValueTransformer {
 @available(OSX 10.10, *)
 public extension RealmValueTransformer {
     
-    public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType<T: Object>(_ type: T.Type, serializationInfo: SerializationInfo) -> ValueTransformer! {
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             
             // TODO: Direct value for primary key
             
             if let dictionary = value as? NSDictionary {
-                return (type as? RealmJSONSerializable.Type)?.realmObjectWithType(type, withJSONDictionary: dictionary, serializationInfo: serializationInfo)
+                return (type as? RealmJSONSerializable.Type)?.realmObject(type, jsonDictionary: dictionary, serializationInfo: serializationInfo)
             } else {
                 return nil
             }
@@ -357,14 +342,14 @@ public extension RealmValueTransformer {
         })
     }
     
-    public class func JSONArrayTransformerWithObjectType<T: Object>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType<T: Object>(_ type: T.Type, serializationInfo: SerializationInfo) -> ValueTransformer! {
         let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, serializationInfo: serializationInfo)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             if let dictionaryArray = value as? [NSDictionary] {
                 let list = List<T>()
                 for dictionary in dictionaryArray {
-                    if let realmObject = dictionaryTransformer.transformedValue(dictionary) as? T {
+                    if let realmObject = dictionaryTransformer?.transformedValue(dictionary) as? T {
                         list.append(realmObject)
                     }
                 }
@@ -374,7 +359,7 @@ public extension RealmValueTransformer {
                 let list = List<T>()
                 for string in stringArray {
                     if let primaryKey = type.primaryKey() {
-                        var keyValueDictionary = (type as? RealmJSONSerializable.Type)?.keyValueDictionaryWithPrimaryKeyValue(string)
+                        var keyValueDictionary = (type as? RealmJSONSerializable.Type)?.keyValueDictionary(with: string)
                         
                         // Default fallback
                         if keyValueDictionary == nil {
@@ -382,7 +367,7 @@ public extension RealmValueTransformer {
                         }
 
                         if let keyValueDictionary = keyValueDictionary {
-                            if let _: AnyObject = keyValueDictionary[primaryKey] {
+                            if let _: AnyObject = keyValueDictionary[primaryKey] as AnyObject? {
                                 let realmObject = serializationInfo.realm.create(T.self, value: keyValueDictionary, update: true)
                                 list.append(realmObject)
                             }
@@ -405,17 +390,17 @@ public extension RealmValueTransformer {
     }
 }
 
-public class RealmReversibleValueTransformer: RealmValueTransformer {
+open class RealmReversibleValueTransformer: RealmValueTransformer {
     
     // MARK: ValueTransformer
     
-    override public class func allowsReverseTransformation() -> Bool {
+    override open class func allowsReverseTransformation() -> Bool {
         return true
     }
     
-    override public func reverseTransformedValue(value: AnyObject?) -> AnyObject? {
+    override open func reverseTransformedValue(_ value: Any?) -> Any? {
         if let reverseClosure = reverseClosure {
-            return reverseClosure(value: value)
+            return reverseClosure(value as AnyObject?)
         }
         return nil
     }

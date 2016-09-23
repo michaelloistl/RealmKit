@@ -9,20 +9,20 @@
 import Foundation
 import RealmSwift
 
-public let RealmSyncOperationWillDeleteObjectNotification = "com.aplo.RealmSyncOperationWillDeleteObjectNotification"
-public let RealmSyncOperationDidCompleteNotification = "com.aplo.RealmSyncOperationDidCompleteNotification"
+public let RealmSyncOperationWillDeleteObjectNotification = NSNotification.Name(rawValue: "com.aplo.RealmSyncOperationWillDeleteObjectNotification")
+public let RealmSyncOperationDidCompleteNotification = NSNotification.Name(rawValue: "com.aplo.RealmSyncOperationDidCompleteNotification")
 
 // MARK: - RealmSyncManagerDelegate
 
 @available(OSX 10.10, *)
 public protocol RealmSyncManagerDelegate {
-    func realmSyncManager(sender: RealmSyncManager, shouldStartWithSyncOperation syncOperation: RealmSyncOperation) -> Bool
+    func realmSyncManager(_ sender: RealmSyncManager, shouldStartWithSyncOperation syncOperation: RealmSyncOperation) -> Bool
 }
 
 // MARK: - RealmSync
 
 @available(OSX 10.10, *)
-public class RealmSyncManager {
+open class RealmSyncManager {
     
     public enum SyncStatus: String {
         case Sync = "sync"
@@ -33,13 +33,13 @@ public class RealmSyncManager {
     
     var registeredTypes = [Object.Type]()
     
-    var syncQueue: dispatch_queue_t = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)
+    var syncQueue: DispatchQueue = DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated)
     
     var addingPendingSyncOperations = false
     
-    public var delegate: RealmSyncManagerDelegate?
+    open var delegate: RealmSyncManagerDelegate?
     
-    public class var sharedManager: RealmSyncManager {
+    open class var sharedManager: RealmSyncManager {
         struct Singleton {
             static let instance = RealmSyncManager()
         }
@@ -47,8 +47,8 @@ public class RealmSyncManager {
         return Singleton.instance
     }
     
-    public lazy var syncOperationQueue: NSOperationQueue = {
-        var _syncOperationQueue = NSOperationQueue()
+    open lazy var syncOperationQueue: OperationQueue = {
+        var _syncOperationQueue = OperationQueue()
         _syncOperationQueue.name = "Sync queue"
         _syncOperationQueue.maxConcurrentOperationCount = 1
         
@@ -62,28 +62,28 @@ public class RealmSyncManager {
     }
     
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Methods
     
-    public func registerTypes(types: [Object.Type]) {
+    open func registerTypes(_ types: [Object.Type]) {
         for type in types {
             registerType(type)
         }
     }
 
-    public func registerType(type: Object.Type) {
+    open func registerType(_ type: Object.Type) {
         registeredTypes.append(type)
     }
     
-    public func addPendingSyncOperations(completion: (operations: [RealmSyncOperation]) -> Void) {
+    open func addPendingSyncOperations(_ completion: @escaping (_ operations: [RealmSyncOperation]) -> Void) {
         var operations = [RealmSyncOperation]()
         
         if addingPendingSyncOperations == false {
             addingPendingSyncOperations = true
             
-            dispatch_async(syncQueue, {
+            syncQueue.async(execute: {
                 var realm: Realm?
                 
                 do {
@@ -125,13 +125,13 @@ public class RealmSyncManager {
                 
                 self.addingPendingSyncOperations = false
                 
-                completion(operations: operations)
+                completion(operations)
             })
         }
     }
     
     // Test: SyncManagerTests.testSyncOperationIsQueued()
-    func syncOperationIsQueued(syncOperation: RealmSyncOperation) -> Bool {
+    func syncOperationIsQueued(_ syncOperation: RealmSyncOperation) -> Bool {
         var isQueued = false
         
         for operation in self.syncOperationQueue.operations {
@@ -151,10 +151,10 @@ public class RealmSyncManager {
 
 // MARK: - RealmSyncObjectInfo
 
-public class RealmSyncObjectInfo: NSObject {
-    public let type: Object.Type
-    public let oldPrimaryKey: String
-    public let newPrimaryKey: String
+open class RealmSyncObjectInfo: NSObject {
+    open let type: Object.Type
+    open let oldPrimaryKey: String
+    open let newPrimaryKey: String
     
     init(type: Object.Type, oldPrimaryKey: String, newPrimaryKey: String) {
         self.type = type
@@ -166,73 +166,73 @@ public class RealmSyncObjectInfo: NSObject {
 // MARK: - RealmSyncOperation
 
 @available(OSX 10.10, *)
-public class RealmSyncOperation: NSOperation {
+open class RealmSyncOperation: Operation {
     
-    public let objectType: Object.Type
-    public let primaryKey: String
+    open let objectType: Object.Type
+    open let primaryKey: String
     
-    public let method: RealmKit.Method
-    public let baseURL: NSURL
-    public let path: String
-    public let parameters: [String : AnyObject]?
+    open let method: RealmKit.Method
+    open let baseURL: URL
+    open let path: String
+    open let parameters: [String : AnyObject]?
     
-    public var userInfo = [String : AnyObject]()
-    public var sessionTask: NSURLSessionTask?
+    open var userInfo = [String : AnyObject]()
+    open var sessionTask: URLSessionTask?
     
-    public var serializationInfo: SerializationInfo?
-    public var syncResult: SyncResult?
+    open var serializationInfo: SerializationInfo?
+    open var syncResult: SyncResult?
     
-    private var _executing: Bool = false
-    override public var executing: Bool {
+    fileprivate var _executing: Bool = false
+    override open var isExecuting: Bool {
         get {
             return _executing
         }
         set {
             if _executing != newValue {
-                willChangeValueForKey("isExecuting")
+                willChangeValue(forKey: "isExecuting")
                 _executing = newValue
-                didChangeValueForKey("isExecuting")
+                didChangeValue(forKey: "isExecuting")
             }
         }
     }
     
-    private var _finished: Bool = false;
-    override public var finished: Bool {
+    fileprivate var _finished: Bool = false;
+    override open var isFinished: Bool {
         get {
             return _finished
         }
         set {
             if _finished != newValue {
-                willChangeValueForKey("isFinished")
+                willChangeValue(forKey: "isFinished")
                 _finished = newValue
-                didChangeValueForKey("isFinished")
+                didChangeValue(forKey: "isFinished")
             }
         }
     }
     
-    private var _cancelled: Bool = false;
-    override public var cancelled: Bool {
+    fileprivate var _cancelled: Bool = false;
+    override open var isCancelled: Bool {
         get {
             return _cancelled
         }
         set {
             if _cancelled != newValue {
-                willChangeValueForKey("isCancelled")
+                willChangeValue(forKey: "isCancelled")
                 _cancelled = newValue
-                didChangeValueForKey("isCancelled")
+                didChangeValue(forKey: "isCancelled")
                 
                 sessionTask?.cancel()
             }
         }
     }
     
-    override public var asynchronous: Bool {
+    override open var isAsynchronous: Bool {
         return true
     }
     
     // Initializers
     
-    public init(objectType: Object.Type, primaryKey: String, baseURL: NSURL, path: String, parameters: [String : AnyObject]?, method: RealmKit.Method) {
+    public init(objectType: Object.Type, primaryKey: String, baseURL: URL, path: String, parameters: [String : AnyObject]?, method: RealmKit.Method) {
         self.objectType = objectType
         self.primaryKey = primaryKey
         
@@ -246,49 +246,49 @@ public class RealmSyncOperation: NSOperation {
     
     // Override NSOperation Functions
     
-    override public func start() {
+    override open func start() {
 
-        if NSThread.isMainThread() == false {
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+        if Thread.isMainThread == false {
+            DispatchQueue.main.async(execute: { () -> Void in
                 self.start()
             })
             return
         }
         
         // Set NSOperation status
-        executing = true
-        finished = false
+        isExecuting = true
+        isFinished = false
         
-        let dispatchSessionGroup = dispatch_group_create()
+        let dispatchSessionGroup = DispatchGroup()
         
         // Start asynchronous API
-        dispatch_group_enter(dispatchSessionGroup)
-        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
+        dispatchSessionGroup.enter()
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async(execute: { () -> Void in
 
             if let syncType = self.objectType as? RealmSyncable.Type {
             
-                dispatch_group_enter(dispatchSessionGroup)
+                dispatchSessionGroup.enter()
                 
                 self.sessionTask = syncType.requestWithBaseURL(self.baseURL, path: self.path, parameters: self.parameters, method: self.method, completion: { (success, request, response, jsonResponse, error) -> Void in
                     
                     self.syncResult = SyncResult(request: request, response: response, success: success, jsonResponse: jsonResponse, oldPrimaryKey: self.primaryKey, error: error, userInfo: self.userInfo)
                     
-                    dispatch_group_leave(dispatchSessionGroup)
+                    dispatchSessionGroup.leave()
                 })
             }
             
-            dispatch_group_leave(dispatchSessionGroup)
+            dispatchSessionGroup.leave()
         })
     
         // Completion
-        dispatch_group_notify(dispatchSessionGroup, dispatch_get_main_queue(), {
+        dispatchSessionGroup.notify(queue: DispatchQueue.main, execute: {
             
             // Debug logging
             if RealmKit.sharedInstance.debugLogs {
                 print("PATH: \(self.path) PARAMETERS: \(self.parameters) HTTPMETHOD: \(self.method.rawValue) STATUSCODE: \(self.syncResult?.response?.statusCode) RESPONSE: \(self.syncResult?.jsonResponse)")
             }
 
-            let dispatchCompletionGroup = dispatch_group_create()
+            let dispatchCompletionGroup = DispatchGroup()
             
             // 1 No GET request fired = the current realmObject is the only local instance
             
@@ -296,7 +296,7 @@ public class RealmSyncOperation: NSOperation {
             
             // 3 GET request fired and returned = the current realmObject and fetched realmObject are both local instances
             
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
+            DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async(execute: { () -> Void in
                 var realm: Realm?
                 
                 do {
@@ -308,10 +308,10 @@ public class RealmSyncOperation: NSOperation {
                         self.serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, syncOperation: self)
                         
                         if let objectDictionary = self.objectDictionaryFromJSONResponse(self.syncResult?.jsonResponse, serializationInfo: self.serializationInfo!) {
-                            dispatch_group_enter(dispatchCompletionGroup)
+                            dispatchCompletionGroup.enter()
                             
                             // Create new Object with ObjectDictionary
-                            if let syncType = self.objectType as? RealmSyncable.Type, serializeType = self.objectType as? RealmJSONSerializable.Type {
+                            if let syncType = self.objectType as? RealmSyncable.Type, let serializeType = self.objectType as? RealmJSONSerializable.Type {
                                 
                                 // Should serialize?
                                 if syncType.realmSyncOperation(self, shouldSerializeJSON: objectDictionary, serializationInfo: self.serializationInfo!, inRealm: realm) {
@@ -337,7 +337,7 @@ public class RealmSyncOperation: NSOperation {
                                         
                                         // Delete temp object
                                         if realmObjectInfo?.primaryKey == nil {
-                                            if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
+                                            if let realmObject = realm.object(ofType: self.objectType, forPrimaryKey: self.primaryKey) as? RealmSyncable {
                                                 do {
                                                     try realm.write({ () -> Void in
                                                         realmObject.setSyncStatus(.Synced, serializationInfo: self.serializationInfo)
@@ -348,12 +348,12 @@ public class RealmSyncOperation: NSOperation {
                                         
                                         // Update syncStatus & syncIdentifier
                                         
-                                        dispatch_group_leave(dispatchCompletionGroup)
+                                        dispatchCompletionGroup.leave()
                                     })
                                 }
                             }
                         } else {
-                            if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
+                            if let realmObject = realm.object(ofType: self.objectType, forPrimaryKey: self.primaryKey) as? RealmSyncable {
                                 do {
                                     try realm.write({ () -> Void in
                                         realmObject.setSyncStatus(.Synced, serializationInfo: self.serializationInfo)
@@ -373,13 +373,13 @@ public class RealmSyncOperation: NSOperation {
                     }
                 }
                 
-                dispatch_group_notify(dispatchCompletionGroup, dispatch_get_main_queue(), {
+                dispatchCompletionGroup.notify(queue: DispatchQueue.main, execute: {
                     
                     // Set NSOperation status
-                    self.executing = false
-                    self.finished = true
+                    self.isExecuting = false
+                    self.isFinished = true
                     
-                    NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationDidCompleteNotification, object:self)
+                    NotificationCenter.default.post(name: RealmSyncOperationDidCompleteNotification, object: self)
                 })
             })
         })
@@ -389,11 +389,11 @@ public class RealmSyncOperation: NSOperation {
     
     // MARK: Networking
     
-    func objectDictionaryFromJSONResponse(jsonResponse: AnyObject?, serializationInfo: SerializationInfo) -> NSDictionary? {
+    func objectDictionaryFromJSONResponse(_ jsonResponse: AnyObject?, serializationInfo: SerializationInfo) -> NSDictionary? {
         if let jsonResponse = jsonResponse as? NSDictionary {
-            if let method = serializationInfo.method, syncType = objectType as? RealmSyncable.Type {
+            if let method = serializationInfo.method, let syncType = objectType as? RealmSyncable.Type {
                 if let responseObjectKey = syncType.realmSyncJSONResponseKey(method, userInfo: serializationInfo.userInfo) {
-                    return jsonResponse.objectForKey(responseObjectKey) as? NSDictionary
+                    return jsonResponse.object(forKey: responseObjectKey) as? NSDictionary
                 } else {
                     return jsonResponse
                 }

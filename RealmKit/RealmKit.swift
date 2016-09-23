@@ -8,13 +8,13 @@
 
 import Foundation
 
-public class RealmKit {
+open class RealmKit {
     
     public enum Method: String {
         case OPTIONS, GET, HEAD, POST, PUT, PATCH, DELETE, TRACE, CONNECT
     }
     
-    public class var sharedInstance: RealmKit {
+    open class var sharedInstance: RealmKit {
         struct Singleton {
             static let instance = RealmKit()
         }
@@ -22,6 +22,6 @@ public class RealmKit {
         return Singleton.instance
     }
     
-    public var debugLogs = false
+    open var debugLogs = false
 
 }

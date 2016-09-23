@@ -15,21 +15,21 @@ public let RealmFetchOperationDidFinishNotification = "com.aplo.RealmFetchOperat
 
 @available(OSX 10.10, *)
 public protocol RealmFetchManagerDelegate {
-    func realmFetchManager(sender: RealmFetchManager, shouldStartWithFetchOperation fetchOperation: RealmFetchOperation) -> Bool
+    func realmFetchManager(_ sender: RealmFetchManager, shouldStartWithFetchOperation fetchOperation: RealmFetchOperation) -> Bool
 }
 
 @available(OSX 10.10, *)
-public class RealmFetchManager {
+open class RealmFetchManager {
     
-    var fetchQueue: dispatch_queue_t = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
+    var fetchQueue: DispatchQueue = DispatchQueue.global(qos: DispatchQoS.QoSClass.default)
     
-    var resumeTimer: NSTimer?
+    var resumeTimer: Timer?
     
     var totalFetchOperations: Int = 0
     
-    public var delegate: RealmFetchManagerDelegate?
+    open var delegate: RealmFetchManagerDelegate?
     
-    public class var sharedManager: RealmFetchManager {
+    open class var sharedManager: RealmFetchManager {
         struct Singleton {
             static let instance = RealmFetchManager()
         }
@@ -37,7 +37,7 @@ public class RealmFetchManager {
         return Singleton.instance
     }
     
-    public var progress: Double {
+    open var progress: Double {
         let remainingCount = Double(self.fetchOperationQueue.operationCount)
         
         if self.totalFetchOperations > 0 {
@@ -47,8 +47,8 @@ public class RealmFetchManager {
         return 0
     }
     
-    public lazy var fetchOperationQueue: NSOperationQueue = {
-        var _operationQueue = NSOperationQueue()
+    open lazy var fetchOperationQueue: OperationQueue = {
+        var _operationQueue = OperationQueue()
         _operationQueue.name = "Fetch queue"
         _operationQueue.maxConcurrentOperationCount = 1
         
@@ -62,12 +62,12 @@ public class RealmFetchManager {
     }
     
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Methods
     
-    public func addFetchOperation(fetchOperation: RealmFetchOperation) {
+    open func addFetchOperation(_ fetchOperation: RealmFetchOperation) {
         
         // Check if a fetchOperation with same identifier is already queued
         if fetchOperationIsQueued(fetchOperation) == false {
@@ -78,8 +78,8 @@ public class RealmFetchManager {
                     self.totalFetchOperations = 0
                 }
                 
-                dispatch_async(dispatch_get_main_queue()) { () -> Void in
-                    NSNotificationCenter.defaultCenter().postNotificationName(RealmFetchOperationProgressDidChangeNotification, object: nil)
+                DispatchQueue.main.async { () -> Void in
+                    NotificationCenter.default.post(name: Notification.Name(rawValue: RealmFetchOperationProgressDidChangeNotification), object: nil)
                 }
             }
             
@@ -90,7 +90,7 @@ public class RealmFetchManager {
         }
     }
     
-    public func fetchOperationIsQueued(fetchOperation: RealmFetchOperation) -> Bool {
+    open func fetchOperationIsQueued(_ fetchOperation: RealmFetchOperation) -> Bool {
         var isQueued = false
         
         for operation in self.fetchOperationQueue.operations {
@@ -111,89 +111,89 @@ public class RealmFetchManager {
         return isQueued
     }
     
-    public func suspendAndResumeAfter(resumeAfter: NSTimeInterval) {
-        fetchOperationQueue.suspended = true
+    open func suspendAndResumeAfter(_ resumeAfter: TimeInterval) {
+        fetchOperationQueue.isSuspended = true
         
         setTimerWithDuration(resumeAfter)
     }
     
-    private func setTimerWithDuration(duration: NSTimeInterval) {
+    fileprivate func setTimerWithDuration(_ duration: TimeInterval) {
         resumeTimer?.invalidate()
         resumeTimer = nil
         
         if duration > 0 {
-            resumeTimer = NSTimer(timeInterval: duration, target: RealmFetchManager.sharedManager, selector: #selector(RealmFetchManager.resumeFetchOperations), userInfo: nil, repeats: false)
+            resumeTimer = Timer(timeInterval: duration, target: RealmFetchManager.sharedManager, selector: #selector(RealmFetchManager.resumeFetchOperations), userInfo: nil, repeats: false)
             if let resumeTimer = resumeTimer {
-                NSRunLoop.mainRunLoop().addTimer(resumeTimer, forMode: NSRunLoopCommonModes)
+                RunLoop.main.add(resumeTimer, forMode: RunLoopMode.commonModes)
             }
         }
     }
     
-    public func resumeFetchOperations() {
-        fetchOperationQueue.suspended = false
+    open func resumeFetchOperations() {
+        fetchOperationQueue.isSuspended = false
     }
     
-    @objc public class func resumeFetchOperations() {
-        sharedManager.fetchOperationQueue.suspended = false
+    @objc open class func resumeFetchOperations() {
+        sharedManager.fetchOperationQueue.isSuspended = false
     }
 }
 
 // MARK: - RealmFetchOperation
 
 @available(OSX 10.10, *)
-public class RealmFetchOperation: NSOperation {
+open class RealmFetchOperation: Operation {
     
-    public typealias BeforeFetchClosure = (completion: (beforeData: [String: Any]?) -> Void) -> Void
-    public typealias FetchClosure = (completion: (fetchResult: FetchResult) -> Void) -> NSURLSessionTask?
-    public typealias AfterFetchClosure = (beforeData: [String: Any]?, fetchResult: FetchResult!, completion: (afterData: [String: Any]?) -> Void) -> Void
+    public typealias BeforeFetchClosure = (_ completion: (_ beforeData: [String: Any]?) -> Void) -> Void
+    public typealias FetchClosure = (_ completion: (_ fetchResult: FetchResult) -> Void) -> URLSessionTask?
+    public typealias AfterFetchClosure = (_ beforeData: [String: Any]?, _ fetchResult: FetchResult?, _ completion: (_ afterData: [String: Any]?) -> Void) -> Void
     
-    public let objectType: Object.Type
-    public let beforeFetchClosure: BeforeFetchClosure
-    public let fetchClosure: FetchClosure
-    public let afterFetchClosure: AfterFetchClosure
-    public let identifier: String
+    open let objectType: Object.Type
+    open let beforeFetchClosure: BeforeFetchClosure
+    open let fetchClosure: FetchClosure
+    open let afterFetchClosure: AfterFetchClosure
+    open let identifier: String
     
     var beforeData: [String: Any]?
     var fetchResult: FetchResult?
     var afterData: [String: Any]?
     
-    public var sessionTask: NSURLSessionTask?
+    open var sessionTask: URLSessionTask?
     
-    private var _executing: Bool = false
-    override public var executing: Bool {
+    fileprivate var _executing: Bool = false
+    override open var isExecuting: Bool {
         get {
             return _executing
         }
         set {
             if _executing != newValue {
-                willChangeValueForKey("isExecuting")
+                willChangeValue(forKey: "isExecuting")
                 _executing = newValue
-                didChangeValueForKey("isExecuting")
+                didChangeValue(forKey: "isExecuting")
             }
         }
     }
     
-    private var _finished: Bool = false;
-    override public var finished: Bool {
+    fileprivate var _finished: Bool = false;
+    override open var isFinished: Bool {
         get {
             return _finished
         }
         set {
             if _finished != newValue {
-                willChangeValueForKey("isFinished")
+                willChangeValue(forKey: "isFinished")
                 _finished = newValue
-                didChangeValueForKey("isFinished")
+                didChangeValue(forKey: "isFinished")
             }
         }
     }
     
-    override public var asynchronous: Bool {
+    override open var isAsynchronous: Bool {
         return true
     }
     
     // Initializers
     
-    public init<T: Object>(type: T.Type, beforeFetchClosure: BeforeFetchClosure, fetchClosure: FetchClosure, afterFetchClosure: AfterFetchClosure, queuePriority: NSOperationQueuePriority = .Normal, identifier: String) {
+    public init<T: Object>(type: T.Type, beforeFetchClosure: @escaping BeforeFetchClosure, fetchClosure: @escaping FetchClosure, afterFetchClosure: @escaping AfterFetchClosure, queuePriority: Operation.QueuePriority = .normal, identifier: String) {
         self.objectType = type
         self.beforeFetchClosure = beforeFetchClosure
         self.fetchClosure = fetchClosure
@@ -209,93 +209,93 @@ public class RealmFetchOperation: NSOperation {
     
     // MARK: NSOperation
     
-    override public func start() {
-        if NSThread.isMainThread() == false {
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+    override open func start() {
+        if Thread.isMainThread == false {
+            DispatchQueue.main.async(execute: { () -> Void in
                 self.start()
             })
             return
         }
         
-        if self.cancelled {
+        if self.isCancelled {
             return
         }
         
         // Set NSOperation status
-        executing = true
-        finished = false
+        isExecuting = true
+        isFinished = false
         
-        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            NSNotificationCenter.defaultCenter().postNotificationName(RealmFetchOperationDidStartNotification, object: self)
+        DispatchQueue.main.async(execute: { () -> Void in
+            NotificationCenter.default.post(name: Notification.Name(rawValue: RealmFetchOperationDidStartNotification), object: self)
         })
         
-        let dispatchBeforeFetchGroup = dispatch_group_create()
-        let dispatchFetchObjectsGroup = dispatch_group_create()
-        let dispatchAfterFetchGroup = dispatch_group_create()
+        let dispatchBeforeFetchGroup = DispatchGroup()
+        let dispatchFetchObjectsGroup = DispatchGroup()
+        let dispatchAfterFetchGroup = DispatchGroup()
         
-        if self.cancelled == false {
+        if self.isCancelled == false {
             
             // Before Fetch
-            dispatch_group_enter(dispatchBeforeFetchGroup)
-            dispatch_async(RealmFetchManager.sharedManager.fetchQueue, { () -> Void in
+            dispatchBeforeFetchGroup.enter()
+            RealmFetchManager.sharedManager.fetchQueue.async(execute: { () -> Void in
                 
-                if self.cancelled == false {
-                    dispatch_group_enter(dispatchBeforeFetchGroup)
-                    self.beforeFetchClosure(completion: { (beforeData) in
+                if self.isCancelled == false {
+                    dispatchBeforeFetchGroup.enter()
+                    self.beforeFetchClosure({ (beforeData) in
                         self.beforeData = beforeData
 
-                        dispatch_group_leave(dispatchBeforeFetchGroup)
+                        dispatchBeforeFetchGroup.leave()
                     })
                 }
 
-                dispatch_group_leave(dispatchBeforeFetchGroup)
+                dispatchBeforeFetchGroup.leave()
             })
 
             // Fetch
-            dispatch_group_enter(dispatchFetchObjectsGroup)
-            dispatch_group_notify(dispatchBeforeFetchGroup, RealmFetchManager.sharedManager.fetchQueue, {
+            dispatchFetchObjectsGroup.enter()
+            dispatchBeforeFetchGroup.notify(queue: RealmFetchManager.sharedManager.fetchQueue, execute: {
                 
-                if self.cancelled == false {
-                    dispatch_group_enter(dispatchFetchObjectsGroup)
-                    self.sessionTask = self.fetchClosure(completion: { (fetchResult) in
+                if self.isCancelled == false {
+                    dispatchFetchObjectsGroup.enter()
+                    self.sessionTask = self.fetchClosure({ (fetchResult) in
                         self.fetchResult = fetchResult
                         
-                        dispatch_group_leave(dispatchFetchObjectsGroup)
+                        dispatchFetchObjectsGroup.leave()
                     })
                 }
                 
-                dispatch_group_leave(dispatchFetchObjectsGroup)
+                dispatchFetchObjectsGroup.leave()
             })
             
             // After Fetch
-            dispatch_group_enter(dispatchAfterFetchGroup)
-            dispatch_group_notify(dispatchFetchObjectsGroup, RealmFetchManager.sharedManager.fetchQueue, {
+            dispatchAfterFetchGroup.enter()
+            dispatchFetchObjectsGroup.notify(queue: RealmFetchManager.sharedManager.fetchQueue, execute: {
 
-                if self.cancelled == false {
-                    dispatch_group_enter(dispatchAfterFetchGroup)
-                    self.afterFetchClosure(beforeData: self.beforeData, fetchResult: self.fetchResult, completion: { (afterData) in
+                if self.isCancelled == false {
+                    dispatchAfterFetchGroup.enter()
+                    self.afterFetchClosure(self.beforeData, self.fetchResult, { (afterData) in
                         self.afterData = afterData
 
-                        dispatch_group_leave(dispatchAfterFetchGroup)
+                        dispatchAfterFetchGroup.leave()
                     })
                 }
                 
-                dispatch_group_leave(dispatchAfterFetchGroup)
+                dispatchAfterFetchGroup.leave()
             })
         }
         
-        dispatch_group_notify(dispatchAfterFetchGroup, dispatch_get_main_queue()) {
-            if self.cancelled == false {
+        dispatchAfterFetchGroup.notify(queue: DispatchQueue.main) {
+            if self.isCancelled == false {
                 if let realmKitType = self.objectType as? RealmKitObject.Type {
                     realmKitType.handleRequest(self.fetchResult?.request, response: self.fetchResult?.response, jsonResponse: self.fetchResult?.jsonResponse, error: self.fetchResult?.error, fetchOperation: self, syncOperation: nil, inRealm: nil)
                 }
                 
-                NSNotificationCenter.defaultCenter().postNotificationName(RealmFetchOperationDidFinishNotification, object: self)
+                NotificationCenter.default.post(name: Notification.Name(rawValue: RealmFetchOperationDidFinishNotification), object: self)
             }
             
             // Set NSOperation status
-            self.executing = false
-            self.finished = true
+            self.isExecuting = false
+            self.isFinished = true
         }
     }
 }
