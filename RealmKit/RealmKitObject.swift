@@ -12,6 +12,8 @@ import RealmSwift
 @available(OSX 10.10, *)
 public protocol RealmKitObjectProtocol {
 
+    
+    
     // MARK: - Properties
     
     var id: String { get set }
@@ -30,7 +32,7 @@ public protocol RealmKitObjectProtocol {
     
     static func baseURL() -> URL!
     
-    static func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.HTTPMethod, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask?
+    static func request(_ method: RealmKit.HTTPMethod, path: String, parameters: [String: Any]?, completion: (RealmKit.JSONResponse) -> Void) -> URLSessionTask?
     
     static func handleRequest(_ request: URLRequest!, response: HTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
@@ -82,9 +84,9 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         return nil
     }
     
-    open class func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.HTTPMethod, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask? {
+    open class func request(_ method: RealmKit.HTTPMethod, path: String, parameters: [String: Any]?, completion: (RealmKit.JSONResponse) -> Void) -> URLSessionTask? {
 
-        print("# RealmKit: Please override requestWithBaseURL:path:parameters:method:completion: in \(self)")
+        print("# RealmKit: Please override request:method:path:parameters:completion: in \(self)")
         
         return nil
     }
