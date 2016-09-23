@@ -21,9 +21,9 @@ public struct SerializationInfo {
     // MARK: Optional
     
     public let method: RealmKit.Method?
-    public var userInfo: [String: AnyObject]
+    public var userInfo: [String: Any]
     
-    public var json: [String: AnyObject]?
+    public var json: [String: Any]?
     
     public let oldPrimaryKey: String?
     public var newPrimaryKey: String?
@@ -35,7 +35,7 @@ public struct SerializationInfo {
     public init(
         realm: Realm,
         method: RealmKit.Method? = nil,
-        userInfo: [String: AnyObject] = [String: AnyObject](),
+        userInfo: [String: Any] = [String: Any](),
         oldPrimaryKey: String? = nil,
         newPrimaryKey: String? = nil,
         syncOperation: RealmSyncOperation? = nil,
@@ -91,11 +91,11 @@ public protocol RealmJSONSerializable: RealmSyncable, RealmFetchable {
     
     static func didCreateOrUpdateRealmObject(with serializationInfo: SerializationInfo?)
     
-    static func keyValueDictionary<T: Object>(for type: T.Type, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> [String: AnyObject]
+    static func keyValueDictionary<T: Object>(for type: T.Type, jsonDictionary: NSDictionary, keyValueDictionary: [String: Any], serializationInfo: SerializationInfo) -> [String: Any]
     
-    static func modifiedRealmObject(_ realmObject: Object, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object?
+    static func modifiedRealmObject(_ realmObject: Object, jsonDictionary: NSDictionary, keyValueDictionary: [String: Any], serializationInfo: SerializationInfo) -> Object?
     
-    static func shouldCreateOrUpdate<T: Object>(_ type: T.Type, primaryKey: String, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool
+    static func shouldCreateOrUpdate<T: Object>(_ type: T.Type, primaryKey: String, jsonDictionary: NSDictionary, keyValueDictionary: [String: Any], serializationInfo: SerializationInfo) -> Bool
 }
 
 // MARK: - Extension for method implementations
@@ -193,7 +193,7 @@ public extension RealmJSONSerializable  {
         
         // Object key -> JSON keyPath
         if let mappingDictionary = jsonKeyPathsByPropertyKey(with: serializationInfo) {
-            var keyValueDictionary = [String: AnyObject]()
+            var keyValueDictionary = [String: Any]()
             var serializationInfo = serializationInfo
             
             for (key, keyPath) in mappingDictionary {
@@ -203,7 +203,7 @@ public extension RealmJSONSerializable  {
                         // Default Value if it's not primary key
                         if let primaryKey = (type as Object.Type).primaryKey() {
                             if key != primaryKey {
-                                if let defaultValue: AnyObject = self.defaultPropertyValues()[key] {
+                                if let defaultValue = self.defaultPropertyValues()[key] {
                                     keyValueDictionary[key] = defaultValue
                                 }
                             }
@@ -211,7 +211,7 @@ public extension RealmJSONSerializable  {
                     } else {
                         
                         // ValueTransformer
-                        serializationInfo.json = jsonDictionary as? [String: AnyObject]
+                        serializationInfo.json = jsonDictionary as? [String: Any]
                         if let valueTransformer = jsonTransformerForKey(key, serializationInfo: serializationInfo) {
                             if let value: AnyObject = valueTransformer.transformedValue(jsonValue) as AnyObject? {
                                 keyValueDictionary[key] = value

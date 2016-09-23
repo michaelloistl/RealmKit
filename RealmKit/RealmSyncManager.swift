@@ -174,9 +174,9 @@ open class RealmSyncOperation: Operation {
     open let method: RealmKit.Method
     open let baseURL: URL
     open let path: String
-    open let parameters: [String : AnyObject]?
+    open let parameters: [String : Any]?
     
-    open var userInfo = [String : AnyObject]()
+    open var userInfo = [String : Any]()
     open var sessionTask: URLSessionTask?
     
     open var serializationInfo: SerializationInfo?
@@ -232,7 +232,7 @@ open class RealmSyncOperation: Operation {
     
     // Initializers
     
-    public init(objectType: Object.Type, primaryKey: String, baseURL: URL, path: String, parameters: [String : AnyObject]?, method: RealmKit.Method) {
+    public init(objectType: Object.Type, primaryKey: String, baseURL: URL, path: String, parameters: [String : Any]?, method: RealmKit.Method) {
         self.objectType = objectType
         self.primaryKey = primaryKey
         

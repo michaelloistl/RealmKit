@@ -49,7 +49,7 @@ public struct PageInfo {
 public protocol RealmFetchPagable: RealmKitObjectProtocol {
     
     // MARK: Required
-    static func fetchPagingParameters(for realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]?
+    static func fetchPagingParameters(for realmFetchPaged: RealmFetchPaged) -> [String: Any]?
     static func fetchPageInfo(from fetchResult: FetchResult?) -> PageInfo?
     
     // MARK: Optional
@@ -115,7 +115,7 @@ open class RealmFetchPaged {
     // MARK: - Methods
     
     open func startRequest(_ addPagingParameters: Bool = true) -> URLSessionTask? {
-        var parameters = fetchRequest.parameters ?? [String: AnyObject]()
+        var parameters = fetchRequest.parameters ?? [String: Any]()
         
         if let pagingParameters = (type as? RealmFetchPagable.Type)?.fetchPagingParameters(for: self) , addPagingParameters {
             pagingParameters.forEach({ (key, value) in

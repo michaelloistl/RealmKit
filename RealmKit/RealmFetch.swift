@@ -20,16 +20,16 @@ public struct FetchRequest {
     
     // MARK: Optional
     
-    public let parameters: [String: AnyObject]?
+    public let parameters: [String: Any]?
     public let jsonResponseKey: String?
-    public let userInfo: [String: AnyObject]
+    public let userInfo: [String: Any]
     
     public init(
         baseURL: URL,
         path: String,
-        parameters: [String: AnyObject]? = nil,
+        parameters: [String: Any]? = nil,
         jsonResponseKey: String? = nil,
-        userInfo: [String: AnyObject] = [String: AnyObject]()
+        userInfo: [String: Any] = [String: Any]()
         ) {
         self.baseURL = baseURL
         self.path = path
@@ -47,7 +47,7 @@ public struct FetchResult {
     public let jsonResponse: AnyObject?
     public let realmObjectInfos: [RealmObjectInfo]?
     public let error: NSError?
-    public let userInfo: [String: AnyObject]
+    public let userInfo: [String: Any]
 
     public init(
         request: URLRequest!,
@@ -56,7 +56,7 @@ public struct FetchResult {
         jsonResponse: AnyObject? = nil,
         realmObjectInfos: [RealmObjectInfo]? = nil,
         error: NSError? = nil,
-        userInfo: [String: AnyObject] = [String: AnyObject]()
+        userInfo: [String: Any] = [String: Any]()
         ) {
         self.request = request
         self.response = response
@@ -105,10 +105,10 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                 
                 var json: AnyObject? = jsonResponse
                 
-                // jsonResponse - [String: AnyObject]
-                if let jsonDictionary = jsonResponse as? [String: AnyObject] {
+                // jsonResponse - [String: Any]
+                if let jsonDictionary = jsonResponse as? [String: Any] {
                     if let jsonObjectKey = fetchRequest.jsonResponseKey {
-                        json = jsonDictionary[jsonObjectKey]
+                        json = jsonDictionary[jsonObjectKey] as AnyObject
                     }
                 }
                 

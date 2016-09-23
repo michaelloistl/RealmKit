@@ -26,11 +26,11 @@ public protocol RealmKitObjectProtocol {
     
     static func primaryKey() -> String?
     
-    static func defaultPropertyValues() -> [String: AnyObject]
+    static func defaultPropertyValues() -> [String: Any]
     
     static func baseURL() -> URL!
     
-    static func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask?
+    static func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask?
     
     static func handleRequest(_ request: URLRequest!, response: HTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
@@ -65,7 +65,7 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         return "id"
     }
     
-    open class func defaultPropertyValues() -> [String: AnyObject] {
+    open class func defaultPropertyValues() -> [String: Any] {
         return [
             "id": UUID().uuidString as AnyObject,
             "deletedAt": 0 as AnyObject,
@@ -82,7 +82,7 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         return nil
     }
     
-    open class func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: AnyObject]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask? {
+    open class func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask? {
 
         print("# RealmKit: Please override requestWithBaseURL:path:parameters:method:completion: in \(self)")
         
@@ -152,15 +152,15 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         return nil
     }
     
-    open class func keyValueDictionary<T: Object>(for type: T.Type, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> [String: AnyObject] {
+    open class func keyValueDictionary<T: Object>(for type: T.Type, jsonDictionary: NSDictionary, keyValueDictionary: [String: Any], serializationInfo: SerializationInfo) -> [String: Any] {
         return keyValueDictionary
     }
     
-    open class func modifiedRealmObject(_ realmObject: Object, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object? {
+    open class func modifiedRealmObject(_ realmObject: Object, jsonDictionary: NSDictionary, keyValueDictionary: [String: Any], serializationInfo: SerializationInfo) -> Object? {
         return realmObject
     }
     
-    open class func shouldCreateOrUpdate<T: Object>(_ type: T.Type, primaryKey: String, jsonDictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool {
+    open class func shouldCreateOrUpdate<T: Object>(_ type: T.Type, primaryKey: String, jsonDictionary: NSDictionary, keyValueDictionary: [String: Any], serializationInfo: SerializationInfo) -> Bool {
         return true
     }
     
@@ -180,7 +180,7 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
     
     // MARK: RealmFetchPagable
     
-    open class func fetchPagingParameters(for realmFetchPaged: RealmFetchPaged) -> [String: AnyObject]? {
+    open class func fetchPagingParameters(for realmFetchPaged: RealmFetchPaged) -> [String: Any]? {
         print("# RealmKit: Please override fetchPagingParametersFor:realmFetchPaged in \(self)")
         
         return nil
@@ -257,13 +257,13 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         return nil
     }
     
-    open func realmSyncParameters(_ method: RealmKit.Method) -> [String: AnyObject]? {
+    open func realmSyncParameters(_ method: RealmKit.Method) -> [String: Any]? {
         print("# RealmKit: Please override realmSyncParameters: in \(self)")
         
         return nil
     }
     
-    open class func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: AnyObject]) -> String? {
+    open class func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: Any]) -> String? {
         print("# RealmKit: Please override realmSyncJSONResponseKey:userInfo: in \(self)")
         
         return nil

@@ -21,7 +21,7 @@ public struct SyncResult {
     public let oldPrimaryKey: String?
     public let newPrimaryKey: String?
     public let error: NSError?
-    public let userInfo: [String: AnyObject]
+    public let userInfo: [String: Any]
     
     public init(
         request: URLRequest!,
@@ -32,7 +32,7 @@ public struct SyncResult {
         oldPrimaryKey: String? = nil,
         newPrimaryKey: String? = nil,
         error: NSError? = nil,
-        userInfo: [String: AnyObject] = [String: AnyObject]()
+        userInfo: [String: Any] = [String: Any]()
         ) {
         self.request = request
         self.response = response
@@ -63,9 +63,9 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     func realmSyncOperations() -> [RealmSyncOperation]
     func realmSyncMethod() -> RealmKit.Method!
     func realmSyncPath(_ method: RealmKit.Method) -> String?
-    func realmSyncParameters(_ method: RealmKit.Method) -> [String: AnyObject]?
+    func realmSyncParameters(_ method: RealmKit.Method) -> [String: Any]?
     
-    static func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: AnyObject]) -> String?
+    static func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: Any]) -> String?
     
     // MARK: Optional
     
