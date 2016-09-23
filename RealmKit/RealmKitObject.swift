@@ -30,7 +30,7 @@ public protocol RealmKitObjectProtocol {
     
     static func baseURL() -> URL!
     
-    static func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask?
+    static func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.HTTPMethod, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask?
     
     static func handleRequest(_ request: URLRequest!, response: HTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
@@ -82,7 +82,7 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         return nil
     }
     
-    open class func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.Method, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask? {
+    open class func requestWithBaseURL(_ baseURL: URL, path: String, parameters: [String: Any]?, method: RealmKit.HTTPMethod, completion: (_ success: Bool, _ request: URLRequest?, _ response: HTTPURLResponse?, _ jsonResponse: AnyObject?, _ error: NSError?) -> Void) -> URLSessionTask? {
 
         print("# RealmKit: Please override requestWithBaseURL:path:parameters:method:completion: in \(self)")
         
@@ -239,7 +239,7 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         return syncOperations
     }
     
-    open func realmSyncMethod() -> RealmKit.Method! {
+    open func realmSyncMethod() -> RealmKit.HTTPMethod! {
         if deletedAt > 0 {
             return .DELETE
         } else {
@@ -251,19 +251,19 @@ open class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable
         }
     }
     
-    open func realmSyncPath(_ method: RealmKit.Method) -> String? {
+    open func realmSyncPath(_ method: RealmKit.HTTPMethod) -> String? {
         print("# RealmKit: Please override realmSyncPath: in \(self)")
         
         return nil
     }
     
-    open func realmSyncParameters(_ method: RealmKit.Method) -> [String: Any]? {
+    open func realmSyncParameters(_ method: RealmKit.HTTPMethod) -> [String: Any]? {
         print("# RealmKit: Please override realmSyncParameters: in \(self)")
         
         return nil
     }
     
-    open class func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: Any]) -> String? {
+    open class func realmSyncJSONResponseKey(_ method: RealmKit.HTTPMethod, userInfo: [String: Any]) -> String? {
         print("# RealmKit: Please override realmSyncJSONResponseKey:userInfo: in \(self)")
         
         return nil

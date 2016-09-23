@@ -20,7 +20,7 @@ public struct SerializationInfo {
     
     // MARK: Optional
     
-    public let method: RealmKit.Method?
+    public let method: RealmKit.HTTPMethod?
     public var userInfo: [String: Any]
     
     public var json: [String: Any]?
@@ -34,7 +34,7 @@ public struct SerializationInfo {
     
     public init(
         realm: Realm,
-        method: RealmKit.Method? = nil,
+        method: RealmKit.HTTPMethod? = nil,
         userInfo: [String: Any] = [String: Any](),
         oldPrimaryKey: String? = nil,
         newPrimaryKey: String? = nil,

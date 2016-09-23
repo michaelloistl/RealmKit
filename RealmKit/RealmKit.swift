@@ -10,7 +10,7 @@ import Foundation
 
 open class RealmKit {
     
-    public enum Method: String {
+    public enum HTTPMethod: String {
         case OPTIONS, GET, HEAD, POST, PUT, PATCH, DELETE, TRACE, CONNECT
     }
     

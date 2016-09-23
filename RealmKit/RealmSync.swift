@@ -61,11 +61,11 @@ public protocol RealmSyncable: RealmKitObjectProtocol {
     func setSyncStatus(_ syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo?)
     
     func realmSyncOperations() -> [RealmSyncOperation]
-    func realmSyncMethod() -> RealmKit.Method!
-    func realmSyncPath(_ method: RealmKit.Method) -> String?
-    func realmSyncParameters(_ method: RealmKit.Method) -> [String: Any]?
+    func realmSyncMethod() -> RealmKit.HTTPMethod!
+    func realmSyncPath(_ method: RealmKit.HTTPMethod) -> String?
+    func realmSyncParameters(_ method: RealmKit.HTTPMethod) -> [String: Any]?
     
-    static func realmSyncJSONResponseKey(_ method: RealmKit.Method, userInfo: [String: Any]) -> String?
+    static func realmSyncJSONResponseKey(_ method: RealmKit.HTTPMethod, userInfo: [String: Any]) -> String?
     
     // MARK: Optional
     
