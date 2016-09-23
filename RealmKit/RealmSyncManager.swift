@@ -14,12 +14,14 @@ public let RealmSyncOperationDidCompleteNotification = "com.aplo.RealmSyncOperat
 
 // MARK: - RealmSyncManagerDelegate
 
+@available(OSX 10.10, *)
 public protocol RealmSyncManagerDelegate {
     func realmSyncManager(sender: RealmSyncManager, shouldStartWithSyncOperation syncOperation: RealmSyncOperation) -> Bool
 }
 
 // MARK: - RealmSync
 
+@available(OSX 10.10, *)
 public class RealmSyncManager {
     
     public enum SyncStatus: String {
@@ -75,7 +77,9 @@ public class RealmSyncManager {
         registeredTypes.append(type)
     }
     
-    public func addPendingSyncOperations() {
+    public func addPendingSyncOperations(completion: (operations: [RealmSyncOperation]) -> Void) {
+        var operations = [RealmSyncOperation]()
+        
         if addingPendingSyncOperations == false {
             addingPendingSyncOperations = true
             
@@ -90,30 +94,38 @@ public class RealmSyncManager {
                 
                 let predicate = NSPredicate(format: "syncStatus == %@", RealmSyncManager.SyncStatus.Sync.rawValue)
                 for registeredType in self.registeredTypes {
-                        if let syncObjects = realm?.objects(registeredType).filter(predicate) {
-                            for syncObject in syncObjects {
-                                if let syncObject = syncObject as? RealmSyncable {
-                                    let syncOperations = syncObject.realmSyncOperations()
-                                    for syncOperation in syncOperations {
-                                        if self.delegate?.realmSyncManager(self, shouldStartWithSyncOperation: syncOperation) ?? true {
-                                            // SyncOperation completion block
-                                            syncOperation.completionBlock = {
-                                                
-                                            }
+                    if let syncObjects = realm?.objects(registeredType).filter(predicate) {
+                        for syncObject in syncObjects {
+                            if let syncObject = syncObject as? RealmSyncable {
+                                let syncOperations = syncObject.realmSyncOperations()
+                                for syncOperation in syncOperations {
+                                    var shouldStart = true
+                                    if let _shouldStart = self.delegate?.realmSyncManager(self, shouldStartWithSyncOperation: syncOperation) {
+                                        shouldStart = _shouldStart
+                                    }
+                                    
+                                    if shouldStart {
+                                        
+                                        // SyncOperation completion block
+                                        syncOperation.completionBlock = {
                                             
-                                            // Add SyncOperation to queue
-                                            if self.syncOperationIsQueued(syncOperation) == false {
-                                                self.syncOperationQueue.addOperation(syncOperation)
-                                            }
+                                        }
+                                        
+                                        // Add SyncOperation to queue
+                                        if self.syncOperationIsQueued(syncOperation) == false {
+                                            operations.append(syncOperation)
+                                            self.syncOperationQueue.addOperation(syncOperation)
                                         }
                                     }
                                 }
-                            
+                            }
                         }
                     }
                 }
                 
                 self.addingPendingSyncOperations = false
+                
+                completion(operations: operations)
             })
         }
     }
@@ -128,13 +140,6 @@ public class RealmSyncManager {
                     if operation.primaryKey == syncOperation.primaryKey {
                         isQueued = true
                         break
-                        
-
-// Only checking for type and primary key in order to only allow one sync operation per object instance
-//                        if operation.path == syncOperation.path {
-//                            if operation.method.rawValue == syncOperation.method.rawValue {
-//                            }
-//                        }
                     }
                 }
             }
@@ -160,6 +165,7 @@ public class RealmSyncObjectInfo: NSObject {
 
 // MARK: - RealmSyncOperation
 
+@available(OSX 10.10, *)
 public class RealmSyncOperation: NSOperation {
     
     public let objectType: Object.Type
@@ -297,7 +303,6 @@ public class RealmSyncOperation: NSOperation {
                     realm = try Realm()
                 } catch { }
                 
-                
                 if let realm = realm {
                     if self.syncResult?.success == true {
                         self.serializationInfo = SerializationInfo(realm: realm, method: self.method, userInfo: self.userInfo, oldPrimaryKey: self.primaryKey, syncOperation: self)
@@ -331,23 +336,7 @@ public class RealmSyncOperation: NSOperation {
                                         syncType.realmSyncOperation(self, didSerializeJSON: objectDictionary, serializationInfo: self.serializationInfo!, syncResult: self.syncResult, inRealm: realm)
                                         
                                         // Delete temp object
-                                        if let newPrimaryKey = realmObjectInfo?.primaryKey {
-                                            if self.primaryKey != newPrimaryKey {
-                                                if var tempRealmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmKitObjectProtocol {
-                                                    let realmSyncObjectInfo = RealmSyncObjectInfo(type: self.objectType, oldPrimaryKey: self.primaryKey, newPrimaryKey: newPrimaryKey)
-                                                    
-                                                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                                        NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
-                                                    })
-                                                    
-                                                    do {
-                                                        try realm.write({ () -> Void in
-                                                            tempRealmObject.deletedAt = NSDate().timeIntervalSince1970
-                                                        })
-                                                    } catch { }
-                                                }
-                                            }
-                                        } else {
+                                        if realmObjectInfo?.primaryKey == nil {
                                             if let realmObject = realm.objectForPrimaryKey(self.objectType, key: self.primaryKey) as? RealmSyncable {
                                                 do {
                                                     try realm.write({ () -> Void in
@@ -386,11 +375,11 @@ public class RealmSyncOperation: NSOperation {
                 
                 dispatch_group_notify(dispatchCompletionGroup, dispatch_get_main_queue(), {
                     
-                    NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationDidCompleteNotification, object:self)
-                    
                     // Set NSOperation status
                     self.executing = false
                     self.finished = true
+                    
+                    NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationDidCompleteNotification, object:self)
                 })
             })
         })

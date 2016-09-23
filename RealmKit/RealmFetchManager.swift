@@ -13,10 +13,12 @@ public let RealmFetchOperationProgressDidChangeNotification = "com.aplo.RealmFet
 public let RealmFetchOperationDidStartNotification = "com.aplo.RealmFetchOperationDidStartNotification"
 public let RealmFetchOperationDidFinishNotification = "com.aplo.RealmFetchOperationDidFinishNotification"
 
+@available(OSX 10.10, *)
 public protocol RealmFetchManagerDelegate {
     func realmFetchManager(sender: RealmFetchManager, shouldStartWithFetchOperation fetchOperation: RealmFetchOperation) -> Bool
 }
 
+@available(OSX 10.10, *)
 public class RealmFetchManager {
     
     var fetchQueue: dispatch_queue_t = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
@@ -110,7 +112,6 @@ public class RealmFetchManager {
     }
     
     public func suspendAndResumeAfter(resumeAfter: NSTimeInterval) {
-        NSLog("suspendAndResumeAfter: \(resumeAfter)")
         fetchOperationQueue.suspended = true
         
         setTimerWithDuration(resumeAfter)
@@ -139,6 +140,7 @@ public class RealmFetchManager {
 
 // MARK: - RealmFetchOperation
 
+@available(OSX 10.10, *)
 public class RealmFetchOperation: NSOperation {
     
     public typealias BeforeFetchClosure = (completion: (beforeData: [String: Any]?) -> Void) -> Void

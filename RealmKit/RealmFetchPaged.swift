@@ -9,6 +9,7 @@
 import Foundation
 import RealmSwift
 
+@available(OSX 10.10, *)
 public typealias RealmFetchPagedCompletionBlock = (realmFetchPaged: RealmFetchPaged!, completed: Bool) -> Void
 
 public struct PageInfo {
@@ -44,6 +45,7 @@ public struct PageInfo {
     }
 }
 
+@available(OSX 10.10, *)
 public protocol RealmFetchPagable: RealmKitObjectProtocol {
     
     // MARK: Required
@@ -55,6 +57,7 @@ public protocol RealmFetchPagable: RealmKitObjectProtocol {
     static func fetchPagedDidComplete(realmFetchPaged: RealmFetchPaged)
 }
 
+@available(OSX 10.10, *)
 public class RealmFetchPaged {
     
     public let type: Object.Type

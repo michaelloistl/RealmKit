@@ -85,6 +85,7 @@ public protocol RealmFetchable: RealmKitObjectProtocol {
 
 // MARK: - Extension for method implementations
 
+@available(OSX 10.10, *)
 public extension RealmFetchable where Self: RealmJSONSerializable {
     
     public static func fetch(fetchRequest: FetchRequest!, serialize: Bool = true, completion: RealmFetchCompletionBlock) -> NSURLSessionTask? {
@@ -129,7 +130,7 @@ public extension RealmFetchable where Self: RealmJSONSerializable {
                         
                         if let realm = realm {
                             if serialize && realmFetchShouldSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm) {
-                                let serializationInfo = SerializationInfo(realm: realm, method: .GET, userInfo: fetchRequest.userInfo)
+                                let serializationInfo = SerializationInfo(realm: realm, method: .GET, userInfo: fetchRequest.userInfo, fetchRequest: fetchRequest)
                                 
                                 // Will Serialize
                                 realmFetchWillSerializeJSON(json, fetchRequest: fetchRequest, inRealm: realm)

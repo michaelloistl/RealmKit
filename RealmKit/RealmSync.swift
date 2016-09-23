@@ -46,6 +46,7 @@ public struct SyncResult {
     }
 }
 
+@available(OSX 10.10, *)
 public protocol RealmSyncable: RealmKitObjectProtocol {
     
     // MARK: - Properties

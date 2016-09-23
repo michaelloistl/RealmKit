@@ -9,6 +9,7 @@
 import Foundation
 import RealmSwift
 
+@available(OSX 10.10, *)
 public protocol RealmKitObjectProtocol {
 
     // MARK: - Properties
@@ -34,6 +35,7 @@ public protocol RealmKitObjectProtocol {
     static func handleRequest(request: NSURLRequest!, response: NSHTTPURLResponse!, jsonResponse: AnyObject?, error: NSError!, fetchOperation: RealmFetchOperation?, syncOperation: RealmSyncOperation?, inRealm realm: Realm?)
 }
 
+@available(OSX 10.10, *)
 public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializable, RealmFetchable, RealmFetchPagable, RealmSyncable {
     
     // MARK: - Properties
@@ -128,6 +130,12 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
                 if var oldObject = realm.objectForPrimaryKey(self, key: oldPrimaryKey) as? RealmJSONSerializable {
                     oldObject.setSyncStatus(.Synced, serializationInfo: serializationInfo)
                     
+                    let realmSyncObjectInfo = RealmSyncObjectInfo(type: self, oldPrimaryKey: oldPrimaryKey, newPrimaryKey: newPrimaryKey)
+
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
+                    })
+
                     // Mark temp object deleted
                     oldObject.deletedAt = NSDate().timeIntervalSince1970
                 }
@@ -152,7 +160,7 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
         return realmObject
     }
     
-    public class func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, serializationInfo: SerializationInfo) -> Bool {
+    public class func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool {
         return true
     }
     
@@ -196,7 +204,19 @@ public class RealmKitObject: Object, RealmKitObjectProtocol, RealmJSONSerializab
     
     public func setSyncStatus(syncStatus: RealmSyncManager.SyncStatus, serializationInfo: SerializationInfo? = nil) {
         if !invalidated {
+            var inWriteTransaction = false
+            if realm?.inWriteTransaction == false {
+                realm?.beginWrite()
+                inWriteTransaction = true
+            }
+            
             self.syncStatus = syncStatus.rawValue
+            
+            if inWriteTransaction {
+                do {
+                    try realm?.commitWrite()
+                } catch {}
+            }
         }
     }
     

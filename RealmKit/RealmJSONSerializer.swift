@@ -11,6 +11,7 @@ import RealmSwift
 
 let RealmJSONSerializerErrorDomain = "com.aplo.ErrorDomain.RealmJSONObjectMapping"
 
+@available(OSX 10.10, *)
 public struct SerializationInfo {
     
     // MARK: Required
@@ -29,6 +30,7 @@ public struct SerializationInfo {
     
     public let syncOperation: RealmSyncOperation?
     public let fetchOperation: RealmFetchOperation?
+    public let fetchRequest: FetchRequest?
     
     public init(
         realm: Realm,
@@ -37,7 +39,8 @@ public struct SerializationInfo {
         oldPrimaryKey: String? = nil,
         newPrimaryKey: String? = nil,
         syncOperation: RealmSyncOperation? = nil,
-        fetchOperation: RealmFetchOperation? = nil
+        fetchOperation: RealmFetchOperation? = nil,
+        fetchRequest: FetchRequest? = nil
         ) {
             self.realm = realm
             self.method = method
@@ -46,6 +49,7 @@ public struct SerializationInfo {
             self.newPrimaryKey = newPrimaryKey
             self.syncOperation = syncOperation
             self.fetchOperation = fetchOperation
+            self.fetchRequest = fetchRequest
     }
 }
 
@@ -64,6 +68,7 @@ public struct RealmObjectInfo {
     }
 }
 
+@available(OSX 10.10, *)
 public protocol RealmJSONSerializable: RealmSyncable, RealmFetchable {
     
     // MARK: - Methods
@@ -90,11 +95,12 @@ public protocol RealmJSONSerializable: RealmSyncable, RealmFetchable {
     
     static func modifiedRealmObject(realmObject: Object, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Object?
     
-    static func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, serializationInfo: SerializationInfo) -> Bool
+    static func shouldCreateOrUpdateRealmObjectWithType<T: Object>(type: T.Type, primaryKey: String, withJSONDictionary dictionary: NSDictionary, keyValueDictionary: [String: AnyObject], serializationInfo: SerializationInfo) -> Bool
 }
 
 // MARK: - Extension for method implementations
 
+@available(OSX 10.10, *)
 public extension RealmJSONSerializable  {
     
     static func hasPrimaryKey() -> Bool {
@@ -110,7 +116,6 @@ public extension RealmJSONSerializable  {
         
         if hasPrimaryKey() {
             var completionRealmObjectInfos = [RealmObjectInfo]()
-            
             do {
                 try serializationInfo.realm.write({ () -> Void in
                     for object in array {
@@ -165,6 +170,21 @@ public extension RealmJSONSerializable  {
                                 // Did create RealmObject in transactionWithBlock
                                 var serializationInfo = serializationInfo
                                 serializationInfo.newPrimaryKey = newPrimaryKey
+                                
+//                                // Delete temp object in same write transaction
+//                                if let oldPrimaryKey = oldPrimaryKey {
+//                                    if var oldRealmObject = serializationInfo.realm.objectForPrimaryKey(type.self, key: oldPrimaryKey) as? RealmKitObjectProtocol {
+//                                        let realmSyncObjectInfo = RealmSyncObjectInfo(type: type.self, oldPrimaryKey: oldPrimaryKey, newPrimaryKey: newPrimaryKey)
+//                                        
+//                                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                                            NSNotificationCenter.defaultCenter().postNotificationName(RealmSyncOperationWillDeleteObjectNotification, object:realmSyncObjectInfo)
+//                                        })
+//                                        
+//                                        oldRealmObject.deletedAt = NSDate().timeIntervalSince1970
+//                                        
+//                                        NSLog("oldRealmObject: \(oldRealmObject)")
+//                                    }
+//                                }
                                 
                                 didCreateOrUpdateRealmObject(serializationInfo)
                             }
@@ -232,20 +252,17 @@ public extension RealmJSONSerializable  {
                 }
             }
             
-//            NSLog("__realmObjectWithType ... id: \(keyValueDictionary["id"]) participants: \(keyValueDictionary["participants"])")
-//            NSLog("__realmObjectWithType ... keyValueDictionary: \(keyValueDictionary)")
+//            NSLog("__realmObjectWithType: \(type.self) __keyValueDictionary: \(keyValueDictionary) __JSON: \(dictionary)")
             
             if let primaryKey = (type as Object.Type).primaryKey(), primaryKeyValue = keyValueDictionary[primaryKey] as? String {
-                
-                // Check if object shall be created/updated
-                if shouldCreateOrUpdateRealmObjectWithType(type, primaryKey: primaryKeyValue, serializationInfo: serializationInfo) {
+                if shouldCreateOrUpdateRealmObjectWithType(type, primaryKey: primaryKeyValue, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo) {
                     let realmObject = serializationInfo.realm.create(type.self, value: keyValueDictionary, update: true)
-                    
-                    // Modify realmObject
                     return self.modifiedRealmObject(realmObject, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
+                } else {
+                    if let realmObject = serializationInfo.realm.objectForPrimaryKey(type.self, key: primaryKey) {
+                        return self.modifiedRealmObject(realmObject, withJSONDictionary: dictionary, keyValueDictionary: keyValueDictionary, serializationInfo: serializationInfo)
+                    }
                 }
-                
-                return nil
             } else {
                 if RealmKit.sharedInstance.debugLogs {
                     print("# RealmKit: There is a serialization issue with the primary key for Type: \(type) Dictionary: \(dictionary) MappingDictionary: \(mappingDictionary) KeyValueDictionary: \(keyValueDictionary)")
@@ -317,6 +334,7 @@ public class RealmValueTransformer: NSValueTransformer {
 
 // MARK: - Predefined ValueTransformers
 
+@available(OSX 10.10, *)
 public extension RealmValueTransformer {
     
     public class func JSONDictionaryTransformerWithObjectType<T: Object>(type: T.Type, serializationInfo: SerializationInfo) -> NSValueTransformer! {
