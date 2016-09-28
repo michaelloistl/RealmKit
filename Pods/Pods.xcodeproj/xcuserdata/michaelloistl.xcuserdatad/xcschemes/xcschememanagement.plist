@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Alamofire.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-RealmKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -27,12 +32,12 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>5445F11898F16D32C559148420005E01</key>
+		<key>1569E332A9210730DFA6A4B62894D1F7</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>6E439BB48A946E9FB53022B1A74397FE</key>
+		<key>5771570DDDBE75E814092DCA8117E1D9</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -42,7 +47,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>B079D27CEB1F378E9364EE0B0F46A9B9</key>
+		<key>79C040AFDDCE1BCBF6D8B5EB0B85887F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>E84776101C36B0F22925B834B87D93DC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
