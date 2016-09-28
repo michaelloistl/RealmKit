@@ -4,27 +4,47 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Alamofire.xcscheme</key>
+		<key>Alamofire-OSX.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-RealmKit.xcscheme</key>
+		<key>Alamofire-iOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-RealmKitTests.xcscheme</key>
+		<key>Pods-iOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Realm.xcscheme</key>
+		<key>Pods-iOSTests.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>RealmSwift.xcscheme</key>
+		<key>Pods-macOS.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Realm-OSX.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Realm-iOS.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>RealmSwift-OSX.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>RealmSwift-iOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -32,27 +52,47 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>1569E332A9210730DFA6A4B62894D1F7</key>
+		<key>02CBD32F6C3D7424701457A087872DD7</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>5771570DDDBE75E814092DCA8117E1D9</key>
+		<key>4B68E14B6D657C94F5B641C03957B721</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>6F109E34757B4DE37D59DCBECCA4F3D5</key>
+		<key>758935DBD801FD6C508E2A665CFD18B3</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>79C040AFDDCE1BCBF6D8B5EB0B85887F</key>
+		<key>89C69EB624EC8137588D9568F2E11964</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>E84776101C36B0F22925B834B87D93DC</key>
+		<key>8A46F3686C46DC9D9C11D7DE4BDDBB54</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B18C24B15F15AC20E244036F9DBC18C0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BD2B1A13DB2CFEBC59DFF2BD53919BDB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>F31DD71DB15E3032D3A8C7D9F9FF4FBB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>F927797F0A0EA22F1C79B4B0DD2F528A</key>
 		<dict>
 			<key>primary</key>
 			<true/>

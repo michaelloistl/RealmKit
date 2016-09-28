@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>RealmKitmacOS.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
@@ -18,6 +23,16 @@
 			<true/>
 		</dict>
 		<key>6A7357EF1BCC0958003F99EF</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6ABE42671D9BFBA200772F8C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6ABE42791D9BFBC900772F8C</key>
 		<dict>
 			<key>primary</key>
 			<true/>
