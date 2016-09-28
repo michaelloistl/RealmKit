@@ -9,7 +9,7 @@
 import Foundation
 import RealmSwift
 
-public enum RKError: Error {
+public enum RKError: Swift.Error {
     
     // JSONSerilizer
     public enum JSONSerilizerFailureReason {
