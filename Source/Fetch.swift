@@ -16,7 +16,6 @@ public struct FetchRequest {
     // MARK: Required
     public let baseURL: URL
     public let path: String
-    public let realm: Realm
     
     // MARK: Optional
     public let parameters: [String: Any]?
@@ -26,14 +25,12 @@ public struct FetchRequest {
     public init(
         baseURL: URL,
         path: String,
-        realm: Realm,
         parameters: [String: Any]? = nil,
         jsonResponseKey: String? = nil,
         userInfo: [String: Any] = [String: Any]()
         ) {
         self.baseURL = baseURL
         self.path = path
-        self.realm = realm
         self.parameters = parameters
         self.jsonResponseKey = jsonResponseKey
         self.userInfo = userInfo
@@ -46,12 +43,12 @@ public struct FetchResult {
     public let fetchRequest: FetchRequest
     
     /// Alamofire's JSONSerializer response
-    public let response: Alamofire.Response
+    public let response: Alamofire.DataResponse<Any>
     
     /// The result from the object serialization
     public let serializationResult: SerializationResult
     
-    init(fetchRequest: FetchRequest, response: Alamofire.Response, serializationResult: SerializationResult) {
+    init(fetchRequest: FetchRequest, response: Alamofire.DataResponse<Any>, serializationResult: SerializationResult) {
         self.fetchRequest = fetchRequest
         self.response = response
         self.serializationResult = serializationResult
@@ -115,9 +112,9 @@ public extension Fetchable where Self: JSONSerializable {
     
     public static func fetch(_ fetchRequest: FetchRequest,
                              persist: Bool = true,
-                             modifyKeyValues: @escaping (([String: AnyObject]) -> [String: AnyObject])? = nil,
-                             modifyObject: @escaping ((Object) -> Object)? = nil,
-                             didSerializeObjects: @escaping (([Object]) -> ())? = nil,
+                             modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])? = nil,
+                             modifyObject: ((RKObject) -> RKObject)? = nil,
+                             didSerializeObjects: (([RKObject]) -> ())? = nil,
                              completion: @escaping (FetchResult?) -> ()) -> URLSessionTask? {
         let dispatchGroup = DispatchGroup()
         var dispatchQueue = DispatchQueue.global(qos: DispatchQoS.QoSClass.default)
@@ -153,9 +150,8 @@ public extension Fetchable where Self: JSONSerializable {
                             // Array
                             if let jsonArray = json as? NSArray {
                                 dispatchGroup.enter()
-                                self.objects(with: jsonArray,
+                                self.serializeObjects(with: jsonArray,
                                              serializationRequest: serializationRequest,
-                                             persist: persist,
                                              modifyKeyValues: modifyKeyValues,
                                              modifyObject: modifyObject,
                                              didSerializeObjects: didSerializeObjects,
@@ -170,9 +166,8 @@ public extension Fetchable where Self: JSONSerializable {
                             // Dictionary
                             else if let jsonDictionary = json as? NSDictionary {
                                 dispatchGroup.enter()
-                                self.object(with: jsonArray,
+                                self.serializeObject(with: jsonDictionary,
                                             serializationRequest: serializationRequest,
-                                            persist: persist,
                                             modifyKeyValues: modifyKeyValues,
                                             modifyObject: modifyObject,
                                             didSerializeObjects: didSerializeObjects,
@@ -194,7 +189,7 @@ public extension Fetchable where Self: JSONSerializable {
                 dispatchGroup.leave()
             }
             
-            _sessionTask = request.task()
+            _sessionTask = request.task
         }
         
         dispatchGroup.notify(queue: DispatchQueue.main, execute: {
@@ -208,15 +203,15 @@ public extension Fetchable where Self: JSONSerializable {
 }
 
 @available(OSX 10.10, *)
-public class FetchPaged<T: Object> {
+public class FetchPaged<T: RKObject> {
     public let pageType: PageInfo.PageType
     public let fetchRequest: FetchRequest
     public let pageLimit: Int
     public let persist: Bool
     
     public let modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])?
-    public let modifyObject: ((Object) -> Object)?
-    public let didSerializeObjects: (([Object]) -> ())?
+    public let modifyObject: ((RKObject) -> RKObject)?
+    public let didSerializeObjects: (([RKObject]) -> ())?
     public let completion: (FetchPagedResult?, Bool) -> ()
     
     public var fetchResults = [FetchResult]()
@@ -228,14 +223,14 @@ public class FetchPaged<T: Object> {
             if let pageInfo = pageInfo {
                 pageInfos.append(pageInfo)
                 
-                if pageInfo.fetchResult?.response.isSuccess == true && (pageLimit == 0 || pageInfo.currentPage < pageLimit) && pageInfo.currentPage < pageInfo.totalPages {
+                if pageInfo.fetchResult?.response.result.isSuccess == true && (pageLimit == 0 || pageInfo.currentPage < pageLimit) && pageInfo.currentPage < pageInfo.totalPages {
                     
                     let results = FetchPagedResult(fetchResults: fetchResults, pageInfos: pageInfos)
                     completion(results, false)
                     
-                    (T.Type as? FetchPagable.Type)?.fetchPagedDidFetch(results)
+                    (T.self as FetchPagable.Type).fetchPagedDidFetch(results)
                     
-                    let pagingParameters = (T.Type as? FetchPagable.Type)?.pagingParameters(from: pageInfo)
+                    let pagingParameters = (T.self as FetchPagable.Type).pagingParameters(from: pageInfo)
                     
                     let _ = startRequest(with: pagingParameters)
                     requestStarted = true
@@ -246,21 +241,21 @@ public class FetchPaged<T: Object> {
                 let results = FetchPagedResult(fetchResults: fetchResults, pageInfos: pageInfos)
                 completion(results, true)
                 
-                (T.Type as? FetchPagable.Type)?.fetchPagedDidComplete(results)
+                (T.self as FetchPagable.Type).fetchPagedDidComplete(results)
             }
         }
     }
     
     // MARK: - Initializers
     
-    public required init<T: Object>(type: T.Type,
+    public required init<T: RKObject>(type: T.Type,
                          fetchRequest: FetchRequest,
                          pageType: PageInfo.PageType,
                          pageLimit: Int = 1,
                          persist: Bool = true,
-                         modifyKeyValues: @escaping (([String: AnyObject]) -> [String: AnyObject])? = nil,
-                         modifyObject: @escaping ((Object) -> Object)? = nil,
-                         didSerializeObjects: @escaping (([Object]) -> ())? = nil,
+                         modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])? = nil,
+                         modifyObject: ((RKObject) -> RKObject)? = nil,
+                         didSerializeObjects: (([RKObject]) -> ())? = nil,
                          completion: @escaping (FetchPagedResult?, Bool) -> ()) {
         self.fetchRequest = fetchRequest
         self.pageType = pageType
@@ -276,29 +271,25 @@ public class FetchPaged<T: Object> {
     // MARK: - Methods
     
     public func startRequest(with pagingParameters: [String: Any]?) -> URLSessionTask? {
-        var parameters = fetchRequest.parameters ?? [String: Any]()
-        pagingParameters.forEach({ (key, value) in
+        var parameters = self.fetchRequest.parameters ?? [String: Any]()
+        pagingParameters?.forEach({ (key, value) in
             parameters[key] = value
         })
         
         let fetchRequest = FetchRequest(baseURL: self.fetchRequest.baseURL, path: self.fetchRequest.path, parameters: parameters, jsonResponseKey: self.fetchRequest.jsonResponseKey, userInfo: self.fetchRequest.userInfo)
         
-        if let fetchableType = T.Type as? Fetchable.Type, let fetchPagableType = T.Type as? FetchPagable.Type {
-            return fetchableType.fetch(fetchRequest,
-                                       persist: self.persist,
-                                       modifyKeyValues: self.modifyKeyValues,
-                                       modifyObject: self.modifyObject,
-                                       didSerializeObjects: self.didSerializeObjects,
-                                       completion: { fetchResult in
-                                        
-                                        if let fetchResult = fetchResult {
-                                            self.fetchResults.append(fetchResult)
-                                        }
-                                        
-                                        self.pageInfo = (T.Type as? FetchPagable.Type)?.pageInfo(from: fetchResult)
-            })
-        }
-        
-        return nil
+        return (T.self as JSONSerializable.Type).self.fetch(fetchRequest,
+                                                            persist: self.persist,
+                                                            modifyKeyValues: self.modifyKeyValues,
+                                                            modifyObject: self.modifyObject,
+                                                            didSerializeObjects: self.didSerializeObjects,
+                                                            completion: { fetchResult in
+                                                                
+                                                                if let fetchResult = fetchResult {
+                                                                    self.fetchResults.append(fetchResult)
+                                                                }
+                                                                
+                                                                self.pageInfo = (T.self as FetchPagable.Type).pageInfo(from: fetchResult)
+        })
     }
 }

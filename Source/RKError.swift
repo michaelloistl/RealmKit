@@ -21,15 +21,16 @@ public enum RKError: Swift.Error {
     //
     
     // Fetch
-    public enum FetchFailureReason {
-        
-    }
+//    public enum FetchFailureReason {
+//        
+//    }
     
     // Sync
-    public enum SyncFailureReason {
-        
-    }
+//    public enum SyncFailureReason {
+//        
+//    }
     
+    case JSONSerilizerFailure(reason: JSONSerilizerFailureReason)
 }
 
 // MARK: - Error Descriptions
@@ -39,9 +40,9 @@ extension RKError.JSONSerilizerFailureReason {
         switch self {
         case .invalidPrimaryKey:
             return "Type doesn't define a valid primaryKey."
-        case .noJsonKeyPathsByPropertyKey(type):
+        case .noJsonKeyPathsByPropertyKey(let type):
             return "Type \(type) doesn't define valid jsonKeyPathsByPropertyKey."
-        case .noPrimaryKeyValue(type, jsonDictionary, jsonKeyPathsByPropertyKey, keyValues):
+        case .noPrimaryKeyValue(let type, let jsonDictionary, let jsonKeyPathsByPropertyKey, let keyValues):
             return "Type \(type) has no primary key value; jsonDictionary: \(jsonDictionary) jsonKeyPathsByPropertyKey: \(jsonKeyPathsByPropertyKey) keyValues: \(keyValues)."
         }
     }

@@ -23,26 +23,26 @@ public struct SerializationRequest {
     
     public let oldPrimaryKey: String?
     
+    public let persist: Bool
+    
     public let syncOperation: SyncOperation?
-//    public let fetchOperation: FetchOperation?
     public let fetchRequest: FetchRequest?
     
     public init(
         realm: Realm,
-        method: Alamofire.HTTPMethod? = nil,
+        httpMethod: Alamofire.HTTPMethod? = nil,
         userInfo: [String: Any] = [String: Any](),
         oldPrimaryKey: String? = nil,
+        persist: Bool = true,
         syncOperation: SyncOperation? = nil,
-//        fetchOperation: FetchOperation? = nil,
         fetchRequest: FetchRequest? = nil
         ) {
             self.realm = realm
-            self.method = method
+            self.httpMethod = httpMethod
             self.userInfo = userInfo
             self.oldPrimaryKey = oldPrimaryKey
-            self.newPrimaryKey = newPrimaryKey
+            self.persist = persist
             self.syncOperation = syncOperation
-//            self.fetchOperation = fetchOperation
             self.fetchRequest = fetchRequest
     }
 }
@@ -51,28 +51,28 @@ public struct SerializationRequest {
 @available(OSX 10.10, *)
 public struct SerializationResult {
     
-    enum SerializedObjects {
+    public enum SerializedObjects {
         case none
         case persisted(objectInfos: [ObjectInfo])
-        case transient(objects: [Object])
+        case transient(objects: [RKObject])
     }
     
     // MARK: Required
     public let serializationRequest: SerializationRequest
     
     // MARK: Optional
-    public let jsonDictionary: [String: Any]?
+    public let json: Any?
     public let serializedObjects: SerializedObjects
     public let error: RKError?
     
     public init(
         serializationRequest: SerializationRequest,
-        jsonDictionary: [String: Any]?,
+        json: Any?,
         serializedObjects: SerializedObjects,
         error: RKError?
         ) {
         self.serializationRequest = serializationRequest
-        self.jsonDictionary = jsonDictionary
+        self.json = json
         self.serializedObjects = serializedObjects
         self.error = error
     }
@@ -80,11 +80,11 @@ public struct SerializationResult {
 
 /// Used to store all data associated with a realm object created/updated during serialization.
 public struct ObjectInfo {
-    public let type: Object.Type
+    public let type: RKObject.Type
     public let primaryKey: String
     
     public init(
-        type: Object.Type,
+        type: RKObject.Type,
         primaryKey: String
         ) {
             self.type = type
@@ -101,15 +101,15 @@ public extension JSONSerializable  {
     
     // MARK: Optional defaults
     
-    open static func modifyKeyValues(_ keyValues: [String: AnyObject]) -> [String: AnyObject]? {
+    public static func modifyKeyValues(_ keyValues: [String: AnyObject]) -> [String: AnyObject]? {
         return nil
     }
 
-    open static func modifyObject(_ object: Object) -> Object? {
+    public static func modifyObject(_ object: RKObject) -> RKObject? {
         return nil
     }
     
-    open static func didSerializeObjects(_ objects: [Object]) -> () {
+    public static func didSerializeObjects(_ objects: [RKObject]) -> () {
         
     }
     
@@ -127,71 +127,71 @@ public extension JSONSerializable  {
     ///
     /// - parameter modifyObject: Optional closure to modify the object after ccreation/update within the same write transaction.
     /// - parameter didSerializeObjects: Optional closure to include optional code after serializing all objects within the same write transaction.
-    public static func objects(with jsonArray: NSArray,
+    public static func serializeObjects(with jsonArray: NSArray,
                                serializationRequest: SerializationRequest,
-                               persist: Bool = true,
-                               modifyKeyValues: @escaping (([String: AnyObject]) -> [String: AnyObject])? = nil,
-                               modifyObject: @escaping ((Object) -> Object)? = nil,
-                               didSerializeObjects: @escaping (([Object]) -> ())? = nil,
+                               modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])? = nil,
+                               modifyObject: ((RKObject) -> RKObject)? = nil,
+                               didSerializeObjects: (([RKObject]) -> ())? = nil,
                                completion: @escaping (SerializationResult) -> Void) {
         if hasPrimaryKey() {
             var _objectInfos = [ObjectInfo]()
-            var _objects = [Object]()
+            var _objects = [RKObject]()
+            var _error: RKError?
             
             // Begin write transaction
             let _ = try? serializationRequest.realm.write({ () -> Void in
                 jsonArray.forEach({ (object) in
                     if let jsonDictionary = object as? NSDictionary {
-                        let type = typeToSerialize(dictionary)
+                        let type = typeToSerialize(jsonDictionary)
                         
-                        var _object: Object?
-                        self.object(type.self,
+                        var _object: RKObject?
+                        
+                        let (object, error) = self.object(type.self,
                                     jsonDictionary: jsonDictionary,
                                     serializationRequest: serializationRequest,
-                                    persist: persist,
-                                    modifyKeyValues: modifyKeyValues,
-                                    shouldUseKeyValues: shouldUseKeyValues,
-                                    completion: { object, error in
-                            
-                                        _object = object
-                                        
-                                        // Optionaly modify object
-                                        if let modifiedObject = self.modifyObject(object) {
-                                            _object = modifiedObject
-                                        }
-                                        if let object = _object, let modifiedObject = modifyObject?(object) {
-                                            _object = modifiedObject
-                                        }
-                                        
-                                        // ObjectInfo
-                                        if let primaryKey = type.primaryKey() {
-                                            if let primaryKey = _object?.value(forKey: primaryKey) as? String {
-                                                let objectInfo = ObjectInfo(type: type.self, primaryKey: primaryKey)
-                                                _objectInfos.append(objectInfo)
-                                            }
-                                        }
-                                        
-                                        if let object = _object {
-                                            _objects.append(object)
-                                        }
-                            })
+                                    modifyKeyValues: modifyKeyValues)
+                        
+                        _object = object
+                        _error = error
+                        
+                        // Optionaly modify object
+                        if let object = _object, let modifiedObject = self.modifyObject(object) {
+                            _object = modifiedObject
+                        }
+                        if let object = _object, let modifiedObject = modifyObject?(object) {
+                            _object = modifiedObject
+                        }
+                        
+                        // ObjectInfo
+                        if let primaryKey = type.primaryKey() {
+                            if let primaryKey = _object?.value(forKey: primaryKey) as? String {
+                                let objectInfo = ObjectInfo(type: type.self, primaryKey: primaryKey)
+                                _objectInfos.append(objectInfo)
+                            }
+                        }
+                        
+                        if let object = _object {
+                            _objects.append(object)
+                        }
                     }
                 })
                 
                 // Hook after serializing objects
-                if let objects = _objects {
-                    self.didSerializeObjects(objects)
-                    didSerializeObjects?(objects)
-                }
+                self.didSerializeObjects(_objects)
+                didSerializeObjects?(_objects)
             })
             // End write transaction
             
-            let serializedObjects = (persist) ? SerializedObjects.persisted(_objectInfos) : SerializedObjects.transient(_objects)
-            let result = SerializationResult(serializationRequest: serializationRequest, jsonDictionary: jsonDictionary as? [String: Any], serializedObjects: serializedObjects, error: nil)
+            let serializedObjects = (serializationRequest.persist) ? SerializationResult.SerializedObjects.persisted(objectInfos: _objectInfos) : SerializationResult.SerializedObjects.transient(objects: _objects)
+            
+            let result = SerializationResult(serializationRequest: serializationRequest, json: jsonArray, serializedObjects: serializedObjects, error: _error)
             
             completion(result)
         } else {
-            let result = SerializationResult(serializationRequest: serializationRequest, jsonDictionary: nil, serializedObjects: SerializedObjects.none, error: RKError.JSONSerilizerFailureReason.invalidPrimaryKey)
+            let error = RKError.JSONSerilizerFailure(reason: .invalidPrimaryKey)
+            let serializedObjects = SerializationResult.SerializedObjects.none
+            
+            let result = SerializationResult(serializationRequest: serializationRequest, json: nil, serializedObjects: serializedObjects, error: error)
             
             completion(result)
         }
@@ -201,67 +201,68 @@ public extension JSONSerializable  {
     ///
     /// - parameter modifyObject: Optional closure to modify the object after ccreation/update within the same write transaction.
     /// - parameter didSerializeObject: Optional closure to include optional code after serializing object within the same write transaction.
-    public static func object(with jsonDictionary: NSDictionary,
+    public static func serializeObject(with jsonDictionary: NSDictionary,
                               serializationRequest: SerializationRequest,
-                              persist: Bool = true,
-                              modifyKeyValues: @escaping (([String: AnyObject]) -> [String: AnyObject])? = nil,
-                              modifyObject: @escaping ((Object) -> Object)? = nil,
-                              didSerializeObjects: @escaping (([Object]) -> ())? = nil,
+                              modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])? = nil,
+                              modifyObject: ((RKObject) -> RKObject)? = nil,
+                              didSerializeObjects: (([RKObject]) -> ())? = nil,
                               completion: @escaping (SerializationResult) -> Void) {
         if hasPrimaryKey() {
             var _objectInfos = [ObjectInfo]()
-            var _objects = [Object]()
+            var _objects = [RKObject]()
+            var _error: RKError?
             
             // Begin write transaction
             let _ = try? serializationRequest.realm.write({ () -> Void in
-                let type = typeToSerialize(dictionary)
+                let type = typeToSerialize(jsonDictionary)
             
-                var _object: Object?
-                self.object(type.self,
+                var _object: RKObject?
+                let (object, error) = self.object(type.self,
                             jsonDictionary: jsonDictionary,
                             serializationRequest: serializationRequest,
-                            persist: persist,
-                            modifyKeyValues: modifyKeyValues,
-                            shouldUseKeyValues: shouldUseKeyValues,
-                            completion: { object, error in
-                      
-                                _object = object
-                                
-                                // Optionaly modify object
-                                if let modifiedObject = self.modifyObject(object) {
-                                    _object = modifiedObject
-                                }
-                                if let object = _object, let modifiedObject = modifyObject?(object) {
-                                    _object = modifiedObject
-                                }
-                                
-                                // Set ObjectInfo
-                                if let primaryKey = type.primaryKey() {
-                                    if let primaryKey = _object?.value(forKey: primaryKey) as? String {
-                                        let objectInfo = ObjectInfo(type: type.self, primaryKey: primaryKey)
-                                        _objectInfos.append(objectInfo)
-                                    }
-                                }
-                                
-                                if let object = _object {
-                                    _objects.append(object)
-                                }
-                                
-                                // Hook after serializing objects
-                                if let object = _object {
-                                    self.didSerializeObjects([object])
-                                    didSerializeObjects?([object])
-                                }
-                    })
+                            modifyKeyValues: modifyKeyValues)
+                    
+                _object = object
+                _error = error
+                    
+                    // Optionaly modify object
+                if let object = _object, let modifiedObject = self.modifyObject(object) {
+                    _object = modifiedObject
+                }
+                if let object = _object, let modifiedObject = modifyObject?(object) {
+                    _object = modifiedObject
+                }
+                
+                // Set ObjectInfo
+                if let primaryKey = type.primaryKey() {
+                    if let primaryKey = _object?.value(forKey: primaryKey) as? String {
+                        let objectInfo = ObjectInfo(type: type.self, primaryKey: primaryKey)
+                        _objectInfos.append(objectInfo)
+                    }
+                }
+                
+                if let object = _object {
+                    _objects.append(object)
+                }
+                
+                // Hook after serializing objects
+                if let object = _object {
+                    self.didSerializeObjects([object])
+                    didSerializeObjects?([object])
+                }
             })
             // End write transaction
             
-            let serializedObjects = (persist) ? SerializedObjects.persisted(_objectInfos) : SerializedObjects.transient(_objects)
-            let result = SerializationResult(serializationRequest: serializationRequest, jsonDictionary: jsonDictionary as? [String: Any], serializedObjects: serializedObjects, error: nil)
+            let serializedObjects = (serializationRequest.persist) ? SerializationResult.SerializedObjects.persisted(objectInfos: _objectInfos) : SerializationResult.SerializedObjects.transient(objects: _objects)
+            
+            let result = SerializationResult(serializationRequest: serializationRequest, json: jsonDictionary as? [String: Any], serializedObjects: serializedObjects, error: _error)
             
             completion(result)
         } else {
-            let result = SerializationResult(serializationRequest: serializationRequest, jsonDictionary: nil, serializedObjects: SerializedObjects.none, error: RKError.JSONSerilizerFailureReason.invalidPrimaryKey)
+            let serializedObjects = SerializationResult.SerializedObjects.none
+            let error = RKError.JSONSerilizerFailure(reason: .invalidPrimaryKey)
+            
+            let result = SerializationResult(serializationRequest: serializationRequest, json: nil, serializedObjects: serializedObjects, error: error)
             
             completion(result)
         }
@@ -272,16 +273,14 @@ public extension JSONSerializable  {
     /// Object key -> JSON keyPath
     ///
     /// - warning: This method may only be called during a write transaction.
-    public static func object<T: Object>(_ type: T.Type,
+    public static func object<T: RKObject>(_ type: T.Type,
                               jsonDictionary: NSDictionary,
                               serializationRequest: SerializationRequest,
-                              persist: Bool = true,
-                              modifyKeyValues: @escaping (([String: AnyObject]) -> [String: AnyObject])? = nil,
-                              completion: @escaping (Object?, RKError?) -> ()) {
-        var _object: Object?
+                              modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])? = nil) -> (object: RKObject?, error: RKError?) {
+        var _object: RKObject?
         var _error: RKError?
         
-        if let mappingDictionary = (type as JSONSerializable.Type).jsonKeyPathsByPropertyKey(with: serializationRequest) {
+        if let mappingDictionary = type.jsonKeyPathsByPropertyKey(with: serializationRequest) {
             var keyValues = [String: AnyObject]()
             
             for (key, keyPath) in mappingDictionary {
@@ -289,7 +288,7 @@ public extension JSONSerializable  {
                     if let _ = jsonValue as? NSNull {
                         
                         // Default Value if it's not primary key
-                        if let primaryKey = (type as Object.Type).primaryKey() {
+                        if let primaryKey = (type as RKObject.Type).primaryKey() {
                             if key != primaryKey {
                                 if let defaultValue = self.defaultPropertyValues()[key] {
                                     keyValues[key] = defaultValue
@@ -315,7 +314,7 @@ public extension JSONSerializable  {
             // TODO: Still set object with just primary key if if shouldn't map ...
             
             // Modify keyValues (optional) before being used to create/update an object
-            if let modifyKeyValues = (type as JSONSerializable.Type).modifyKeyValues(keyValues) {
+            if let modifyKeyValues = type.modifyKeyValues(keyValues) {
                 keyValues = modifyKeyValues
             }
             if let modifyKeyValues = modifyKeyValues?(keyValues) {
@@ -323,22 +322,22 @@ public extension JSONSerializable  {
             }
             
             // Set lastFetchedAt
-            if let _type = type as? Fetchable, let method = serializationRequest.method, method == .get {
+            if let httpMethod = serializationRequest.httpMethod, httpMethod == .get {
                 keyValues["lastFetchedAt"] = NSDate()
             }
             
             // Set lastSyncedAt
-            if let _type = type as? Syncable, let method = serializationRequest.method, method != .get {
+            if let httpMethod = serializationRequest.httpMethod, httpMethod != .get {
                 keyValues["lastSyncedAt"] = NSDate()
             }
             
-            if let serverKey = (type as ObjectProtocol).serverKey(), let serverKeyValue = keyValues[serverKey] as? String { // "id" = "1"
+            if let serverKey = type.serverKey(), let serverKeyValue = keyValues[serverKey] as? String { // "id" = "1"
                 
                 // Check if object with serverKeyValue exists
                 if let existingObject = serializationRequest.realm.objects(type.self).filter(NSPredicate(format: "server_id == %@", serverKeyValue)).first {
                     
                     // Set primary id on keyValues to make sure to update the existing object
-                    keyValues["id"] = existingObject.id
+                    keyValues["id"] = existingObject.id as AnyObject
 
                     // Set _object in case there is a local unsynced object in order to avoid updating
                     if let httpMethod = serializationRequest.httpMethod, httpMethod == .get {
@@ -350,24 +349,31 @@ public extension JSONSerializable  {
                 
                 // Create/update object
                 if _object == nil {
-                    _object = serializationRequest.realm.create(type.self, value: keyValues, update: true)
+                    if serializationRequest.persist {
+                        _object = serializationRequest.realm.create(type.self, value: keyValues, update: true)
+                    } else {
+                        _object = type.init()
+                        keyValues.forEach({ (key, value) in
+                            _object?.setValue(value, forKey: key)
+                        })
+                    }
                 }
             } else {
-                _error = RKError.JSONSerilizerFailureReason.noPrimaryKeyValue(type, jsonDictionary as? [String: Any], mappingDictionary, keyValues)
+                _error = RKError.JSONSerilizerFailure(reason: .noPrimaryKeyValue(type: type, jsonDictionary: jsonDictionary as? [String: Any], jsonKeyPathsByPropertyKey: mappingDictionary, keyValues: keyValues))
                 
                 if RealmKit.sharedInstance.debugLogs {
                     print("# RealmKit: There is a serialization issue with the primary key for Type: \(type) JSON Dictionary: \(jsonDictionary) MappingDictionary: \(mappingDictionary) KeyValues: \(keyValues)" as Any)
                 }
             }
         } else {
-            _error = RKError.JSONSerilizerFailureReason.noJsonKeyPathsByPropertyKey(type)
+            _error = RKError.JSONSerilizerFailure(reason: .noJsonKeyPathsByPropertyKey(type: type))
             
             if RealmKit.sharedInstance.debugLogs {
                 print("# RealmKit: There is no jsonKeyPathsByPropertyKey: defined for type: \(type)")
             }
         }
         
-        completion(_object, _error)
+        return (_object, _error)
     }
 }
 
@@ -434,18 +440,18 @@ open class RealmValueTransformer: ValueTransformer {
 @available(OSX 10.10, *)
 public extension RealmValueTransformer {
     
-    public class func JSONDictionaryTransformerWithObjectType<T: Object>(_ type: T.Type, serializationRequest: Serializationrequest) -> ValueTransformer! {
+    public class func JSONDictionaryTransformerWithObjectType<T: RKObject>(_ type: T.Type, serializationRequest: SerializationRequest) -> ValueTransformer! {
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             
             // TODO: Direct value for primary key
             
             if let dictionary = value as? NSDictionary {
-                return (type as? JSONSerializable.Type)?.realmObject(type, jsonDictionary: dictionary, serializationRequest: serializationRequest)
+                return (type as JSONSerializable.Type).object(type, jsonDictionary: dictionary, serializationRequest: serializationRequest).object
             } else {
                 return nil
             }
             }, reverseClosure: { (value) -> AnyObject? in
-                if let _ = value as? Object {
+                if let _ = value as? RKObject {
                     // TODO: Implement JSONDictionaryFromRealmObject:
                     return nil
                 } else {
@@ -454,15 +460,15 @@ public extension RealmValueTransformer {
         })
     }
     
-    public class func JSONArrayTransformerWithObjectType<T: Object>(_ type: T.Type, serializationRequest: SerializationRequest) -> ValueTransformer! {
+    public class func JSONArrayTransformerWithObjectType<T: RKObject>(_ type: T.Type, serializationRequest: SerializationRequest) -> ValueTransformer! {
         let dictionaryTransformer = JSONDictionaryTransformerWithObjectType(type, serializationRequest: serializationRequest)
         
         return reversibleTransformerWithForwardBlock({ (value) -> AnyObject? in
             if let dictionaryArray = value as? [NSDictionary] {
                 let list = List<T>()
                 for dictionary in dictionaryArray {
-                    if let realmObject = dictionaryTransformer?.transformedValue(dictionary) as? T {
-                        list.append(realmObject)
+                    if let object = dictionaryTransformer?.transformedValue(dictionary) as? T {
+                        list.append(object)
                     }
                 }
                 return list
