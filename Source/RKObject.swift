@@ -20,61 +20,60 @@ open class RKObject: Object, RKObjectProtocol, JSONSerializable, Requestable, Fe
     public dynamic var id: String = UUID().uuidString
     public dynamic var deletedAt: TimeInterval = 0
     
-    public dynamic var server_id: String?
-    public dynamic var server_deletedAt: TimeInterval = 0
+    public dynamic var serverId: String?
+    public dynamic var serverDeletedAt: TimeInterval = 0
 
     /// Primary key for local realm objects needs to be "id".
     open override class func primaryKey() -> String? {
         return "id"
     }
     
-    /// Primary key for local realm objects needs to be "id".
-    public class func serverKey() -> String? {
+    /// Primary key for remote objects.
+    open class func serverKey() -> String? {
         print("# RealmKit: Please override serverKey in \(self)")
         return nil
     }
     
-    open class func defaultPropertyValues() -> [String: AnyObject] {
+    open class func defaultPropertyValues() -> [String: Any] {
         return [
-            "id": UUID().uuidString as AnyObject,
-            "deletedAt": 0 as AnyObject,
-            "server_id": NSNull() as AnyObject,
-            "server_deletedAt": 0 as AnyObject,
-            "syncStatus": SyncStatus.Synced.rawValue as AnyObject
+            "id": UUID().uuidString,
+            "deletedAt": 0,
+            "serverId": NSNull(),
+            "serverDeletedAt": 0,
+            "syncStatus": SyncStatus.synced.rawValue
         ]
+    }
+    
+    open override class func ignoredProperties() -> [String] {
+        return []
     }
     
     // MARK: JSONSerializable
 
     /// Returns the json keyPath for a given object property key (mapping).
-    open class func jsonKeyPathsByPropertyKey(with serializationRequest: SerializationRequest) -> [String : String]! {
+    open class func jsonKeyPathsByPropertyKey(with serializationRequest: SerializationRequest) -> [String : String] {
         print("# RealmKit: Please override jsonKeyPathsByPropertyKey: in \(self)")
-        return nil
+        return [:]
     }
     
     /// Returns the ValueTransformer for a given object property key.
-    open class func jsonTransformerForKey(_ key: String!, serializationRequest: SerializationRequest) -> ValueTransformer! {
+    open class func jsonTransformerForKey(_ key: String!, jsonDictionary: NSDictionary, serializationRequest: SerializationRequest) -> ValueTransformer! {
         print("# RealmKit: Please override jsonTransformerForKey:serializationRequest: in \(self)")
         return nil
     }
     
-    /// Returns the type for the realm object to be created/updated during serialization.
-    open class func typeToSerialize(_ jsonDictionary: NSDictionary) -> RKObject.Type {
-        return self
-    }
-    
     /// Allows to modify keyValues before being used to create/update object during serialization.
-    open class func modifyKeyValues(_ keyValues: [String: AnyObject]) -> [String: AnyObject]? {
+    open class func modifyKeyValues(_ keyValues: [String: Any], jsonDictionary: NSDictionary?, serializationRequest: SerializationRequest) -> [String: Any]? {
         return nil
     }
     
     /// Allows to modify object after serialization in same write transaction as it was created/updated.
-    open class func modifyObject(_ object: RKObject) -> RKObject? {
+    open class func modify<T: RKObject>(_ type: T.Type ,object: T) -> T? {
         return nil
     }
     
     /// Used as hook after object serilization in same write transaction as it was created/updated.
-    open class func didSerializeObjects(_ objects: [RKObject]) -> () {
+    open class func didSerialize<T: RKObject>(_ type: T.Type ,objects: [T], serializationRequest: SerializationRequest) -> Void {
         
     }
     
@@ -87,9 +86,14 @@ open class RKObject: Object, RKObjectProtocol, JSONSerializable, Requestable, Fe
     }
     
     /// Returns the headers (e.g. authentication) that is used for fetch & sync requests.
-    open class func headers() -> [String: String]? {
+    open class func headers(_ completion: @escaping (_ headers: [String: String]?) -> Void) {
         print("# RealmKit: Please override headers in \(self)")
-        return nil
+        completion(nil)
+    }
+    
+    /// Handle networking response.
+    open class func handle(_ response: Alamofire.DataResponse<Any>, fetchRequest: FetchRequest?, syncOperation: SyncOperation?) {
+        
     }
     
     // MARK: Fetchable
@@ -107,7 +111,7 @@ open class RKObject: Object, RKObjectProtocol, JSONSerializable, Requestable, Fe
         return nil
     }
     
-    open class func pagingParameters(from pageInfo: PageInfo) -> [String: Any]? {
+    open class func pagingParameters(from pageInfo: PageInfo, pageType: PageInfo.PageType) -> [String: Any]? {
         print("# RealmKit: Please override pagingParameters: in \(self)")
         return nil
     }
@@ -123,9 +127,9 @@ open class RKObject: Object, RKObjectProtocol, JSONSerializable, Requestable, Fe
     // MARK: Syncable
     
     public dynamic var lastSyncedAt: NSDate?
-    public dynamic var syncStatus: String = SyncStatus.Synced.rawValue
+    public dynamic var syncStatus: String = SyncStatus.synced.rawValue
     
-    open func setSyncStatus(_ syncStatus: SyncStatus, serializationRequest: SerializationRequest?) {
+    open func setSyncStatus(_ syncStatus: SyncStatus, serializationRequest: SerializationRequest? = nil) {
         if !isInvalidated {
             var inWriteTransaction = false
             if realm?.isInWriteTransaction == false {
@@ -147,15 +151,15 @@ open class RKObject: Object, RKObjectProtocol, JSONSerializable, Requestable, Fe
         var syncOperations = [SyncOperation]()
 
         let objectType = type(of: self)
-        let primaryKey = id
-        let serverKey = server_id
+        let primaryId = self.id
+        let serverId = self.serverId
         let httpMethod = syncHTTPMethod()
         let baseURL = objectType.baseURL()
-        let parameters = syncParameters(httpMethod!)
-        let path = syncPath(httpMethod!)
+        let parameters = syncParameters(httpMethod)
+        let path = syncPath(httpMethod)
 
-        if let path = path, let httpMethod = httpMethod, let baseURL = baseURL {
-            let operation = SyncOperation(objectType: objectType, primaryKey: primaryKey, serverKey: serverKey, baseURL: baseURL, path: path, parameters: parameters, httpMethod: httpMethod)
+        if let path = path, let baseURL = baseURL {
+            let operation = SyncOperation(objectType: objectType, primaryId: primaryId, serverId: serverId, baseURL: baseURL, path: path, parameters: parameters, httpMethod: httpMethod)
 
             syncOperations.append(operation)
         }
@@ -163,29 +167,29 @@ open class RKObject: Object, RKObjectProtocol, JSONSerializable, Requestable, Fe
         return syncOperations
     }
     
-    open func syncHTTPMethod() -> Alamofire.HTTPMethod! {
+    open func syncHTTPMethod() -> Alamofire.HTTPMethod {
         if deletedAt > 0 {
             return .delete
         } else {
-            if let _ = server_id {
-                return .post
-            } else {
+            if let _ = serverId {
                 return .put
+            } else {
+                return .post
             }
         }
     }
     
-    open func syncPath(_ httpMethod: Alamofire.HTTPMethod!) -> String? {
+    open func syncPath(_ httpMethod: Alamofire.HTTPMethod) -> String? {
         print("# RealmKit: Please override syncPath: in \(self)")
         return nil
     }
     
-    open func syncParameters(_ httpMethod: Alamofire.HTTPMethod!) -> [String: Any]? {
+    open func syncParameters(_ httpMethod: Alamofire.HTTPMethod) -> [String: Any]? {
         print("# RealmKit: Please override syncParameters: in \(self)")
         return nil
     }
     
-    open class func syncJSONResponseKey(_ httpMethod: Alamofire.HTTPMethod!, userInfo: [String: Any]) -> String? {
+    open class func syncJSONResponseKey(_ httpMethod: Alamofire.HTTPMethod, userInfo: [String: Any]) -> String? {
         print("# RealmKit: Please override syncJSONResponseKey:userInfo: in \(self)")
         return nil
     }

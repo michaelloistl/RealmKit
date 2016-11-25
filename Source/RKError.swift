@@ -15,7 +15,7 @@ public enum RKError: Swift.Error {
     public enum JSONSerilizerFailureReason {
         case invalidPrimaryKey
         case noJsonKeyPathsByPropertyKey(type: Object.Type)
-        case noPrimaryKeyValue(type: Object.Type?, jsonDictionary: [String: Any]?, jsonKeyPathsByPropertyKey: [String : String]?, keyValues: [String: AnyObject]?)
+        case noPrimaryKeyValue(type: Object.Type?, jsonDictionary: [String: Any]?, jsonKeyPathsByPropertyKey: [String : String]?, keyValues: [String: Any]?)
     }
     
     //

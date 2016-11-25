@@ -17,8 +17,8 @@ public protocol RKObjectProtocol {
     var id: String { get set }
     var deletedAt: TimeInterval { get set }
     
-    var server_id: String? { get set }
-    var server_deletedAt: TimeInterval { get set }
+    var serverId: String? { get set }
+    var serverDeletedAt: TimeInterval { get set }
     
     // MARK: - Methods
     
@@ -27,8 +27,9 @@ public protocol RKObjectProtocol {
     ///
     static func primaryKey() -> String?
     static func serverKey() -> String?
+    static func ignoredProperties() -> [String]
     
-    static func defaultPropertyValues() -> [String: AnyObject]
+    static func defaultPropertyValues() -> [String: Any]
 }
 
 @available(OSX 10.10, *)
@@ -42,7 +43,10 @@ public protocol Requestable {
     static func baseURL() -> URL!
     
     /// Returns the headers (e.g. authentication) that is used for fetch & sync requests.
-    static func headers() -> [String: String]?
+    static func headers(_ completion: @escaping (_ headers: [String: String]?) -> Void)
+    
+    /// Handle networking response.
+    static func handle(_ response: Alamofire.DataResponse<Any>, fetchRequest: FetchRequest?, syncOperation: SyncOperation?)
 }
 
 @available(OSX 10.10, *)
@@ -53,24 +57,21 @@ public protocol JSONSerializable: Syncable, Fetchable {
     // MARK: Required
     
     /// Returns the json keyPath for a given object property key (mapping).
-    static func jsonKeyPathsByPropertyKey(with serializationRequest: SerializationRequest) -> [String : String]!
+    static func jsonKeyPathsByPropertyKey(with serializationRequest: SerializationRequest) -> [String : String]
     
     /// Returns the ValueTransformer for a given object property key.
-    static func jsonTransformerForKey(_ key: String!, serializationRequest: SerializationRequest) -> ValueTransformer!
-    
-    /// Returns the type for the realm object to be created/updated during serialization.
-    static func typeToSerialize(_ jsonDictionary: NSDictionary) -> RKObject.Type
+    static func jsonTransformerForKey(_ key: String!, jsonDictionary: NSDictionary, serializationRequest: SerializationRequest) -> ValueTransformer!
     
     // MARK: Optional
     
     /// Allows to modify keyValues before being used to create/update object during serialization.
-    static func modifyKeyValues(_ keyValues: [String: AnyObject]) -> [String: AnyObject]?
+    static func modifyKeyValues(_ keyValues: [String: Any], jsonDictionary: NSDictionary?, serializationRequest: SerializationRequest) -> [String: Any]?
     
     /// Allows to modify object after serialization in same write transaction as it was created/updated.
-    static func modifyObject(_ object: RKObject) -> RKObject?
+    static func modify<T: RKObject>(_ type: T.Type ,object: T) -> T?
     
     /// Used as hook after object serilization in same write transaction as it was created/updated.
-    static func didSerializeObjects(_ objects: [RKObject]) -> ()
+    static func didSerialize<T: RKObject>(_ type: T.Type ,objects: [T], serializationRequest: SerializationRequest) -> Void
 }
 
 @available(OSX 10.10, *)
@@ -88,7 +89,7 @@ public protocol FetchPagable: RKObjectProtocol, Requestable {
     
     // MARK: Required
     static func pageInfo(from fetchResult: FetchResult?) -> PageInfo?
-    static func pagingParameters(from pageInfo: PageInfo) -> [String: Any]?
+    static func pagingParameters(from pageInfo: PageInfo, pageType: PageInfo.PageType) -> [String: Any]?
     
     // MARK: Optional
     static func fetchPagedDidFetch(_ fetchPagedResult: FetchPagedResult)
@@ -109,11 +110,11 @@ public protocol Syncable: RKObjectProtocol, Requestable {
     func setSyncStatus(_ syncStatus: SyncStatus, serializationRequest: SerializationRequest?)
     
     func syncOperations() -> [SyncOperation]
-    func syncHTTPMethod() -> Alamofire.HTTPMethod!
-    func syncPath(_ httpMethod: Alamofire.HTTPMethod!) -> String?
-    func syncParameters(_ httpMethod: Alamofire.HTTPMethod!) -> [String: Any]?
+    func syncHTTPMethod() -> Alamofire.HTTPMethod
+    func syncPath(_ httpMethod: Alamofire.HTTPMethod) -> String?
+    func syncParameters(_ httpMethod: Alamofire.HTTPMethod) -> [String: Any]?
     
-    static func syncJSONResponseKey(_ httpMethod: Alamofire.HTTPMethod!, userInfo: [String: Any]) -> String?
+    static func syncJSONResponseKey(_ httpMethod: Alamofire.HTTPMethod, userInfo: [String: Any]) -> String?
     
     // MARK: Optional
 //    static func syncOperation(_ sender: SyncOperation, willSerializeJSON json: Any, serializationRequest: SerializationRequest)

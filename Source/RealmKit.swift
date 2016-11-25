@@ -7,11 +7,21 @@
 //
 
 import Foundation
+import Alamofire
+
+public extension NSNotification.Name {
+    
+    // Fetch
+    
+    // Sync
+    static let SyncOperationDidStart = NSNotification.Name("com.aplo.RealmKit.SyncOperationDidStart")
+    static let SyncOperationDidComplete = NSNotification.Name("com.aplo.RealmKit.SyncOperationDidComplete")
+}
 
 public class RealmKit {
     
     /// Returns shared instance
-    public class var sharedInstance: RealmKit {
+    public class var shared: RealmKit {
         struct Singleton {
             static let instance = RealmKit()
         }
@@ -21,4 +31,11 @@ public class RealmKit {
     
     public var debugLogs = false
 
+    lazy var sessionManager: Alamofire.SessionManager = {
+        let configuration = URLSessionConfiguration.default
+//        configuration.httpMaximumConnectionsPerHost = 10
+        let _sessionManager = Alamofire.SessionManager(configuration: configuration)
+        return _sessionManager
+    }()
+    
 }

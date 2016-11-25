@@ -20,6 +20,7 @@ public struct FetchRequest {
     // MARK: Optional
     public let parameters: [String: Any]?
     public let jsonResponseKey: String?
+    public let isPaged: Bool
     public let userInfo: [String: Any]
     
     public init(
@@ -27,12 +28,14 @@ public struct FetchRequest {
         path: String,
         parameters: [String: Any]? = nil,
         jsonResponseKey: String? = nil,
+        isPaged: Bool = false,
         userInfo: [String: Any] = [String: Any]()
         ) {
         self.baseURL = baseURL
         self.path = path
         self.parameters = parameters
         self.jsonResponseKey = jsonResponseKey
+        self.isPaged = isPaged
         self.userInfo = userInfo
     }
 }
@@ -46,9 +49,22 @@ public struct FetchResult {
     public let response: Alamofire.DataResponse<Any>
     
     /// The result from the object serialization
-    public let serializationResult: SerializationResult
+    public let serializationResult: SerializationResult?
     
-    init(fetchRequest: FetchRequest, response: Alamofire.DataResponse<Any>, serializationResult: SerializationResult) {
+    /// Success based on status code
+    public var isSuccess: Bool {
+        return response.isSuccess
+    }
+    
+    public var objectInfos: [ObjectInfo] {
+        return self.serializationResult?.objectInfos ?? [ObjectInfo]()
+    }
+    
+    public var objects: [RKObject] {
+        return self.serializationResult?.objects ?? [RKObject]()
+    }
+    
+    init(fetchRequest: FetchRequest, response: Alamofire.DataResponse<Any>, serializationResult: SerializationResult?) {
         self.fetchRequest = fetchRequest
         self.response = response
         self.serializationResult = serializationResult
@@ -61,6 +77,19 @@ public struct FetchPagedResult {
     
     /// Array of all pageInfos
     public let pageInfos: [PageInfo]
+    
+    /// Success based on status code
+    public var isSuccess: Bool {
+        return fetchResults.filter({ $0.response.isSuccess == false }).count == 0
+    }
+  
+    public var objectInfos: [ObjectInfo] {
+        return self.fetchResults.map({ $0.serializationResult?.objectInfos ?? [ObjectInfo]() }).flatMap({ $0 })
+    }
+    
+    public var objects: [RKObject] {
+        return self.fetchResults.map({ $0.serializationResult?.objects ?? [RKObject]() }).flatMap({ $0 })
+    }
     
     init(fetchResults: [FetchResult], pageInfos: [PageInfo]) {
         self.fetchResults = fetchResults
@@ -110,90 +139,102 @@ public struct PageInfo {
 @available(OSX 10.10, *)
 public extension Fetchable where Self: JSONSerializable {
     
-    public static func fetch(_ fetchRequest: FetchRequest,
+    @discardableResult public static func fetch<T: RKObject>(_ type: T.Type, fetchRequest: FetchRequest,
                              persist: Bool = true,
-                             modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])? = nil,
-                             modifyObject: ((RKObject) -> RKObject)? = nil,
-                             didSerializeObjects: (([RKObject]) -> ())? = nil,
-                             completion: @escaping (FetchResult?) -> ()) -> URLSessionTask? {
+                             modifyKeyValues: (([String: Any]) -> [String: Any])? = nil,
+                             modifyObject: ((T) -> T)? = nil,
+                             didSerializeObjects: (([T]) -> Void)? = nil,
+                             completion: @escaping (FetchResult?) -> Void) -> URLSessionTask? {
         let dispatchGroup = DispatchGroup()
         var dispatchQueue = DispatchQueue.global(qos: DispatchQoS.QoSClass.default)
-        
-        var _sessionTask: URLSessionTask?
         var _fetchResult: FetchResult?
+        var _sessionTask: URLSessionTask?
         
         if let url = self.baseURL()?.appendingPathComponent(fetchRequest.path) {
             dispatchGroup.enter()
-            let request = Alamofire.request(url, method: .get, headers: self.headers()).responseJSON { response in
-            
-                var json: Any? = response.result.value
-                
-                if let jsonDictionary = response.result.value as? [String: Any] {
-                    if let jsonObjectKey = fetchRequest.jsonResponseKey {
-                        json = jsonDictionary[jsonObjectKey]
-                    }
-                }
-                
-                if let json = json {
-                    dispatchGroup.enter()
+            self.headers { (headers) in
+                _sessionTask = RealmKit.shared.sessionManager.request(url, method: .get, parameters: fetchRequest.parameters, headers: headers).responseJSON { response in
                     
-                    // Set dispatchQueue to main thread in order to return array with serialized objects
-                    if !persist {
-                        dispatchQueue = DispatchQueue.main
-                    }
-                    
-                    dispatchGroup.enter()
-                    dispatchQueue.async(execute: {
-                        if let realm = try? Realm() {
-                            let serializationRequest = SerializationRequest(realm: realm, httpMethod: .get, userInfo: fetchRequest.userInfo, fetchRequest: fetchRequest)
-                            
-                            // Array
-                            if let jsonArray = json as? NSArray {
-                                dispatchGroup.enter()
-                                self.serializeObjects(with: jsonArray,
-                                             serializationRequest: serializationRequest,
-                                             modifyKeyValues: modifyKeyValues,
-                                             modifyObject: modifyObject,
-                                             didSerializeObjects: didSerializeObjects,
-                                             completion: { serializationResult in
-                                                
-                                                _fetchResult = FetchResult(fetchRequest: fetchRequest, response: response, serializationResult: serializationResult)
-                                                
-                                                dispatchGroup.leave()
-                                    })
-                            }
-                            
-                            // Dictionary
-                            else if let jsonDictionary = json as? NSDictionary {
-                                dispatchGroup.enter()
-                                self.serializeObject(with: jsonDictionary,
-                                            serializationRequest: serializationRequest,
-                                            modifyKeyValues: modifyKeyValues,
-                                            modifyObject: modifyObject,
-                                            didSerializeObjects: didSerializeObjects,
-                                            completion: { serializationResult in
-                                                
-                                                _fetchResult = FetchResult(fetchRequest: fetchRequest, response: response, serializationResult: serializationResult)
-                                                
-                                                dispatchGroup.leave()
-                                })
+                    DispatchQueue.global().async {
+                        var json: Any? = response.result.value
+                        
+                        if let jsonDictionary = response.result.value as? [String: Any] {
+                            if let jsonObjectKey = fetchRequest.jsonResponseKey {
+                                json = jsonDictionary[jsonObjectKey]
                             }
                         }
                         
+                        if let json = json, response.isSuccess {
+                            dispatchGroup.enter()
+                            
+                            // Set dispatchQueue to main thread in order to return array with serialized objects
+                            if !persist {
+                                dispatchQueue = DispatchQueue.main
+                            }
+                            
+                            dispatchGroup.enter()
+                            dispatchQueue.async(execute: {
+                                if let realm = try? Realm() {
+                                    let serializationRequest = SerializationRequest(realm: realm, httpMethod: .get, userInfo: fetchRequest.userInfo, persist: persist, fetchRequest: fetchRequest)
+                                    
+                                    // Array
+                                    if let jsonArray = json as? NSArray {
+                                        dispatchGroup.enter()
+                                        self.serializeObjects(T.self,
+                                                              jsonArray: jsonArray,
+                                                              serializationRequest: serializationRequest,
+                                                              modifyKeyValues: modifyKeyValues,
+                                                              modifyObject: modifyObject,
+                                                              didSerializeObjects: didSerializeObjects,
+                                                              completion: { serializationResult in
+                                                                
+                                                                _fetchResult = FetchResult(fetchRequest: fetchRequest, response: response, serializationResult: serializationResult)
+                                                                
+                                                                dispatchGroup.leave()
+                                        })
+                                    }
+                                        
+                                        // Dictionary
+                                    else if let jsonDictionary = json as? NSDictionary {
+                                        dispatchGroup.enter()
+                                        self.serializeObject(T.self,
+                                                             jsonDictionary: jsonDictionary,
+                                                             serializationRequest: serializationRequest,
+                                                             modifyKeyValues: modifyKeyValues,
+                                                             modifyObject: modifyObject,
+                                                             didSerializeObjects: didSerializeObjects,
+                                                             completion: { serializationResult in
+                                                                
+                                                                _fetchResult = FetchResult(fetchRequest: fetchRequest, response: response, serializationResult: serializationResult)
+                                                                
+                                                                dispatchGroup.leave()
+                                        })
+                                    }
+                                }
+                                
+                                dispatchGroup.leave()
+                            })
+                            
+                            dispatchGroup.leave()
+                        } else {
+                            _fetchResult = FetchResult(fetchRequest: fetchRequest, response: response, serializationResult: nil)
+                        }
+                        
+                        // Handle networking response
+                        self.handle(response, fetchRequest: fetchRequest, syncOperation: nil)
+                        
                         dispatchGroup.leave()
-                    })
-                    
-                    dispatchGroup.leave()
-                }
-                
-                dispatchGroup.leave()
+                    }
+                }.task
             }
-            
-            _sessionTask = request.task
         }
         
         dispatchGroup.notify(queue: DispatchQueue.main, execute: {
-            self.fetchDidComplete(_fetchResult)
+            
+            // Only call fetchDidComplete when not part of a paged request
+            if !fetchRequest.isPaged {
+                self.fetchDidComplete(_fetchResult)
+            }
             
             completion(_fetchResult)
         })
@@ -209,10 +250,10 @@ public class FetchPaged<T: RKObject> {
     public let pageLimit: Int
     public let persist: Bool
     
-    public let modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])?
-    public let modifyObject: ((RKObject) -> RKObject)?
-    public let didSerializeObjects: (([RKObject]) -> ())?
-    public let completion: (FetchPagedResult?, Bool) -> ()
+    public let modifyKeyValues: (([String: Any]) -> [String: Any])?
+    public let modifyObject: ((T) -> T)?
+    public let didSerializeObjects: (([T]) -> Void)?
+    public let completion: (FetchPagedResult?, Bool) -> Void
     
     public var fetchResults = [FetchResult]()
     public var pageInfos = [PageInfo]()
@@ -230,9 +271,10 @@ public class FetchPaged<T: RKObject> {
                     
                     (T.self as FetchPagable.Type).fetchPagedDidFetch(results)
                     
-                    let pagingParameters = (T.self as FetchPagable.Type).pagingParameters(from: pageInfo)
+                    let pagingParameters = (T.self as FetchPagable.Type).pagingParameters(from: pageInfo, pageType: pageType)
                     
-                    let _ = startRequest(with: pagingParameters)
+                    let _ = startRequest(withPagingParameters: pagingParameters)
+                    
                     requestStarted = true
                 }
             }
@@ -248,15 +290,15 @@ public class FetchPaged<T: RKObject> {
     
     // MARK: - Initializers
     
-    public required init<T: RKObject>(type: T.Type,
+    public required init(type: T.Type,
                          fetchRequest: FetchRequest,
-                         pageType: PageInfo.PageType,
+                         pageType: PageInfo.PageType = .next,
                          pageLimit: Int = 1,
                          persist: Bool = true,
-                         modifyKeyValues: (([String: AnyObject]) -> [String: AnyObject])? = nil,
-                         modifyObject: ((RKObject) -> RKObject)? = nil,
-                         didSerializeObjects: (([RKObject]) -> ())? = nil,
-                         completion: @escaping (FetchPagedResult?, Bool) -> ()) {
+                         modifyKeyValues: (([String: Any]) -> [String: Any])? = nil,
+                         modifyObject: ((T) -> T)? = nil,
+                         didSerializeObjects: (([T]) -> Void)? = nil,
+                         completion: @escaping (FetchPagedResult?, Bool) -> Void) {
         self.fetchRequest = fetchRequest
         self.pageType = pageType
         self.pageLimit = pageLimit
@@ -270,25 +312,24 @@ public class FetchPaged<T: RKObject> {
     
     // MARK: - Methods
     
-    public func startRequest(with pagingParameters: [String: Any]?) -> URLSessionTask? {
+    @discardableResult public func startRequest(withPagingParameters pagingParameters: [String: Any]? = nil) -> URLSessionTask? {
         var parameters = self.fetchRequest.parameters ?? [String: Any]()
         pagingParameters?.forEach({ (key, value) in
             parameters[key] = value
         })
         
-        let fetchRequest = FetchRequest(baseURL: self.fetchRequest.baseURL, path: self.fetchRequest.path, parameters: parameters, jsonResponseKey: self.fetchRequest.jsonResponseKey, userInfo: self.fetchRequest.userInfo)
+        let fetchRequest = FetchRequest(baseURL: self.fetchRequest.baseURL, path: self.fetchRequest.path, parameters: parameters, jsonResponseKey: self.fetchRequest.jsonResponseKey, isPaged: true, userInfo: self.fetchRequest.userInfo)
         
-        return (T.self as JSONSerializable.Type).self.fetch(fetchRequest,
+        return (T.self as JSONSerializable.Type).self.fetch(T.self,
+                                                            fetchRequest: fetchRequest,
                                                             persist: self.persist,
                                                             modifyKeyValues: self.modifyKeyValues,
                                                             modifyObject: self.modifyObject,
                                                             didSerializeObjects: self.didSerializeObjects,
                                                             completion: { fetchResult in
-                                                                
                                                                 if let fetchResult = fetchResult {
                                                                     self.fetchResults.append(fetchResult)
                                                                 }
-                                                                
                                                                 self.pageInfo = (T.self as FetchPagable.Type).pageInfo(from: fetchResult)
         })
     }
