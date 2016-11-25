@@ -1,7 +1,7 @@
 use_frameworks!
 
 def shared_pods
-    pod 'RealmSwift', '~> 1.1'
+    pod 'RealmSwift', '~> 2.1'
     pod 'Alamofire', '~> 4.0'
 end
 
@@ -15,10 +15,10 @@ target 'iOSTests' do
     shared_pods
 end
 
-target 'macOS' do
-    platform :osx, '10.11'
-    shared_pods
-end
+#target 'RealmKit-macOS' do
+#    platform :osx, '10.11'
+#    shared_pods
+#end
 
 post_install do |installer|
     installer.pods_project.targets.each do |target|

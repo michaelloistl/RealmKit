@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6ABE42791D9BFBC900772F8C"
-               BuildableName = "macOS.framework"
-               BlueprintName = "macOS"
+               BuildableName = "RealmKit-macOS.framework"
+               BlueprintName = "RealmKit-macOS"
                ReferencedContainer = "container:RealmKit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -33,8 +33,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6ABE42791D9BFBC900772F8C"
-            BuildableName = "macOS.framework"
-            BlueprintName = "macOS"
+            BuildableName = "RealmKit-macOS.framework"
+            BlueprintName = "RealmKit-macOS"
             ReferencedContainer = "container:RealmKit.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -56,8 +56,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6ABE42791D9BFBC900772F8C"
-            BuildableName = "macOS.framework"
-            BlueprintName = "macOS"
+            BuildableName = "RealmKit-macOS.framework"
+            BlueprintName = "RealmKit-macOS"
             ReferencedContainer = "container:RealmKit.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -75,8 +75,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6ABE42791D9BFBC900772F8C"
-            BuildableName = "macOS.framework"
-            BlueprintName = "macOS"
+            BuildableName = "RealmKit-macOS.framework"
+            BlueprintName = "RealmKit-macOS"
             ReferencedContainer = "container:RealmKit.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

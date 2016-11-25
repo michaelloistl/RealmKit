@@ -267,7 +267,7 @@ void Results::update_tableview(bool wants_notifications)
                 m_table_view.sort(m_sort);
             }
             m_mode = Mode::TableView;
-            break;
+            REALM_FALLTHROUGH;
         case Mode::TableView:
             if (wants_notifications && !m_notifier && !m_realm->is_in_transaction() && m_realm->can_deliver_notifications()) {
                 m_notifier = std::make_shared<_impl::ResultsNotifier>(*this);
@@ -524,6 +524,9 @@ Results Results::snapshot() &&
 
 void Results::prepare_async()
 {
+    if (m_notifier) {
+        return;
+    }
     if (m_realm->config().read_only()) {
         throw InvalidTransactionException("Cannot create asynchronous query for read-only Realms");
     }
@@ -534,11 +537,9 @@ void Results::prepare_async()
         throw std::logic_error("Cannot create asynchronous query for snapshotted Results.");
     }
 
-    if (!m_notifier) {
-        m_wants_background_updates = true;
-        m_notifier = std::make_shared<_impl::ResultsNotifier>(*this);
-        _impl::RealmCoordinator::register_notifier(m_notifier);
-    }
+    m_wants_background_updates = true;
+    m_notifier = std::make_shared<_impl::ResultsNotifier>(*this);
+    _impl::RealmCoordinator::register_notifier(m_notifier);
 }
 
 NotificationToken Results::async(std::function<void (std::exception_ptr)> target)

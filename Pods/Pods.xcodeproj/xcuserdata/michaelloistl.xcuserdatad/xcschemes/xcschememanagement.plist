@@ -4,12 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Alamofire-OSX.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Alamofire-iOS.xcscheme</key>
+		<key>Alamofire.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -24,27 +19,12 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-macOS.xcscheme</key>
+		<key>Realm.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Realm-OSX.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Realm-iOS.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>RealmSwift-OSX.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>RealmSwift-iOS.xcscheme</key>
+		<key>RealmSwift.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -52,47 +32,27 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>02CBD32F6C3D7424701457A087872DD7</key>
+		<key>1CF4A3FEB855F1544F293752C89A47E5</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>20B70B8616370516C787DB213CCE225D</key>
+		<key>1D3471DF7EAC9E1DFA74F180FF01D2A8</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>758935DBD801FD6C508E2A665CFD18B3</key>
+		<key>3B5CE5FD19F2858CDC864B1320F80BFB</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>89C69EB624EC8137588D9568F2E11964</key>
+		<key>79C040AFDDCE1BCBF6D8B5EB0B85887F</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>8A46F3686C46DC9D9C11D7DE4BDDBB54</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>B18C24B15F15AC20E244036F9DBC18C0</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>BD2B1A13DB2CFEBC59DFF2BD53919BDB</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>F31DD71DB15E3032D3A8C7D9F9FF4FBB</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>F927797F0A0EA22F1C79B4B0DD2F528A</key>
+		<key>A0D3AA713F47597CEDA9F767FC1F0D55</key>
 		<dict>
 			<key>primary</key>
 			<true/>
