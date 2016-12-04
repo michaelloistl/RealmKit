@@ -77,6 +77,10 @@ open class RKObject: Object, RKObjectProtocol, JSONSerializable, Requestable, Fe
         
     }
     
+    open class func existingObject<T: RKObject>(_ type: T.Type, keyValues: [String: Any])  -> T? {
+        return nil
+    }
+    
     // MARK: Requestable
     
     /// Returns the base URL that is used for fetch & sync requests.

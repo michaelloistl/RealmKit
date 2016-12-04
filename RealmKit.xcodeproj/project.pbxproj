@@ -43,6 +43,10 @@
 				<string>5DBBE33DBF9703B84C6C6D46</string>
 				<string>D0925BDF9F5579496DB88C21</string>
 				<string>4968F477B606A0870BE29D0D</string>
+				<string>C2574BAD1A742ED2EB8BBFFC</string>
+				<string>7597CD0895A5746FEDF4DDC4</string>
+				<string>A383C5F8CB8B09958C5602EA</string>
+				<string>6530633B4F3BB981B086641D</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -50,74 +54,6 @@
 			<string>Pods</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
-		</dict>
-		<key>04D66D1F083C19E991E70672</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>inputPaths</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXShellScriptBuildPhase</string>
-			<key>name</key>
-			<string>[CP] Check Pods Manifest.lock</string>
-			<key>outputPaths</key>
-			<array/>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-			<key>shellPath</key>
-			<string>/bin/sh</string>
-			<key>shellScript</key>
-			<string>diff "${PODS_ROOT}/../Podfile.lock" "${PODS_ROOT}/Manifest.lock" &gt; /dev/null
-if [[ $? != 0 ]] ; then
-    cat &lt;&lt; EOM
-error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.
-EOM
-    exit 1
-fi
-</string>
-			<key>showEnvVarsInLog</key>
-			<string>0</string>
-		</dict>
-		<key>05025FDA60BFA20F9E919CE5</key>
-		<dict>
-			<key>fileRef</key>
-			<string>233CFB35768224B5856E803F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>093EB155824A2E51953F9A7E</key>
-		<dict>
-			<key>fileRef</key>
-			<string>E021456C5010D2F77530E19D</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>0D6F7B2C947010C852370B9A</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>inputPaths</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXShellScriptBuildPhase</string>
-			<key>name</key>
-			<string>[CP] Copy Pods Resources</string>
-			<key>outputPaths</key>
-			<array/>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-			<key>shellPath</key>
-			<string>/bin/sh</string>
-			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-iOS/Pods-iOS-resources.sh"
-</string>
-			<key>showEnvVarsInLog</key>
-			<string>0</string>
 		</dict>
 		<key>1AE17C4265EB8DD84E66CEF8</key>
 		<dict>
@@ -134,7 +70,20 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>222D8348F2C28B8418C3A353</key>
+		<key>233CFB35768224B5856E803F</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>wrapper.framework</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>Pods_iOSTests.framework</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>258DB6170DFB832D25CD83B5</key>
 		<dict>
 			<key>buildActionMask</key>
 			<string>2147483647</string>
@@ -160,43 +109,6 @@ error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or up
 EOM
     exit 1
 fi
-</string>
-			<key>showEnvVarsInLog</key>
-			<string>0</string>
-		</dict>
-		<key>233CFB35768224B5856E803F</key>
-		<dict>
-			<key>explicitFileType</key>
-			<string>wrapper.framework</string>
-			<key>includeInIndex</key>
-			<string>0</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>path</key>
-			<string>Pods_iOSTests.framework</string>
-			<key>sourceTree</key>
-			<string>BUILT_PRODUCTS_DIR</string>
-		</dict>
-		<key>2D07FB9B6C90958AF19C0F3C</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>inputPaths</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXShellScriptBuildPhase</string>
-			<key>name</key>
-			<string>[CP] Copy Pods Resources</string>
-			<key>outputPaths</key>
-			<array/>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-			<key>shellPath</key>
-			<string>/bin/sh</string>
-			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-iOSTests/Pods-iOSTests-resources.sh"
 </string>
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
@@ -244,13 +156,6 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>4DD310602E0DC6F2CA793201</key>
-		<dict>
-			<key>fileRef</key>
-			<string>42D2E71E4D5BAD5C5E44E181</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
 		<key>53D263ED441CEE790FBAA82F</key>
 		<dict>
 			<key>includeInIndex</key>
@@ -296,29 +201,20 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>655A56CB934C1BEDE14957A2</key>
+		<key>6530633B4F3BB981B086641D</key>
 		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>inputPaths</key>
-			<array/>
+			<key>includeInIndex</key>
+			<string>1</string>
 			<key>isa</key>
-			<string>PBXShellScriptBuildPhase</string>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.xcconfig</string>
 			<key>name</key>
-			<string>[CP] Embed Pods Frameworks</string>
-			<key>outputPaths</key>
-			<array/>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-			<key>shellPath</key>
-			<string>/bin/sh</string>
-			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-iOSTests/Pods-iOSTests-frameworks.sh"
-</string>
-			<key>showEnvVarsInLog</key>
-			<string>0</string>
+			<string>Pods-RealmKit macOS.release.xcconfig</string>
+			<key>path</key>
+			<string>Pods/Target Support Files/Pods-RealmKit macOS/Pods-RealmKit macOS.release.xcconfig</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
 		</dict>
 		<key>69117910E6236C963B2A9BD2</key>
 		<dict>
@@ -348,147 +244,6 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>6A4EAE9B1D9D443400E212F1</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A4EAE9A1D9D443400E212F1</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67821D9C00F8008ECE8F</key>
-		<dict>
-			<key>children</key>
-			<array>
-				<string>6A6D67831D9C00F8008ECE8F</string>
-			</array>
-			<key>isa</key>
-			<string>PBXGroup</string>
-			<key>path</key>
-			<string>iOS</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67831D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileEncoding</key>
-			<string>4</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.plist.xml</string>
-			<key>path</key>
-			<string>Info.plist</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67851D9C00F8008ECE8F</key>
-		<dict>
-			<key>children</key>
-			<array>
-				<string>6A6D67861D9C00F8008ECE8F</string>
-				<string>6A6D67871D9C00F8008ECE8F</string>
-				<string>6A6D678B1D9C00F8008ECE8F</string>
-			</array>
-			<key>isa</key>
-			<string>PBXGroup</string>
-			<key>path</key>
-			<string>iOSTests</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67861D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileEncoding</key>
-			<string>4</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.plist.xml</string>
-			<key>path</key>
-			<string>Info.plist</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67871D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileEncoding</key>
-			<string>4</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.json</string>
-			<key>path</key>
-			<string>Item.json</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D678B1D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileEncoding</key>
-			<string>4</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.json</string>
-			<key>path</key>
-			<string>User.json</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D678C1D9C00F8008ECE8F</key>
-		<dict>
-			<key>children</key>
-			<array>
-				<string>6A6D67911D9C00F8008ECE8F</string>
-			</array>
-			<key>isa</key>
-			<string>PBXGroup</string>
-			<key>path</key>
-			<string>macOS</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67911D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileEncoding</key>
-			<string>4</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.plist.xml</string>
-			<key>path</key>
-			<string>Info.plist</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67951D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67861D9C00F8008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67961D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67871D9C00F8008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D679A1D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D678B1D9C00F8008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D679E1D9C00F8008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67911D9C00F8008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
 		<key>6A6D67A01D9C0106008ECE8F</key>
 		<dict>
 			<key>children</key>
@@ -502,8 +257,6 @@ fi
 				<string>6A6D67AA1D9C0106008ECE8F</string>
 				<string>6A4EAE9A1D9D443400E212F1</string>
 				<string>6AC61CB91DA411CA0040BF42</string>
-				<string>6A6D67A41D9C0106008ECE8F</string>
-				<string>6A6D67A51D9C0106008ECE8F</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -548,32 +301,6 @@ fi
 			<string>sourcecode.swift</string>
 			<key>path</key>
 			<string>Protocols.swift</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67A41D9C0106008ECE8F</key>
-		<dict>
-			<key>fileEncoding</key>
-			<string>4</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>sourcecode.swift</string>
-			<key>path</key>
-			<string>_RealmFetchManager.swift</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A6D67A51D9C0106008ECE8F</key>
-		<dict>
-			<key>fileEncoding</key>
-			<string>4</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>sourcecode.swift</string>
-			<key>path</key>
-			<string>_RealmFetchPaged.swift</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -629,77 +356,11 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>6A6D67AB1D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A11D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67AD1D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A21D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67AF1D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A31D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67B11D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A41D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67B31D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A51D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67B51D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A61D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67B71D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A71D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67BB1D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67A91D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A6D67BD1D9C0106008ECE8F</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A6D67AA1D9C0106008ECE8F</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
 		<key>6A7357DC1BCC0958003F99EF</key>
 		<dict>
 			<key>children</key>
 			<array>
 				<string>6A6D67A01D9C0106008ECE8F</string>
-				<string>6A6D67821D9C00F8008ECE8F</string>
-				<string>6A6D67851D9C00F8008ECE8F</string>
-				<string>6A6D678C1D9C00F8008ECE8F</string>
 				<string>6A7357E71BCC0958003F99EF</string>
 				<string>0275F272F3D204D45DAE5B05</string>
 				<string>D94E331967F613F70E831D3A</string>
@@ -714,26 +375,48 @@ fi
 			<key>attributes</key>
 			<dict>
 				<key>LastSwiftUpdateCheck</key>
-				<string>0800</string>
+				<string>0820</string>
 				<key>LastUpgradeCheck</key>
 				<string>0800</string>
 				<key>ORGANIZATIONNAME</key>
 				<string>Aplo</string>
 				<key>TargetAttributes</key>
 				<dict>
-					<key>6A7357E51BCC0958003F99EF</key>
+					<key>6A7899D41DF2FD040098AF6B</key>
 					<dict>
 						<key>CreatedOnToolsVersion</key>
-						<string>7.0.1</string>
-						<key>LastSwiftMigration</key>
-						<string>0800</string>
+						<string>8.2</string>
+						<key>DevelopmentTeam</key>
+						<string>52EDKXLXY5</string>
+						<key>ProvisioningStyle</key>
+						<string>Automatic</string>
 					</dict>
-					<key>6A7357EF1BCC0958003F99EF</key>
+					<key>6A7899DC1DF2FD050098AF6B</key>
 					<dict>
 						<key>CreatedOnToolsVersion</key>
-						<string>7.0.1</string>
-						<key>LastSwiftMigration</key>
-						<string>0800</string>
+						<string>8.2</string>
+						<key>DevelopmentTeam</key>
+						<string>52EDKXLXY5</string>
+						<key>ProvisioningStyle</key>
+						<string>Automatic</string>
+					</dict>
+					<key>6A7899F01DF2FD250098AF6B</key>
+					<dict>
+						<key>CreatedOnToolsVersion</key>
+						<string>8.2</string>
+						<key>DevelopmentTeam</key>
+						<string>52EDKXLXY5</string>
+						<key>ProvisioningStyle</key>
+						<string>Automatic</string>
+					</dict>
+					<key>6A7899F81DF2FD250098AF6B</key>
+					<dict>
+						<key>CreatedOnToolsVersion</key>
+						<string>8.2</string>
+						<key>DevelopmentTeam</key>
+						<string>52EDKXLXY5</string>
+						<key>ProvisioningStyle</key>
+						<string>Automatic</string>
 					</dict>
 				</dict>
 			</dict>
@@ -764,8 +447,10 @@ fi
 			<string></string>
 			<key>targets</key>
 			<array>
-				<string>6A7357E51BCC0958003F99EF</string>
-				<string>6A7357EF1BCC0958003F99EF</string>
+				<string>6A7899D41DF2FD040098AF6B</string>
+				<string>6A7899DC1DF2FD050098AF6B</string>
+				<string>6A7899F01DF2FD250098AF6B</string>
+				<string>6A7899F81DF2FD250098AF6B</string>
 			</array>
 		</dict>
 		<key>6A7357E01BCC0958003F99EF</key>
@@ -782,119 +467,14 @@ fi
 			<key>isa</key>
 			<string>XCConfigurationList</string>
 		</dict>
-		<key>6A7357E11BCC0958003F99EF</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array>
-				<string>6A6D67AB1D9C0106008ECE8F</string>
-				<string>6A6D67AD1D9C0106008ECE8F</string>
-				<string>6A6D67B31D9C0106008ECE8F</string>
-				<string>6A6D67BD1D9C0106008ECE8F</string>
-				<string>6A6D67B71D9C0106008ECE8F</string>
-				<string>6AC61CBA1DA411CA0040BF42</string>
-				<string>6A6D67AF1D9C0106008ECE8F</string>
-				<string>6A6D67B11D9C0106008ECE8F</string>
-				<string>6A6D67BB1D9C0106008ECE8F</string>
-				<string>6A6D67B51D9C0106008ECE8F</string>
-			</array>
-			<key>isa</key>
-			<string>PBXSourcesBuildPhase</string>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-		</dict>
-		<key>6A7357E21BCC0958003F99EF</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array>
-				<string>4DD310602E0DC6F2CA793201</string>
-				<string>F644D2C8B5CCD3231AA68A22</string>
-				<string>093EB155824A2E51953F9A7E</string>
-			</array>
-			<key>isa</key>
-			<string>PBXFrameworksBuildPhase</string>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-		</dict>
-		<key>6A7357E31BCC0958003F99EF</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array>
-				<string>6A4EAE9B1D9D443400E212F1</string>
-			</array>
-			<key>isa</key>
-			<string>PBXHeadersBuildPhase</string>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-		</dict>
-		<key>6A7357E41BCC0958003F99EF</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array>
-				<string>6A6D679A1D9C00F8008ECE8F</string>
-				<string>6A6D67961D9C00F8008ECE8F</string>
-				<string>6A6D67951D9C00F8008ECE8F</string>
-				<string>6A6D679E1D9C00F8008ECE8F</string>
-			</array>
-			<key>isa</key>
-			<string>PBXResourcesBuildPhase</string>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-		</dict>
-		<key>6A7357E51BCC0958003F99EF</key>
-		<dict>
-			<key>buildConfigurationList</key>
-			<string>6A7357FA1BCC0958003F99EF</string>
-			<key>buildPhases</key>
-			<array>
-				<string>222D8348F2C28B8418C3A353</string>
-				<string>6A7357E11BCC0958003F99EF</string>
-				<string>6A7357E21BCC0958003F99EF</string>
-				<string>6A7357E31BCC0958003F99EF</string>
-				<string>6A7357E41BCC0958003F99EF</string>
-				<string>0D6F7B2C947010C852370B9A</string>
-			</array>
-			<key>buildRules</key>
-			<array/>
-			<key>dependencies</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXNativeTarget</string>
-			<key>name</key>
-			<string>iOS</string>
-			<key>productName</key>
-			<string>RealmKit</string>
-			<key>productReference</key>
-			<string>6A7357E61BCC0958003F99EF</string>
-			<key>productType</key>
-			<string>com.apple.product-type.framework</string>
-		</dict>
-		<key>6A7357E61BCC0958003F99EF</key>
-		<dict>
-			<key>explicitFileType</key>
-			<string>wrapper.framework</string>
-			<key>includeInIndex</key>
-			<string>0</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>path</key>
-			<string>iOS.framework</string>
-			<key>sourceTree</key>
-			<string>BUILT_PRODUCTS_DIR</string>
-		</dict>
 		<key>6A7357E71BCC0958003F99EF</key>
 		<dict>
 			<key>children</key>
 			<array>
-				<string>6A7357E61BCC0958003F99EF</string>
-				<string>6A7357F01BCC0958003F99EF</string>
+				<string>6A7899D51DF2FD040098AF6B</string>
+				<string>6A7899DD1DF2FD050098AF6B</string>
+				<string>6A7899F11DF2FD250098AF6B</string>
+				<string>6A7899F91DF2FD250098AF6B</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -902,115 +482,6 @@ fi
 			<string>Products</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
-		</dict>
-		<key>6A7357EC1BCC0958003F99EF</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXSourcesBuildPhase</string>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-		</dict>
-		<key>6A7357ED1BCC0958003F99EF</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array>
-				<string>6A7357F11BCC0958003F99EF</string>
-				<string>6BE620BAD44F0DED06B0CBFE</string>
-				<string>05025FDA60BFA20F9E919CE5</string>
-			</array>
-			<key>isa</key>
-			<string>PBXFrameworksBuildPhase</string>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-		</dict>
-		<key>6A7357EE1BCC0958003F99EF</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXResourcesBuildPhase</string>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-		</dict>
-		<key>6A7357EF1BCC0958003F99EF</key>
-		<dict>
-			<key>buildConfigurationList</key>
-			<string>6A7357FD1BCC0958003F99EF</string>
-			<key>buildPhases</key>
-			<array>
-				<string>04D66D1F083C19E991E70672</string>
-				<string>6A7357EC1BCC0958003F99EF</string>
-				<string>6A7357ED1BCC0958003F99EF</string>
-				<string>6A7357EE1BCC0958003F99EF</string>
-				<string>655A56CB934C1BEDE14957A2</string>
-				<string>2D07FB9B6C90958AF19C0F3C</string>
-			</array>
-			<key>buildRules</key>
-			<array/>
-			<key>dependencies</key>
-			<array>
-				<string>6A7357F31BCC0958003F99EF</string>
-			</array>
-			<key>isa</key>
-			<string>PBXNativeTarget</string>
-			<key>name</key>
-			<string>iOSTests</string>
-			<key>productName</key>
-			<string>RealmKitTests</string>
-			<key>productReference</key>
-			<string>6A7357F01BCC0958003F99EF</string>
-			<key>productType</key>
-			<string>com.apple.product-type.bundle.unit-test</string>
-		</dict>
-		<key>6A7357F01BCC0958003F99EF</key>
-		<dict>
-			<key>explicitFileType</key>
-			<string>wrapper.cfbundle</string>
-			<key>includeInIndex</key>
-			<string>0</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>path</key>
-			<string>iOSTests.xctest</string>
-			<key>sourceTree</key>
-			<string>BUILT_PRODUCTS_DIR</string>
-		</dict>
-		<key>6A7357F11BCC0958003F99EF</key>
-		<dict>
-			<key>fileRef</key>
-			<string>6A7357E61BCC0958003F99EF</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>6A7357F21BCC0958003F99EF</key>
-		<dict>
-			<key>containerPortal</key>
-			<string>6A7357DD1BCC0958003F99EF</string>
-			<key>isa</key>
-			<string>PBXContainerItemProxy</string>
-			<key>proxyType</key>
-			<string>1</string>
-			<key>remoteGlobalIDString</key>
-			<string>6A7357E51BCC0958003F99EF</string>
-			<key>remoteInfo</key>
-			<string>RealmKit</string>
-		</dict>
-		<key>6A7357F31BCC0958003F99EF</key>
-		<dict>
-			<key>isa</key>
-			<string>PBXTargetDependency</string>
-			<key>target</key>
-			<string>6A7357E51BCC0958003F99EF</string>
-			<key>targetProxy</key>
-			<string>6A7357F21BCC0958003F99EF</string>
 		</dict>
 		<key>6A7357F81BCC0958003F99EF</key>
 		<dict>
@@ -1197,34 +668,236 @@ fi
 			<key>name</key>
 			<string>Release</string>
 		</dict>
-		<key>6A7357FA1BCC0958003F99EF</key>
+		<key>6A7899D01DF2FD040098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>6A789A101DF2FD2D0098AF6B</string>
+				<string>6A789A0D1DF2FD2D0098AF6B</string>
+				<string>6A789A0C1DF2FD2D0098AF6B</string>
+				<string>6A789A081DF2FD2D0098AF6B</string>
+				<string>6A789A0A1DF2FD2D0098AF6B</string>
+				<string>6A789A091DF2FD2D0098AF6B</string>
+				<string>6A789A0E1DF2FD2D0098AF6B</string>
+				<string>6A789A0B1DF2FD2D0098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXSourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899D11DF2FD040098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>B1CB5D2D07DC69F5383A989E</string>
+			</array>
+			<key>isa</key>
+			<string>PBXFrameworksBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899D21DF2FD040098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>6A789A0F1DF2FD2D0098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXHeadersBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899D31DF2FD040098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXResourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899D41DF2FD040098AF6B</key>
+		<dict>
+			<key>buildConfigurationList</key>
+			<string>6A7899E61DF2FD050098AF6B</string>
+			<key>buildPhases</key>
+			<array>
+				<string>258DB6170DFB832D25CD83B5</string>
+				<string>6A7899D01DF2FD040098AF6B</string>
+				<string>6A7899D11DF2FD040098AF6B</string>
+				<string>6A7899D21DF2FD040098AF6B</string>
+				<string>6A7899D31DF2FD040098AF6B</string>
+				<string>D63C8D9BF1A20B19E149AF6A</string>
+			</array>
+			<key>buildRules</key>
+			<array/>
+			<key>dependencies</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXNativeTarget</string>
+			<key>name</key>
+			<string>RealmKit iOS</string>
+			<key>productName</key>
+			<string>RealmKit iOS</string>
+			<key>productReference</key>
+			<string>6A7899D51DF2FD040098AF6B</string>
+			<key>productType</key>
+			<string>com.apple.product-type.framework</string>
+		</dict>
+		<key>6A7899D51DF2FD040098AF6B</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>wrapper.framework</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>RealmKit iOS.framework</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>6A7899D91DF2FD050098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXSourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899DA1DF2FD050098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>6A7899DE1DF2FD050098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXFrameworksBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899DB1DF2FD050098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXResourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899DC1DF2FD050098AF6B</key>
+		<dict>
+			<key>buildConfigurationList</key>
+			<string>6A7899E91DF2FD050098AF6B</string>
+			<key>buildPhases</key>
+			<array>
+				<string>6A7899D91DF2FD050098AF6B</string>
+				<string>6A7899DA1DF2FD050098AF6B</string>
+				<string>6A7899DB1DF2FD050098AF6B</string>
+			</array>
+			<key>buildRules</key>
+			<array/>
+			<key>dependencies</key>
+			<array>
+				<string>6A7899E01DF2FD050098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXNativeTarget</string>
+			<key>name</key>
+			<string>RealmKit iOSTests</string>
+			<key>productName</key>
+			<string>RealmKit iOSTests</string>
+			<key>productReference</key>
+			<string>6A7899DD1DF2FD050098AF6B</string>
+			<key>productType</key>
+			<string>com.apple.product-type.bundle.unit-test</string>
+		</dict>
+		<key>6A7899DD1DF2FD050098AF6B</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>wrapper.cfbundle</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>RealmKit iOSTests.xctest</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>6A7899DE1DF2FD050098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A7899D51DF2FD040098AF6B</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A7899DF1DF2FD050098AF6B</key>
+		<dict>
+			<key>containerPortal</key>
+			<string>6A7357DD1BCC0958003F99EF</string>
+			<key>isa</key>
+			<string>PBXContainerItemProxy</string>
+			<key>proxyType</key>
+			<string>1</string>
+			<key>remoteGlobalIDString</key>
+			<string>6A7899D41DF2FD040098AF6B</string>
+			<key>remoteInfo</key>
+			<string>RealmKit iOS</string>
+		</dict>
+		<key>6A7899E01DF2FD050098AF6B</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXTargetDependency</string>
+			<key>target</key>
+			<string>6A7899D41DF2FD040098AF6B</string>
+			<key>targetProxy</key>
+			<string>6A7899DF1DF2FD050098AF6B</string>
+		</dict>
+		<key>6A7899E61DF2FD050098AF6B</key>
 		<dict>
 			<key>buildConfigurations</key>
 			<array>
-				<string>6A7357FB1BCC0958003F99EF</string>
-				<string>6A7357FC1BCC0958003F99EF</string>
+				<string>6A7899E71DF2FD050098AF6B</string>
+				<string>6A7899E81DF2FD050098AF6B</string>
 			</array>
 			<key>defaultConfigurationIsVisible</key>
 			<string>0</string>
-			<key>defaultConfigurationName</key>
-			<string>Release</string>
 			<key>isa</key>
 			<string>XCConfigurationList</string>
 		</dict>
-		<key>6A7357FB1BCC0958003F99EF</key>
+		<key>6A7899E71DF2FD050098AF6B</key>
 		<dict>
 			<key>baseConfigurationReference</key>
-			<string>69117910E6236C963B2A9BD2</string>
+			<string>C2574BAD1A742ED2EB8BBFFC</string>
 			<key>buildSettings</key>
 			<dict>
-				<key>ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES</key>
+				<key>CLANG_ANALYZER_NONNULL</key>
 				<string>YES</string>
-				<key>CLANG_ENABLE_MODULES</key>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
 				<string>YES</string>
-				<key>CODE_SIGN_IDENTITY[sdk=iphoneos*]</key>
+				<key>CODE_SIGN_IDENTITY</key>
 				<string></string>
 				<key>DEFINES_MODULE</key>
 				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
 				<key>DYLIB_COMPATIBILITY_VERSION</key>
 				<string>1</string>
 				<key>DYLIB_CURRENT_VERSION</key>
@@ -1232,21 +905,21 @@ fi
 				<key>DYLIB_INSTALL_NAME_BASE</key>
 				<string>@rpath</string>
 				<key>INFOPLIST_FILE</key>
-				<string>iOS/Info.plist</string>
+				<string>RealmKit iOS/Info.plist</string>
 				<key>INSTALL_PATH</key>
 				<string>$(LOCAL_LIBRARY_DIR)/Frameworks</string>
+				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+				<string>10.2</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<string>$(inherited) @executable_path/Frameworks @loader_path/Frameworks</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>com.RealmKit.iOS</string>
-				<key>PRODUCT_MODULE_NAME</key>
-				<string>$(PRODUCT_NAME:c99extidentifier)</string>
+				<string>com.aplo.RealmKit-iOS</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>SKIP_INSTALL</key>
 				<string>YES</string>
-				<key>SWIFT_OPTIMIZATION_LEVEL</key>
-				<string>-Onone</string>
+				<key>SWIFT_ACTIVE_COMPILATION_CONDITIONS</key>
+				<string>DEBUG</string>
 				<key>SWIFT_VERSION</key>
 				<string>3.0</string>
 			</dict>
@@ -1255,20 +928,22 @@ fi
 			<key>name</key>
 			<string>Debug</string>
 		</dict>
-		<key>6A7357FC1BCC0958003F99EF</key>
+		<key>6A7899E81DF2FD050098AF6B</key>
 		<dict>
 			<key>baseConfigurationReference</key>
-			<string>1AE17C4265EB8DD84E66CEF8</string>
+			<string>7597CD0895A5746FEDF4DDC4</string>
 			<key>buildSettings</key>
 			<dict>
-				<key>ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES</key>
+				<key>CLANG_ANALYZER_NONNULL</key>
 				<string>YES</string>
-				<key>CLANG_ENABLE_MODULES</key>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
 				<string>YES</string>
-				<key>CODE_SIGN_IDENTITY[sdk=iphoneos*]</key>
+				<key>CODE_SIGN_IDENTITY</key>
 				<string></string>
 				<key>DEFINES_MODULE</key>
 				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
 				<key>DYLIB_COMPATIBILITY_VERSION</key>
 				<string>1</string>
 				<key>DYLIB_CURRENT_VERSION</key>
@@ -1276,15 +951,15 @@ fi
 				<key>DYLIB_INSTALL_NAME_BASE</key>
 				<string>@rpath</string>
 				<key>INFOPLIST_FILE</key>
-				<string>iOS/Info.plist</string>
+				<string>RealmKit iOS/Info.plist</string>
 				<key>INSTALL_PATH</key>
 				<string>$(LOCAL_LIBRARY_DIR)/Frameworks</string>
+				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+				<string>10.2</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<string>$(inherited) @executable_path/Frameworks @loader_path/Frameworks</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>com.RealmKit.iOS</string>
-				<key>PRODUCT_MODULE_NAME</key>
-				<string>$(PRODUCT_NAME:c99extidentifier)</string>
+				<string>com.aplo.RealmKit-iOS</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>SKIP_INSTALL</key>
@@ -1297,40 +972,42 @@ fi
 			<key>name</key>
 			<string>Release</string>
 		</dict>
-		<key>6A7357FD1BCC0958003F99EF</key>
+		<key>6A7899E91DF2FD050098AF6B</key>
 		<dict>
 			<key>buildConfigurations</key>
 			<array>
-				<string>6A7357FE1BCC0958003F99EF</string>
-				<string>6A7357FF1BCC0958003F99EF</string>
+				<string>6A7899EA1DF2FD050098AF6B</string>
+				<string>6A7899EB1DF2FD050098AF6B</string>
 			</array>
 			<key>defaultConfigurationIsVisible</key>
 			<string>0</string>
-			<key>defaultConfigurationName</key>
-			<string>Release</string>
 			<key>isa</key>
 			<string>XCConfigurationList</string>
 		</dict>
-		<key>6A7357FE1BCC0958003F99EF</key>
+		<key>6A7899EA1DF2FD050098AF6B</key>
 		<dict>
-			<key>baseConfigurationReference</key>
-			<string>8759E9D30279A5AADEF6186A</string>
 			<key>buildSettings</key>
 			<dict>
 				<key>ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES</key>
 				<string>YES</string>
-				<key>CLANG_ENABLE_MODULES</key>
+				<key>CLANG_ANALYZER_NONNULL</key>
 				<string>YES</string>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
+				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
 				<key>INFOPLIST_FILE</key>
-				<string>RealmKitTests/Info.plist</string>
+				<string>RealmKit iOSTests/Info.plist</string>
+				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+				<string>10.2</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<string>$(inherited) @executable_path/Frameworks @loader_path/Frameworks</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>com.aplo.RealmKitTests</string>
+				<string>com.aplo.RealmKit-iOSTests</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
-				<key>SWIFT_OPTIMIZATION_LEVEL</key>
-				<string>-Onone</string>
+				<key>SWIFT_ACTIVE_COMPILATION_CONDITIONS</key>
+				<string>DEBUG</string>
 				<key>SWIFT_VERSION</key>
 				<string>3.0</string>
 			</dict>
@@ -1339,22 +1016,26 @@ fi
 			<key>name</key>
 			<string>Debug</string>
 		</dict>
-		<key>6A7357FF1BCC0958003F99EF</key>
+		<key>6A7899EB1DF2FD050098AF6B</key>
 		<dict>
-			<key>baseConfigurationReference</key>
-			<string>7E4AD2911976BA28E9714B93</string>
 			<key>buildSettings</key>
 			<dict>
 				<key>ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES</key>
 				<string>YES</string>
-				<key>CLANG_ENABLE_MODULES</key>
+				<key>CLANG_ANALYZER_NONNULL</key>
 				<string>YES</string>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
+				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
 				<key>INFOPLIST_FILE</key>
-				<string>RealmKitTests/Info.plist</string>
+				<string>RealmKit iOSTests/Info.plist</string>
+				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+				<string>10.2</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<string>$(inherited) @executable_path/Frameworks @loader_path/Frameworks</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>com.aplo.RealmKitTests</string>
+				<string>com.aplo.RealmKit-iOSTests</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>SWIFT_VERSION</key>
@@ -1364,6 +1045,534 @@ fi
 			<string>XCBuildConfiguration</string>
 			<key>name</key>
 			<string>Release</string>
+		</dict>
+		<key>6A7899EC1DF2FD250098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>6A789A191DF2FD2E0098AF6B</string>
+				<string>6A789A161DF2FD2E0098AF6B</string>
+				<string>6A789A151DF2FD2E0098AF6B</string>
+				<string>6A789A111DF2FD2E0098AF6B</string>
+				<string>6A789A131DF2FD2E0098AF6B</string>
+				<string>6A789A121DF2FD2E0098AF6B</string>
+				<string>6A789A171DF2FD2E0098AF6B</string>
+				<string>6A789A141DF2FD2E0098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXSourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899ED1DF2FD250098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>8B50EBF3D561B6F514681A17</string>
+			</array>
+			<key>isa</key>
+			<string>PBXFrameworksBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899EE1DF2FD250098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>6A789A181DF2FD2E0098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXHeadersBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899EF1DF2FD250098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXResourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899F01DF2FD250098AF6B</key>
+		<dict>
+			<key>buildConfigurationList</key>
+			<string>6A789A021DF2FD250098AF6B</string>
+			<key>buildPhases</key>
+			<array>
+				<string>7697D90D9DB912F7CC22692E</string>
+				<string>6A7899EC1DF2FD250098AF6B</string>
+				<string>6A7899ED1DF2FD250098AF6B</string>
+				<string>6A7899EE1DF2FD250098AF6B</string>
+				<string>6A7899EF1DF2FD250098AF6B</string>
+				<string>7FE5D54A3916F889EB1ED816</string>
+			</array>
+			<key>buildRules</key>
+			<array/>
+			<key>dependencies</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXNativeTarget</string>
+			<key>name</key>
+			<string>RealmKit macOS</string>
+			<key>productName</key>
+			<string>RealmKit macOS</string>
+			<key>productReference</key>
+			<string>6A7899F11DF2FD250098AF6B</string>
+			<key>productType</key>
+			<string>com.apple.product-type.framework</string>
+		</dict>
+		<key>6A7899F11DF2FD250098AF6B</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>wrapper.framework</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>RealmKit macOS.framework</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>6A7899F51DF2FD250098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXSourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899F61DF2FD250098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array>
+				<string>6A7899FA1DF2FD250098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXFrameworksBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899F71DF2FD250098AF6B</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXResourcesBuildPhase</string>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+		</dict>
+		<key>6A7899F81DF2FD250098AF6B</key>
+		<dict>
+			<key>buildConfigurationList</key>
+			<string>6A789A051DF2FD250098AF6B</string>
+			<key>buildPhases</key>
+			<array>
+				<string>6A7899F51DF2FD250098AF6B</string>
+				<string>6A7899F61DF2FD250098AF6B</string>
+				<string>6A7899F71DF2FD250098AF6B</string>
+			</array>
+			<key>buildRules</key>
+			<array/>
+			<key>dependencies</key>
+			<array>
+				<string>6A7899FC1DF2FD250098AF6B</string>
+			</array>
+			<key>isa</key>
+			<string>PBXNativeTarget</string>
+			<key>name</key>
+			<string>RealmKit macOSTests</string>
+			<key>productName</key>
+			<string>RealmKit macOSTests</string>
+			<key>productReference</key>
+			<string>6A7899F91DF2FD250098AF6B</string>
+			<key>productType</key>
+			<string>com.apple.product-type.bundle.unit-test</string>
+		</dict>
+		<key>6A7899F91DF2FD250098AF6B</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>wrapper.cfbundle</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>RealmKit macOSTests.xctest</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>6A7899FA1DF2FD250098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A7899F11DF2FD250098AF6B</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A7899FB1DF2FD250098AF6B</key>
+		<dict>
+			<key>containerPortal</key>
+			<string>6A7357DD1BCC0958003F99EF</string>
+			<key>isa</key>
+			<string>PBXContainerItemProxy</string>
+			<key>proxyType</key>
+			<string>1</string>
+			<key>remoteGlobalIDString</key>
+			<string>6A7899F01DF2FD250098AF6B</string>
+			<key>remoteInfo</key>
+			<string>RealmKit macOS</string>
+		</dict>
+		<key>6A7899FC1DF2FD250098AF6B</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXTargetDependency</string>
+			<key>target</key>
+			<string>6A7899F01DF2FD250098AF6B</string>
+			<key>targetProxy</key>
+			<string>6A7899FB1DF2FD250098AF6B</string>
+		</dict>
+		<key>6A789A021DF2FD250098AF6B</key>
+		<dict>
+			<key>buildConfigurations</key>
+			<array>
+				<string>6A789A031DF2FD250098AF6B</string>
+				<string>6A789A041DF2FD250098AF6B</string>
+			</array>
+			<key>defaultConfigurationIsVisible</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>XCConfigurationList</string>
+		</dict>
+		<key>6A789A031DF2FD250098AF6B</key>
+		<dict>
+			<key>baseConfigurationReference</key>
+			<string>A383C5F8CB8B09958C5602EA</string>
+			<key>buildSettings</key>
+			<dict>
+				<key>CLANG_ANALYZER_NONNULL</key>
+				<string>YES</string>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
+				<string>YES</string>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string>-</string>
+				<key>COMBINE_HIDPI_IMAGES</key>
+				<string>YES</string>
+				<key>DEFINES_MODULE</key>
+				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
+				<key>DYLIB_COMPATIBILITY_VERSION</key>
+				<string>1</string>
+				<key>DYLIB_CURRENT_VERSION</key>
+				<string>1</string>
+				<key>DYLIB_INSTALL_NAME_BASE</key>
+				<string>@rpath</string>
+				<key>FRAMEWORK_VERSION</key>
+				<string>A</string>
+				<key>INFOPLIST_FILE</key>
+				<string>RealmKit macOS/Info.plist</string>
+				<key>INSTALL_PATH</key>
+				<string>$(LOCAL_LIBRARY_DIR)/Frameworks</string>
+				<key>LD_RUNPATH_SEARCH_PATHS</key>
+				<string>$(inherited) @executable_path/../Frameworks @loader_path/Frameworks</string>
+				<key>MACOSX_DEPLOYMENT_TARGET</key>
+				<string>10.12</string>
+				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
+				<string>com.aplo.RealmKit-macOS</string>
+				<key>PRODUCT_NAME</key>
+				<string>$(TARGET_NAME)</string>
+				<key>SDKROOT</key>
+				<string>macosx</string>
+				<key>SKIP_INSTALL</key>
+				<string>YES</string>
+				<key>SWIFT_ACTIVE_COMPILATION_CONDITIONS</key>
+				<string>DEBUG</string>
+				<key>SWIFT_VERSION</key>
+				<string>3.0</string>
+			</dict>
+			<key>isa</key>
+			<string>XCBuildConfiguration</string>
+			<key>name</key>
+			<string>Debug</string>
+		</dict>
+		<key>6A789A041DF2FD250098AF6B</key>
+		<dict>
+			<key>baseConfigurationReference</key>
+			<string>6530633B4F3BB981B086641D</string>
+			<key>buildSettings</key>
+			<dict>
+				<key>CLANG_ANALYZER_NONNULL</key>
+				<string>YES</string>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
+				<string>YES</string>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string>-</string>
+				<key>COMBINE_HIDPI_IMAGES</key>
+				<string>YES</string>
+				<key>DEFINES_MODULE</key>
+				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
+				<key>DYLIB_COMPATIBILITY_VERSION</key>
+				<string>1</string>
+				<key>DYLIB_CURRENT_VERSION</key>
+				<string>1</string>
+				<key>DYLIB_INSTALL_NAME_BASE</key>
+				<string>@rpath</string>
+				<key>FRAMEWORK_VERSION</key>
+				<string>A</string>
+				<key>INFOPLIST_FILE</key>
+				<string>RealmKit macOS/Info.plist</string>
+				<key>INSTALL_PATH</key>
+				<string>$(LOCAL_LIBRARY_DIR)/Frameworks</string>
+				<key>LD_RUNPATH_SEARCH_PATHS</key>
+				<string>$(inherited) @executable_path/../Frameworks @loader_path/Frameworks</string>
+				<key>MACOSX_DEPLOYMENT_TARGET</key>
+				<string>10.12</string>
+				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
+				<string>com.aplo.RealmKit-macOS</string>
+				<key>PRODUCT_NAME</key>
+				<string>$(TARGET_NAME)</string>
+				<key>SDKROOT</key>
+				<string>macosx</string>
+				<key>SKIP_INSTALL</key>
+				<string>YES</string>
+				<key>SWIFT_VERSION</key>
+				<string>3.0</string>
+			</dict>
+			<key>isa</key>
+			<string>XCBuildConfiguration</string>
+			<key>name</key>
+			<string>Release</string>
+		</dict>
+		<key>6A789A051DF2FD250098AF6B</key>
+		<dict>
+			<key>buildConfigurations</key>
+			<array>
+				<string>6A789A061DF2FD250098AF6B</string>
+				<string>6A789A071DF2FD250098AF6B</string>
+			</array>
+			<key>defaultConfigurationIsVisible</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>XCConfigurationList</string>
+		</dict>
+		<key>6A789A061DF2FD250098AF6B</key>
+		<dict>
+			<key>buildSettings</key>
+			<dict>
+				<key>ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES</key>
+				<string>YES</string>
+				<key>CLANG_ANALYZER_NONNULL</key>
+				<string>YES</string>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
+				<string>YES</string>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string>-</string>
+				<key>COMBINE_HIDPI_IMAGES</key>
+				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
+				<key>INFOPLIST_FILE</key>
+				<string>RealmKit macOSTests/Info.plist</string>
+				<key>LD_RUNPATH_SEARCH_PATHS</key>
+				<string>$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks</string>
+				<key>MACOSX_DEPLOYMENT_TARGET</key>
+				<string>10.12</string>
+				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
+				<string>com.aplo.RealmKit-macOSTests</string>
+				<key>PRODUCT_NAME</key>
+				<string>$(TARGET_NAME)</string>
+				<key>SDKROOT</key>
+				<string>macosx</string>
+				<key>SWIFT_ACTIVE_COMPILATION_CONDITIONS</key>
+				<string>DEBUG</string>
+				<key>SWIFT_VERSION</key>
+				<string>3.0</string>
+			</dict>
+			<key>isa</key>
+			<string>XCBuildConfiguration</string>
+			<key>name</key>
+			<string>Debug</string>
+		</dict>
+		<key>6A789A071DF2FD250098AF6B</key>
+		<dict>
+			<key>buildSettings</key>
+			<dict>
+				<key>ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES</key>
+				<string>YES</string>
+				<key>CLANG_ANALYZER_NONNULL</key>
+				<string>YES</string>
+				<key>CLANG_WARN_DOCUMENTATION_COMMENTS</key>
+				<string>YES</string>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string>-</string>
+				<key>COMBINE_HIDPI_IMAGES</key>
+				<string>YES</string>
+				<key>DEVELOPMENT_TEAM</key>
+				<string>52EDKXLXY5</string>
+				<key>INFOPLIST_FILE</key>
+				<string>RealmKit macOSTests/Info.plist</string>
+				<key>LD_RUNPATH_SEARCH_PATHS</key>
+				<string>$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks</string>
+				<key>MACOSX_DEPLOYMENT_TARGET</key>
+				<string>10.12</string>
+				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
+				<string>com.aplo.RealmKit-macOSTests</string>
+				<key>PRODUCT_NAME</key>
+				<string>$(TARGET_NAME)</string>
+				<key>SDKROOT</key>
+				<string>macosx</string>
+				<key>SWIFT_VERSION</key>
+				<string>3.0</string>
+			</dict>
+			<key>isa</key>
+			<string>XCBuildConfiguration</string>
+			<key>name</key>
+			<string>Release</string>
+		</dict>
+		<key>6A789A081DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A61D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A091DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A31D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A0A1DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A71D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A0B1DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A91D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A0C1DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A21D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A0D1DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A11D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A0E1DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67AA1D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A0F1DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A4EAE9A1D9D443400E212F1</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A101DF2FD2D0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6AC61CB91DA411CA0040BF42</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A111DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A61D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A121DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A31D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A131DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A71D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A141DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A91D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A151DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A21D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A161DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67A11D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A171DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A6D67AA1D9C0106008ECE8F</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A181DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6A4EAE9A1D9D443400E212F1</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>6A789A191DF2FD2E0098AF6B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>6AC61CB91DA411CA0040BF42</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>6AC61CB91DA411CA0040BF42</key>
 		<dict>
@@ -1378,19 +1587,50 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>6AC61CBA1DA411CA0040BF42</key>
+		<key>7597CD0895A5746FEDF4DDC4</key>
 		<dict>
-			<key>fileRef</key>
-			<string>6AC61CB91DA411CA0040BF42</string>
+			<key>includeInIndex</key>
+			<string>1</string>
 			<key>isa</key>
-			<string>PBXBuildFile</string>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.xcconfig</string>
+			<key>name</key>
+			<string>Pods-RealmKit iOS.release.xcconfig</string>
+			<key>path</key>
+			<string>Pods/Target Support Files/Pods-RealmKit iOS/Pods-RealmKit iOS.release.xcconfig</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
 		</dict>
-		<key>6BE620BAD44F0DED06B0CBFE</key>
+		<key>7697D90D9DB912F7CC22692E</key>
 		<dict>
-			<key>fileRef</key>
-			<string>8C2F63E1C60F01FE88009B50</string>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>inputPaths</key>
+			<array/>
 			<key>isa</key>
-			<string>PBXBuildFile</string>
+			<string>PBXShellScriptBuildPhase</string>
+			<key>name</key>
+			<string>[CP] Check Pods Manifest.lock</string>
+			<key>outputPaths</key>
+			<array/>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+			<key>shellPath</key>
+			<string>/bin/sh</string>
+			<key>shellScript</key>
+			<string>diff "${PODS_ROOT}/../Podfile.lock" "${PODS_ROOT}/Manifest.lock" &gt; /dev/null
+if [[ $? != 0 ]] ; then
+    cat &lt;&lt; EOM
+error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.
+EOM
+    exit 1
+fi
+</string>
+			<key>showEnvVarsInLog</key>
+			<string>0</string>
 		</dict>
 		<key>7E4AD2911976BA28E9714B93</key>
 		<dict>
@@ -1407,6 +1647,30 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
+		<key>7FE5D54A3916F889EB1ED816</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>inputPaths</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXShellScriptBuildPhase</string>
+			<key>name</key>
+			<string>[CP] Copy Pods Resources</string>
+			<key>outputPaths</key>
+			<array/>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+			<key>shellPath</key>
+			<string>/bin/sh</string>
+			<key>shellScript</key>
+			<string>"${SRCROOT}/Pods/Target Support Files/Pods-RealmKit macOS/Pods-RealmKit macOS-resources.sh"
+</string>
+			<key>showEnvVarsInLog</key>
+			<string>0</string>
+		</dict>
 		<key>8759E9D30279A5AADEF6186A</key>
 		<dict>
 			<key>includeInIndex</key>
@@ -1421,6 +1685,13 @@ fi
 			<string>Pods/Target Support Files/Pods-iOSTests/Pods-iOSTests.debug.xcconfig</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
+		</dict>
+		<key>8B50EBF3D561B6F514681A17</key>
+		<dict>
+			<key>fileRef</key>
+			<string>C1C3DCD56FD9976A659FA8FE</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>8BA276D65BE7D98268271901</key>
 		<dict>
@@ -1450,6 +1721,21 @@ fi
 			<key>sourceTree</key>
 			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
+		<key>A383C5F8CB8B09958C5602EA</key>
+		<dict>
+			<key>includeInIndex</key>
+			<string>1</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.xcconfig</string>
+			<key>name</key>
+			<string>Pods-RealmKit macOS.debug.xcconfig</string>
+			<key>path</key>
+			<string>Pods/Target Support Files/Pods-RealmKit macOS/Pods-RealmKit macOS.debug.xcconfig</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
 		<key>A69B959F2974780AA3168DA9</key>
 		<dict>
 			<key>explicitFileType</key>
@@ -1478,6 +1764,13 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
+		<key>B1CB5D2D07DC69F5383A989E</key>
+		<dict>
+			<key>fileRef</key>
+			<string>D3F092F25FA9BF097507F645</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
 		<key>C1C3DCD56FD9976A659FA8FE</key>
 		<dict>
 			<key>explicitFileType</key>
@@ -1490,6 +1783,21 @@ fi
 			<string>Pods_RealmKit_macOS.framework</string>
 			<key>sourceTree</key>
 			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>C2574BAD1A742ED2EB8BBFFC</key>
+		<dict>
+			<key>includeInIndex</key>
+			<string>1</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.xcconfig</string>
+			<key>name</key>
+			<string>Pods-RealmKit iOS.debug.xcconfig</string>
+			<key>path</key>
+			<string>Pods/Target Support Files/Pods-RealmKit iOS/Pods-RealmKit iOS.debug.xcconfig</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
 		</dict>
 		<key>C9715A8F8A89543B9FE3050D</key>
 		<dict>
@@ -1534,6 +1842,30 @@ fi
 			<key>sourceTree</key>
 			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
+		<key>D63C8D9BF1A20B19E149AF6A</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>inputPaths</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXShellScriptBuildPhase</string>
+			<key>name</key>
+			<string>[CP] Copy Pods Resources</string>
+			<key>outputPaths</key>
+			<array/>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+			<key>shellPath</key>
+			<string>/bin/sh</string>
+			<key>shellScript</key>
+			<string>"${SRCROOT}/Pods/Target Support Files/Pods-RealmKit iOS/Pods-RealmKit iOS-resources.sh"
+</string>
+			<key>showEnvVarsInLog</key>
+			<string>0</string>
+		</dict>
 		<key>D94E331967F613F70E831D3A</key>
 		<dict>
 			<key>children</key>
@@ -1565,13 +1897,6 @@ fi
 			<string>Pods_RealmKit.framework</string>
 			<key>sourceTree</key>
 			<string>BUILT_PRODUCTS_DIR</string>
-		</dict>
-		<key>F644D2C8B5CCD3231AA68A22</key>
-		<dict>
-			<key>fileRef</key>
-			<string>D3F092F25FA9BF097507F645</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>

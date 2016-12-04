@@ -72,6 +72,9 @@ public protocol JSONSerializable: Syncable, Fetchable {
     
     /// Used as hook after object serilization in same write transaction as it was created/updated.
     static func didSerialize<T: RKObject>(_ type: T.Type ,objects: [T], serializationRequest: SerializationRequest) -> Void
+    
+    /// Used to query existing object as alternative to serverId
+    static func existingObject<T: RKObject>(_ type: T.Type, keyValues: [String: Any])  -> T?
 }
 
 @available(OSX 10.10, *)

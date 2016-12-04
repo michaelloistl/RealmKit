@@ -134,6 +134,10 @@ public extension JSONSerializable  {
         
     }
     
+    public static func existingObject<T: RKObject>(_ type: T.Type, keyValues: [String: Any])  -> T? {
+        return nil
+    }
+    
     // MARK: Helpers
 
     /// Helper method to check if type has valid primaryKey set.
@@ -346,9 +350,16 @@ public extension JSONSerializable  {
             
             if let _ = type.serverKey(), let serverKeyValue = keyValues["serverId"] as? String {
                 
-                // Check if object with serverKeyValue exists
-                if let existingObject = serializationRequest.realm.objects(type.self).filter(NSPredicate(format: "serverId == %@", serverKeyValue)).first {
-                    
+                // Check if object exists (with serverKeyValue)
+                var existingObject: T?
+                
+                if let _existingObject = type.existingObject(type.self, keyValues: keyValues) {
+                    existingObject = _existingObject
+                } else if let _existingObject = serializationRequest.realm.objects(type.self).filter(NSPredicate(format: "serverId == %@", serverKeyValue)).first {
+                    existingObject = _existingObject
+                }
+                
+                if let existingObject = existingObject {
                     
                     // TODO: Remove equal values from KeyValues
                     keyValues.forEach({ (key, value) in

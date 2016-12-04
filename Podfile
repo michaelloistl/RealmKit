@@ -5,20 +5,15 @@ def shared_pods
     pod 'Alamofire', '~> 4.0'
 end
 
-target 'iOS' do
+target 'RealmKit iOS' do
     platform :ios, '9.0'
     shared_pods
 end
 
-target 'iOSTests' do
-    platform :ios, '9.0'
+target 'RealmKit macOS' do
+    platform :osx, '10.11'
     shared_pods
 end
-
-#target 'RealmKit-macOS' do
-#    platform :osx, '10.11'
-#    shared_pods
-#end
 
 post_install do |installer|
     installer.pods_project.targets.each do |target|

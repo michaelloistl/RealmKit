@@ -4,6 +4,16 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>RealmKit iOS.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>7</integer>
+		</dict>
+		<key>RealmKit macOS.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
 		<key>RealmKit.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -12,7 +22,7 @@
 		<key>RealmKitmacOS.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>6</integer>
+			<integer>1</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
@@ -23,6 +33,26 @@
 			<true/>
 		</dict>
 		<key>6A7357EF1BCC0958003F99EF</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6A7899D41DF2FD040098AF6B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6A7899DC1DF2FD050098AF6B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6A7899F01DF2FD250098AF6B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6A7899F81DF2FD250098AF6B</key>
 		<dict>
 			<key>primary</key>
 			<true/>
