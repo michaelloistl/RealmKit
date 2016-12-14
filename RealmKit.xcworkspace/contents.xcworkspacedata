@@ -5,6 +5,12 @@
       location = "group:RealmKit.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:RealmKit iOS/RealmKit-iOS-Info.plist">
+   </FileRef>
+   <FileRef
+      location = "group:RealmKit macOS/RealmKit-macOS-Info.plist">
+   </FileRef>
+   <FileRef
       location = "group:Pods/Pods.xcodeproj">
    </FileRef>
 </Workspace>

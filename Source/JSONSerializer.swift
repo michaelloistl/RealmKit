@@ -349,7 +349,7 @@ public extension JSONSerializable  {
             }
             
             if let _ = type.serverKey(), let serverKeyValue = keyValues["serverId"] as? String {
-                
+
                 // Check if object exists (with serverKeyValue)
                 var existingObject: T?
                 
@@ -359,7 +359,7 @@ public extension JSONSerializable  {
                     existingObject = _existingObject
                 }
                 
-                if let existingObject = existingObject {
+                if let existingObject = existingObject, serializationRequest.persist {
                     
                     // TODO: Remove equal values from KeyValues
                     keyValues.forEach({ (key, value) in

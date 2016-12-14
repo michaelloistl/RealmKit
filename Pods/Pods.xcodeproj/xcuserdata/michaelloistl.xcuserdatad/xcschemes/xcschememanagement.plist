@@ -8,44 +8,101 @@
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>5</integer>
 		</dict>
 		<key>Alamofire-iOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>4</integer>
 		</dict>
 		<key>Pods-RealmKit iOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>6</integer>
 		</dict>
 		<key>Pods-RealmKit macOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>7</integer>
 		</dict>
 		<key>Realm-OSX.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>9</integer>
 		</dict>
 		<key>Realm-iOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>8</integer>
 		</dict>
 		<key>RealmSwift-OSX.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>11</integer>
 		</dict>
 		<key>RealmSwift-iOS.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>10</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
-	<dict/>
+	<dict>
+		<key>1D864A75B2B5907B8535BB42BEA42493</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>25FB25C9567FD7EDB1EF494691E93F05</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4EE1028961B3201484CA36B0E1F1AABA</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>544BCDEA165B16BA025269D65A076579</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>89C69EB624EC8137588D9568F2E11964</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>8A46F3686C46DC9D9C11D7DE4BDDBB54</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BD47791C6441A313B0D29F56D469E9AC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BF494837519E14DA0926CF20F95C6C76</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
 </dict>
 </plist>

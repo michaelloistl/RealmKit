@@ -88,10 +88,8 @@ public class RKSyncManager {
     
     open func addPendingSyncOperations(_ completion: @escaping (_ operations: [SyncOperation]) -> Void) {
         var operations = [SyncOperation]()
-        
         if addingPendingSyncOperations == false {
             addingPendingSyncOperations = true
-            
             syncQueue.async(execute: {
                 let realm = try? Realm()
                 realm?.refresh()
